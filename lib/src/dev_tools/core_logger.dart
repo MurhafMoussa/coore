@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:logger/logger.dart';
 
 /// Abstract logging interface for application-wide logging

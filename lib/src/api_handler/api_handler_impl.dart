@@ -24,7 +24,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// and [NetworkExceptionMapper].
   ///
   /// [dio]: The Dio instance to be used for HTTP calls.
-  /// [exceptionMapper]: A mapper to convert Dio exceptions into [NetworkFailure] instances.
+  /// [exceptionMapper]: A mapper to convert Network exceptions into [NetworkFailure] instances.
   DioApiHandler(this._dio, this._exceptionMapper);
 
   /// Builds Dio [Options] with extra headers based on [isAuthorized] and [shouldCache].
