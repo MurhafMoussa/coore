@@ -1,14 +1,15 @@
 import 'package:coore/src/api_handler/models/error_response_model.dart';
 import 'package:dio/dio.dart';
 
-import '../failures/failure.dart';
 import '../failures/network_failure.dart';
-import 'exception_mapper.dart';
+import 'network_exception_mapper.dart';
 
-class DioNetworkExceptionMapper implements ExceptionMapper {
+class DioNetworkExceptionMapper implements NetworkExceptionMapper {
   @override
-  Failure mapException(Exception exception, StackTrace? stackTrace) {
-    if (exception is! DioException) return const UnknownFailure();
+  NetworkFailure mapException(Exception exception, StackTrace? stackTrace) {
+    if (exception is! DioException) {
+      return NoInternetConnectionFailure(_defaultErrorMessage, stackTrace);
+    }
     switch (exception.type) {
       case DioExceptionType.cancel:
         return RequestCancelledFailure("Request cancelled", stackTrace);
