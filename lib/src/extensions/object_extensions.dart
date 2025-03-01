@@ -1,10 +1,4 @@
-
-
-/// --------------------------------------------------
-/// Null / Blank and Dynamic Length Checks
-/// --------------------------------------------------
-
-extension NullAndBlankExtensions on Object? {
+extension ObjectExtensions on Object? {
   /// Checks if the object is null.
   bool get isNull => this == null;
 

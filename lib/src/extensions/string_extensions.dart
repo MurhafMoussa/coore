@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-extension DateParsingExtensions on String {
+extension StringExtensions on String {
   /// Tries to parse the string into a [DateTime] by testing multiple date formats.
   ///
   /// Throws a [FormatException] if none of the supported formats match.

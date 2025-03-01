@@ -1,6 +1,6 @@
 import 'dart:math';
 
-extension OneAKindInt on int {
+extension IntExtensions on int {
   /// Returns `true` if all digits are the same.
   bool get isOneAKind {
     final s = toString();
