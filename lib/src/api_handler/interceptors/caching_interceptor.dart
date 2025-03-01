@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:dio/dio.dart';
 
 import '../base_cache_store/base_cache_store.dart';
