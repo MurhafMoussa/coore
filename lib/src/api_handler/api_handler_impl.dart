@@ -12,7 +12,7 @@ import 'form_data_adapter.dart';
 ///
 /// The [DioApiHandler] accepts a Dio instance via constructor injection.
 /// It wraps HTTP calls in a common response handler that returns a
-/// [TaskEither<NetworkFailure, Map<String, dynamic>>]. This allows the API
+/// [ApiResponse]. This allows the API
 /// layer to use functional error handling and provide clear, user-friendly errors
 /// via [NetworkFailure]. Additional options for caching and authorization are
 /// included in the request options.
@@ -48,9 +48,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// response data as a [Map<String, dynamic>]. On error, if the error is a [DioException],
   /// it is mapped to a [NetworkFailure] using the exception mapper; otherwise,
   /// the error is thrown.
-  TaskEither<NetworkFailure, Map<String, dynamic>> _handleResponse(
-    Future<Response> Function() dioMethod,
-  ) {
+  ApiResponse _handleResponse(Future<Response> Function() dioMethod) {
     return TaskEither.tryCatch(
       () async {
         final response = await dioMethod();
@@ -76,7 +74,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// Returns a [TaskEither] containing either a [NetworkFailure] on error or a
   /// [Map<String, dynamic>] with the response data.
   @override
-  TaskEither<NetworkFailure, Map<String, dynamic>> get(
+  ApiResponse get(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelRequestAdapter? cancelRequestAdapter,
@@ -106,7 +104,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// Returns a [TaskEither] containing either a [NetworkFailure] on error or a
   /// [Map<String, dynamic>] with the response data.
   @override
-  TaskEither<NetworkFailure, Map<String, dynamic>> post(
+  ApiResponse post(
     String path, {
     Map<String, dynamic>? body,
     FormDataAdapter? formData,
@@ -144,7 +142,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// Returns a [TaskEither] containing either a [NetworkFailure] on error or a
   /// [Map<String, dynamic>] with the response data.
   @override
-  TaskEither<NetworkFailure, Map<String, dynamic>> delete(
+  ApiResponse delete(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelRequestAdapter? cancelRequestAdapter,
@@ -172,7 +170,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// Returns a [TaskEither] containing either a [NetworkFailure] on error or a
   /// [Map<String, dynamic>] with the response data.
   @override
-  TaskEither<NetworkFailure, Map<String, dynamic>> put(
+  ApiResponse put(
     String path, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
@@ -207,7 +205,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// Returns a [TaskEither] containing either a [NetworkFailure] on error or a
   /// [Map<String, dynamic>] with the response data.
   @override
-  TaskEither<NetworkFailure, Map<String, dynamic>> patch(
+  ApiResponse patch(
     String path, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
@@ -242,7 +240,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// Returns a [TaskEither] containing either a [NetworkFailure] on error or a
   /// [Map<String, dynamic>] with the response data.
   @override
-  TaskEither<NetworkFailure, Map<String, dynamic>> download(
+  ApiResponse download(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,

@@ -23,7 +23,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  TaskEither<NetworkFailure, Map<String, dynamic>> get(
+  ApiResponse get(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelRequestAdapter? cancelRequestAdapter,
@@ -44,7 +44,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  TaskEither<NetworkFailure, Map<String, dynamic>> post(
+  ApiResponse post(
     String path, {
     Map<String, dynamic>? body,
     FormDataAdapter? formData,
@@ -63,7 +63,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  TaskEither<NetworkFailure, Map<String, dynamic>> delete(
+  ApiResponse delete(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelRequestAdapter? cancelRequestAdapter,
@@ -82,7 +82,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  TaskEither<NetworkFailure, Map<String, dynamic>> put(
+  ApiResponse put(
     String path, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
@@ -103,7 +103,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  TaskEither<NetworkFailure, Map<String, dynamic>> patch(
+  ApiResponse patch(
     String path, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
@@ -123,7 +123,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success, which could be the file path or a success message.
-  TaskEither<NetworkFailure, Map<String, dynamic>> download(
+  ApiResponse download(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,
