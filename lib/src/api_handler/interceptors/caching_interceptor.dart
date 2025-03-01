@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:dio/dio.dart';
 
 import '../base_cache_store/base_cache_store.dart';
@@ -32,7 +33,6 @@ class CachingInterceptor extends Interceptor {
   /// [cacheStore] is required to store and retrieve cache entries.
   /// Optional parameters include:
   /// - [defaultCacheDuration]: How long a cache entry remains valid (default: 30 minutes).
-  /// - [cacheDurationExtra]: The extra key that can be used to specify a custom cache duration.
   /// - [forceRefreshExtra]: The extra key that, when set to true, forces the request to bypass the cache.
   CachingInterceptor({
     required this.cacheStore,
