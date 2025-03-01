@@ -5,22 +5,31 @@ import 'package:coore/src/api_handler/interceptors/caching_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/logging_interceptor.dart';
 import 'package:coore/src/config/entities/core_config_entity.dart';
 import 'package:coore/src/config/entities/network_config_entity.dart';
+import 'package:coore/src/config/service/config_service.dart';
 import 'package:coore/src/dev_tools/core_logger.dart';
 import 'package:coore/src/environment/environment_config.dart';
 import 'package:coore/src/error_handling/exception_mapper/dio_exception_mapper.dart';
 import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
+import 'package:coore/src/local_database/local_database_interface.dart';
+import 'package:coore/src/local_database/nosql_database_imp.dart';
+import 'package:coore/src/localization/cubit/localization_cubit.dart';
 import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
 import 'package:coore/src/network_status/service/network_status_imp.dart';
 import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:coore/src/ui/message_viewers/toaster.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:logger/logger.dart' as logger;
+import 'package:path_provider/path_provider.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
+  final directory = await getApplicationDocumentsDirectory();
+  Hive.init(directory.path);
+
   getIt
     ..registerLazySingleton(
       () => logger.Logger(
@@ -46,7 +55,19 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       () => NetworkStatusImp(getIt()),
     )
     ..registerLazySingleton(() => NetworkStatusCubit(networkStatus: getIt()))
-    ..registerLazySingleton(() => Toaster());
+    ..registerLazySingleton(() => Toaster())
+    ..registerFactoryParam<LocalDatabaseInterface, String, void>(
+      (boxName, _) => HiveLocalDatabase(boxName),
+    )
+    ..registerLazySingleton(
+      () => ConfigService(getIt<LocalDatabaseInterface>(param1: 'coreConfig')),
+    )
+    ..registerLazySingleton(
+      () => LocalizationCubit(
+        service: getIt(),
+        config: coreEntity.localizationConfigEntity,
+      ),
+    );
 }
 
 Dio _createDio(NetworkConfigEntity entity) {
