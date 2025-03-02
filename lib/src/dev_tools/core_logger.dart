@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
 /// Abstract logging interface for application-wide logging
@@ -18,6 +19,8 @@ abstract interface class CoreLogger {
 
   /// Log critical errors that need immediate investigation
   void error(dynamic message, [dynamic error, StackTrace? stackTrace]);
+
+  bool get shouldLog;
 }
 
 /// Concrete implementation using the logger package
@@ -28,26 +31,39 @@ class CoreLoggerImpl implements CoreLogger {
 
   @override
   void debug(message, [error, StackTrace? stackTrace]) {
-    _logger.d(message, error: error, stackTrace: stackTrace);
+    if (shouldLog) {
+      _logger.d(message, error: error, stackTrace: stackTrace);
+    }
   }
 
   @override
   void error(message, [error, StackTrace? stackTrace]) {
-    _logger.e(message, error: error, stackTrace: stackTrace);
+    if (shouldLog) {
+      _logger.e(message, error: error, stackTrace: stackTrace);
+    }
   }
 
   @override
   void info(message, [error, StackTrace? stackTrace]) {
-    _logger.i(message, error: error, stackTrace: stackTrace);
+    if (shouldLog) {
+      _logger.i(message, error: error, stackTrace: stackTrace);
+    }
   }
 
   @override
   void verbose(message, [error, StackTrace? stackTrace]) {
-    _logger.t(message, error: error, stackTrace: stackTrace);
+    if (shouldLog) {
+      _logger.t(message, error: error, stackTrace: stackTrace);
+    }
   }
 
   @override
   void warning(message, [error, StackTrace? stackTrace]) {
-    _logger.w(message, error: error, stackTrace: stackTrace);
+    if (shouldLog) {
+      _logger.w(message, error: error, stackTrace: stackTrace);
+    }
   }
+
+  @override
+  bool get shouldLog => kDebugMode;
 }
