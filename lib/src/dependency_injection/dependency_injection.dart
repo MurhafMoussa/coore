@@ -13,6 +13,7 @@ import 'package:coore/src/error_handling/exception_mapper/network_exception_mapp
 import 'package:coore/src/local_database/local_database_interface.dart';
 import 'package:coore/src/local_database/nosql_database_imp.dart';
 import 'package:coore/src/localization/cubit/localization_cubit.dart';
+import 'package:coore/src/navigation/core_navigator.dart';
 import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
 import 'package:coore/src/network_status/service/network_status_imp.dart';
 import 'package:coore/src/network_status/service/network_status_interface.dart';
@@ -66,6 +67,12 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       () => LocalizationCubit(
         service: getIt(),
         config: coreEntity.localizationConfigEntity,
+      ),
+    )
+    ..registerLazySingleton(
+      () => CoreNavigator(
+        logger: getIt(),
+        navigationConfigEntity: coreEntity.navigationConfigEntity,
       ),
     );
 }
