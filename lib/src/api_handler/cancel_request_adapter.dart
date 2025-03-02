@@ -35,6 +35,9 @@ class DioCancelRequestAdapter implements CancelRequestAdapter {
   /// mechanism and can be useful for logging or debugging purposes.
   @override
   void cancelRequest([Object? reason]) {
+    if (isCancelled) {
+      return;
+    }
     _cancelToken.cancel(reason);
   }
 
