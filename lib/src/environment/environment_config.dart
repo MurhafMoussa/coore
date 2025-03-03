@@ -1,33 +1,33 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-enum Environment {
+enum CoreEnvironment {
   development,
   staging,
   uat,
   production;
 
-  static Environment getEnvironmentFromString(String env) {
-    return Environment.values.firstWhere(
+  static CoreEnvironment getEnvironmentFromString(String env) {
+    return CoreEnvironment.values.firstWhere(
       (element) => element.name == env,
-      orElse: () => Environment.development,
+      orElse: () => CoreEnvironment.development,
     );
   }
 }
 
 class EnvironmentConfig {
   /// Load the .env file and optionally merge with additional environment variables.
-  Future<void> loadEnv(Environment environment) async {
+  Future<void> loadEnv(CoreEnvironment environment) async {
     switch (environment) {
-      case Environment.development:
+      case CoreEnvironment.development:
         await dotenv.load(fileName: '.env.development');
         break;
-      case Environment.staging:
+      case CoreEnvironment.staging:
         await dotenv.load(fileName: '.env.staging');
         break;
-      case Environment.uat:
+      case CoreEnvironment.uat:
         await dotenv.load(fileName: '.env.uat');
         break;
-      case Environment.production:
+      case CoreEnvironment.production:
         await dotenv.load(fileName: '.env.production');
         break;
     }

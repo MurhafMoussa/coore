@@ -12,7 +12,7 @@ class CoreConfig {
     CoreConfigEntity configEntity,
   ) async {
     await setupCoreDependencies(configEntity);
-    await getIt<EnvironmentConfig>().loadEnv(configEntity.currentEnvironment);
+
     Bloc.observer = CoreBlocObserver(getIt<CoreLogger>());
   }
 

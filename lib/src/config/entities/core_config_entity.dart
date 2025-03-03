@@ -6,7 +6,6 @@ import 'package:coore/src/environment/environment_config.dart';
 import 'package:equatable/equatable.dart';
 
 class CoreConfigEntity extends Equatable {
-
   const CoreConfigEntity({
     required this.currentEnvironment,
     required this.networkConfigEntity,
@@ -14,7 +13,7 @@ class CoreConfigEntity extends Equatable {
     required this.navigationConfigEntity,
     required this.themeConfigEntity,
   });
-  final Environment currentEnvironment;
+  final CoreEnvironment currentEnvironment;
   final NetworkConfigEntity networkConfigEntity;
   final LocalizationConfigEntity localizationConfigEntity;
   final NavigationConfigEntity navigationConfigEntity;

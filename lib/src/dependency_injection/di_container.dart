@@ -44,7 +44,6 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       ),
     )
     ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
-    ..registerLazySingleton(() => EnvironmentConfig())
     ..registerLazySingleton(() => _createDio(coreEntity.networkConfigEntity))
     ..registerLazySingleton<NetworkExceptionMapper>(
       () => DioNetworkExceptionMapper(),
@@ -100,10 +99,7 @@ Dio _createDio(NetworkConfigEntity entity) {
     )
     ..interceptors.addAll([
       if (entity.enableLogging)
-        LoggingInterceptor(
-          logger: getIt(),
-          maxBodyLength: 2048,
-        ),
+        LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
       if (entity.enableCache)
         CachingInterceptor(
           cacheStore: MemoryCacheStore(),
