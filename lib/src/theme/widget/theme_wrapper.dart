@@ -2,7 +2,7 @@ import 'package:coore/src/config/entities/theme_config_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../dependency_injection/dependency_injection.dart';
+import '../../dependency_injection/di_container.dart';
 import '../cubit/theme_cubit.dart';
 
 /// A wrapper widget that provides [ThemeCubit] to the widget tree

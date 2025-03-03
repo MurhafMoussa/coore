@@ -1,4 +1,4 @@
-import 'package:coore/src/dependency_injection/dependency_injection.dart';
+import 'package:coore/src/dependency_injection/di_container.dart';
 import 'package:coore/src/ui/message_viewers/toaster.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

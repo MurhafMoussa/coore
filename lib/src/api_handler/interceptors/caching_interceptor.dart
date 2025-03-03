@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 
-import '../base_cache_store/base_cache_store.dart';
+import '../base_cache_store/base_cache_store_interface.dart';
 import '../base_cache_store/cache_entry.dart';
 
 /// A Dio interceptor that handles caching of GET requests.

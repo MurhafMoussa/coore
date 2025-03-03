@@ -1,5 +1,5 @@
 import '../../utils/lock.dart';
-import 'base_cache_store.dart';
+import 'base_cache_store_interface.dart';
 import 'cache_entry.dart';
 
 class MemoryCacheStore implements BaseCacheStore {

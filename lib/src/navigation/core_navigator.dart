@@ -1,5 +1,5 @@
 import 'package:coore/src/config/entities/navigation_config_entity.dart';
-import 'package:coore/src/dependency_injection/dependency_injection.dart';
+import 'package:coore/src/dependency_injection/di_container.dart';
 import 'package:coore/src/dev_tools/core_logger.dart';
 import 'package:coore/src/navigation/screen_params/base_screen_params.dart';
 import 'package:flutter/material.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../dependency_injection/dependency_injection.dart';
+import '../dependency_injection/di_container.dart';
 import '../dev_tools/core_logger.dart';
 import '../navigation/screen_params/base_screen_params.dart';
 
