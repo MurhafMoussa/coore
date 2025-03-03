@@ -11,4 +11,6 @@ typedef RepositoryStreamResponse<T> = Stream<Either<Failure, T>>;
 /// A callback used to track the download or upload progress
 
 typedef ProgressTrackerCallback = void Function(double progress);
+
+/// The core id that will be used in all entities
 typedef Id = int;
