@@ -6,14 +6,13 @@ import 'package:coore/src/config/service/config_service.dart';
 import 'package:flutter/material.dart';
 
 class ThemeCubit extends Cubit<ThemeConfigEntity> {
-
   ThemeCubit({
     required ConfigService repository,
     required ThemeConfigEntity themeConfigEntity,
   }) : _configService = repository,
        _configEntity = themeConfigEntity,
 
-       super(ThemeConfigEntity.defaultConfig()) {
+       super(themeConfigEntity) {
     _init();
   }
   final ConfigService _configService;
