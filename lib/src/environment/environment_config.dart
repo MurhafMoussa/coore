@@ -1,6 +1,18 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-enum Environment { development, staging, uat, production }
+enum Environment {
+  development,
+  staging,
+  uat,
+  production;
+
+  static Environment getEnvironmentFromString(String env) {
+    return Environment.values.firstWhere(
+      (element) => element.name == env,
+      orElse: () => Environment.development,
+    );
+  }
+}
 
 class EnvironmentConfig {
   /// Load the .env file and optionally merge with additional environment variables.
