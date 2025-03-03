@@ -3,13 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class NavigationConfigEntity extends Equatable {
-  final List<RouteBase> routes;
-  final String initialRoute;
-  final bool enableLogging;
-  final Widget Function(BuildContext, GoRouterState)? errorBuilder;
-  final Future<String?> Function(BuildContext, GoRouterState)? redirect;
-
-  final List<NavigatorObserver> navigationObservers;
 
   const NavigationConfigEntity({
     required this.routes,
@@ -19,6 +12,13 @@ class NavigationConfigEntity extends Equatable {
     this.redirect,
     this.navigationObservers = const [],
   });
+  final List<RouteBase> routes;
+  final String initialRoute;
+  final bool enableLogging;
+  final Widget Function(BuildContext, GoRouterState)? errorBuilder;
+  final Future<String?> Function(BuildContext, GoRouterState)? redirect;
+
+  final List<NavigatorObserver> navigationObservers;
 
   @override
   List<Object?> get props => [

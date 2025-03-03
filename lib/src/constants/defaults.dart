@@ -5,7 +5,7 @@ abstract class Defaults {
   static const String defaultString = '';
   static const bool defaultBool = false;
   static const int defaultInt = 0;
-  static const double defaultDouble = 0.0;
+  static const double defaultDouble = 0;
   static const num defaultNum = 0;
   static const List defaultList = [];
   static const Map defaultMap = {};

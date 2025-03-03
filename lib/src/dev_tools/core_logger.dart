@@ -25,9 +25,9 @@ abstract interface class CoreLogger {
 
 /// Concrete implementation using the logger package
 class CoreLoggerImpl implements CoreLogger {
-  final Logger _logger;
 
   CoreLoggerImpl(this._logger);
+  final Logger _logger;
 
   @override
   void debug(message, [error, StackTrace? stackTrace]) {

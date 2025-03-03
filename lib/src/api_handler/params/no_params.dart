@@ -1,6 +1,6 @@
 import 'package:coore/src/api_handler/cancel_request_adapter.dart';
 
-import 'base_params.dart';
+import 'package:coore/src/api_handler/params/base_params.dart';
 
 class NoParams extends BaseParams {
   const NoParams({super.cancelTokenAdapter});

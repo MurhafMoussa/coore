@@ -1,8 +1,7 @@
 import 'package:coore/src/api_handler/models/error_response_model.dart';
+import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
+import 'package:coore/src/error_handling/failures/network_failure.dart';
 import 'package:dio/dio.dart';
-
-import '../failures/network_failure.dart';
-import 'network_exception_mapper.dart';
 
 class DioNetworkExceptionMapper implements NetworkExceptionMapper {
   @override
@@ -12,28 +11,28 @@ class DioNetworkExceptionMapper implements NetworkExceptionMapper {
     }
     switch (exception.type) {
       case DioExceptionType.cancel:
-        return RequestCancelledFailure("Request cancelled", stackTrace);
+        return RequestCancelledFailure('Request cancelled', stackTrace);
 
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return RequestTimeoutFailure("Request timed out", stackTrace);
+        return RequestTimeoutFailure('Request timed out', stackTrace);
 
       case DioExceptionType.unknown:
         return NoInternetConnectionFailure(
-          "No internet connection",
+          'No internet connection',
           stackTrace,
         );
 
       case DioExceptionType.badCertificate:
         return UnableToProcessFailure(
-          "Invalid or expired SSL certificate",
+          'Invalid or expired SSL certificate',
           stackTrace,
         );
 
       case DioExceptionType.connectionError:
         return ConnectionErrorFailure(
-          "Unable to establish a connection with the server",
+          'Unable to establish a connection with the server',
           stackTrace,
         );
 

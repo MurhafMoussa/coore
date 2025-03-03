@@ -93,7 +93,6 @@ Dio _createDio(NetworkConfigEntity entity) {
         followRedirects: entity.followRedirects,
         maxRedirects: entity.maxRedirects,
         queryParameters: entity.defaultQueryParams,
-        responseType: ResponseType.json,
         sendTimeout: entity.sendTimeout,
         receiveTimeout: entity.receiveTimeout,
         headers: entity.staticHeaders,
@@ -103,9 +102,6 @@ Dio _createDio(NetworkConfigEntity entity) {
       if (entity.enableLogging)
         LoggingInterceptor(
           logger: getIt(),
-          logError: true,
-          logRequest: true,
-          logResponse: true,
           maxBodyLength: 2048,
         ),
       if (entity.enableCache)

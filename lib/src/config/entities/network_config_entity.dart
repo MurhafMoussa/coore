@@ -2,6 +2,30 @@ import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
 class NetworkConfigEntity extends Equatable {
+
+  const NetworkConfigEntity({
+    required this.baseUrl,
+
+    this.connectTimeout = const Duration(seconds: 10),
+    this.sendTimeout = const Duration(seconds: 10),
+    this.receiveTimeout = const Duration(seconds: 10),
+    this.enableLogging = false,
+    this.staticHeaders = const {},
+    this.defaultQueryParams = const {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    this.interceptors = const [],
+    this.defaultContentType = 'application/json',
+    this.maxRetries = 3,
+    this.retryInterval = const Duration(seconds: 1),
+    this.retryOnStatusCodes = const [500, 502, 503, 504],
+    this.enableCache = false,
+    this.cacheDuration = const Duration(minutes: 5),
+
+    this.followRedirects = true,
+    this.maxRedirects = 5,
+  });
   /// Base URL for API endpoints (e.g., "https://api.example.com")
   final String baseUrl;
 
@@ -47,30 +71,6 @@ class NetworkConfigEntity extends Equatable {
   /// Maximum allowed redirects
   final int maxRedirects;
   final List<Interceptor> interceptors;
-
-  const NetworkConfigEntity({
-    required this.baseUrl,
-
-    this.connectTimeout = const Duration(seconds: 10),
-    this.sendTimeout = const Duration(seconds: 10),
-    this.receiveTimeout = const Duration(seconds: 10),
-    this.enableLogging = false,
-    this.staticHeaders = const {},
-    this.defaultQueryParams = const {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    this.interceptors = const [],
-    this.defaultContentType = 'application/json',
-    this.maxRetries = 3,
-    this.retryInterval = const Duration(seconds: 1),
-    this.retryOnStatusCodes = const [500, 502, 503, 504],
-    this.enableCache = false,
-    this.cacheDuration = const Duration(minutes: 5),
-
-    this.followRedirects = true,
-    this.maxRedirects = 5,
-  });
 
   @override
   List<Object?> get props => [

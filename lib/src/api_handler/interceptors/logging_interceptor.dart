@@ -5,12 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 class LoggingInterceptor extends Interceptor {
-  final CoreLogger logger;
-
-  final int maxBodyLength;
-  final bool logRequest;
-  final bool logResponse;
-  final bool logError;
 
   LoggingInterceptor({
     required this.logger,
@@ -19,6 +13,12 @@ class LoggingInterceptor extends Interceptor {
     this.logResponse = true,
     this.logError = true,
   });
+  final CoreLogger logger;
+
+  final int maxBodyLength;
+  final bool logRequest;
+  final bool logResponse;
+  final bool logError;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {

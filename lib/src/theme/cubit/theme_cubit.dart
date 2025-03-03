@@ -1,15 +1,11 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:coore/src/config/entities/theme_config_entity.dart';
 import 'package:coore/src/config/service/config_service.dart';
 import 'package:flutter/material.dart';
 
-import '../../config/entities/theme_config_entity.dart';
-
 class ThemeCubit extends Cubit<ThemeConfigEntity> {
-  final ConfigService _configService;
-  final ThemeConfigEntity _configEntity;
-  Timer? _autoSwitchTimer;
 
   ThemeCubit({
     required ConfigService repository,
@@ -20,6 +16,9 @@ class ThemeCubit extends Cubit<ThemeConfigEntity> {
        super(ThemeConfigEntity.defaultConfig()) {
     _init();
   }
+  final ConfigService _configService;
+  final ThemeConfigEntity _configEntity;
+  Timer? _autoSwitchTimer;
 
   Future<void> _init() async {
     final savedThemeMode = await _configService.getThemeMode();

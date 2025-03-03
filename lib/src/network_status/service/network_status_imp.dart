@@ -1,18 +1,17 @@
 import 'dart:async';
 
+import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
-import 'network_status_interface.dart';
-
 class NetworkStatusImp implements NetworkStatusInterface {
-  final InternetConnection _internetConnection;
-  final StreamController<ConnectionStatus> _controller =
-      StreamController<ConnectionStatus>.broadcast();
-  StreamSubscription<InternetStatus>? _subscription;
 
   NetworkStatusImp(this._internetConnection) {
     _init();
   }
+  final InternetConnection _internetConnection;
+  final StreamController<ConnectionStatus> _controller =
+      StreamController<ConnectionStatus>.broadcast();
+  StreamSubscription<InternetStatus>? _subscription;
 
   @override
   Stream<ConnectionStatus> get connectionStream => _controller.stream;

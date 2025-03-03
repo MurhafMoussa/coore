@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 /// Runs the extension method generator for a DTO class.
@@ -30,14 +31,14 @@ Future<void> main() async {
       dtoClassName.isEmpty ||
       entityClassName.isEmpty ||
       dtoFilePath.isEmpty) {
-    print('One or more inputs were invalid.');
+    log('One or more inputs were invalid.');
     return;
   }
 
   // Create a File instance for the given DTO file path.
   final file = File(dtoFilePath);
   if (!await file.exists()) {
-    print('File not found at $dtoFilePath');
+    log('File not found at $dtoFilePath');
     return;
   }
 
@@ -49,9 +50,9 @@ Future<void> main() async {
   final fieldRegex = RegExp(r'final\s+(\S+)\?\s+(\S+);');
   final matches = fieldRegex.allMatches(content).toList();
 
-  // If no nullable fields are found, print a message and exit.
+  // If no nullable fields are found, log(message) a message and exit.
   if (matches.isEmpty) {
-    print('No nullable fields were found in the file.');
+    log('No nullable fields were found in the file.');
     return;
   }
 
@@ -71,7 +72,7 @@ Future<void> main() async {
     if (type == 'int') {
       mappingLine = '$fieldName: $fieldName ?? Defaults.defaultInt,';
     } else if (type == 'String') {
-      mappingLine = "$fieldName: $fieldName ?? Defaults.defaultString,";
+      mappingLine = '$fieldName: $fieldName ?? Defaults.defaultString,';
     } else if (type == 'double') {
       mappingLine = '$fieldName: $fieldName ?? Defaults.defaultDouble,';
     } else if (type == 'bool') {
@@ -119,10 +120,10 @@ ${lines.join('\n')}
 ''';
 
   // Print the generated extension method code.
-  print('\nGenerated extension method:\n');
-  print(extensionCode);
+  log('\nGenerated extension method:\n');
+  log(extensionCode);
 
   // Append the generated extension method code to the DTO file.
   await file.writeAsString('\n$extensionCode', mode: FileMode.append);
-  print('Extension method appended to $dtoFilePath');
+  log('Extension method appended to $dtoFilePath');
 }

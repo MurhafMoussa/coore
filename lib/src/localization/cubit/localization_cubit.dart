@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LocalizationCubit extends Cubit<Locale> {
-  final ConfigService service;
-  final LocalizationConfigEntity config;
 
   LocalizationCubit({required this.service, required this.config})
     : super(config.defaultLocale) {
     _initialize();
   }
+  final ConfigService service;
+  final LocalizationConfigEntity config;
 
-  void _initialize() async {
+  Future<void> _initialize() async {
     await _fetchLocale();
   }
 

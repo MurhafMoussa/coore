@@ -52,7 +52,7 @@ extension StringExtensions on String {
 
   bool get isAlphabetOnly => RegExp(r'^[a-zA-Z]+$').hasMatch(this);
 
-  bool get hasCapitalLetter => RegExp(r'[A-Z]').hasMatch(this);
+  bool get hasCapitalLetter => RegExp('[A-Z]').hasMatch(this);
 
   bool get isBool => this == 'true' || this == 'false';
 
@@ -171,7 +171,7 @@ extension StringExtensions on String {
   bool get isPalindrom {
     final cleanString = toLowerCase()
         .replaceAll(RegExp(r'\s+'), '')
-        .replaceAll(RegExp(r'[^0-9a-zA-Z]+'), '');
+        .replaceAll(RegExp('[^0-9a-zA-Z]+'), '');
     for (int i = 0; i < cleanString.length; i++) {
       if (cleanString[i] != cleanString[cleanString.length - i - 1]) {
         return false;
@@ -231,7 +231,7 @@ extension StringExtensions on String {
                   ? ''
                   : word[0].toUpperCase() + word.substring(1).toLowerCase(),
         )
-        .join('');
+        .join();
     return newString[0].toLowerCase() + newString.substring(1);
   }
 
@@ -257,7 +257,7 @@ extension StringExtensions on String {
   /// Groups the string into “words” based on uppercase letters and symbols.
   List<String> _groupIntoWords() {
     final RegExp upperAlphaRegex = RegExp('[A-Z]');
-    final Set<String> symbolSet = {' ', '.', '/', '_', '\\', '-'};
+    final Set<String> symbolSet = {' ', '.', '/', '_', r'\', '-'};
     final sb = StringBuffer();
     final words = <String>[];
     final isAllCaps = toUpperCase() == this;

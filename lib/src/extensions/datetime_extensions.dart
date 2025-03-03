@@ -94,7 +94,7 @@ extension DateTimeX on DateTime {
   /// ```
   DateTime get lastDayOfMonth {
     final nextMonth =
-        (month < 12) ? DateTime(year, month + 1) : DateTime(year + 1, 1);
+        (month < 12) ? DateTime(year, month + 1) : DateTime(year + 1);
     return nextMonth.subtract(const Duration(days: 1));
   }
 
@@ -282,7 +282,7 @@ extension DateTimeX on DateTime {
   int get weekOfYear {
     // Adjust to nearest Thursday: current date + 4 - current weekday
     final adjusted = add(Duration(days: 4 - (weekday % 7)));
-    final firstJan = DateTime(adjusted.year, 1, 1);
+    final firstJan = DateTime(adjusted.year);
     return ((adjusted.difference(firstJan).inDays) / 7).floor() + 1;
   }
 
@@ -290,7 +290,7 @@ extension DateTimeX on DateTime {
   int get quarter => ((month - 1) ~/ 3) + 1;
 
   /// Returns the first day of the quarter.
-  DateTime get firstDayOfQuarter => DateTime(year, ((quarter - 1) * 3) + 1, 1);
+  DateTime get firstDayOfQuarter => DateTime(year, ((quarter - 1) * 3) + 1);
 
   /// Returns the last day of the quarter.
   DateTime get lastDayOfQuarter {
@@ -301,12 +301,11 @@ extension DateTimeX on DateTime {
     return DateTime(
       nextQuarterYear,
       adjustedMonth,
-      1,
     ).subtract(const Duration(days: 1));
   }
 
   /// Returns the day number in the year.
-  int get dayOfYear => difference(DateTime(year, 1, 1)).inDays + 1;
+  int get dayOfYear => difference(DateTime(year)).inDays + 1;
 
   /// Checks if the date falls on a weekend.
   bool get isWeekend =>
@@ -325,7 +324,7 @@ extension DateTimeX on DateTime {
     // Move date to Thursday in current week: ISO weeks start on Monday, and Thursday is the week’s pivot.
     final adjusted = add(Duration(days: 3 - ((weekday + 6) % 7)));
     // Find the first Thursday of the year.
-    DateTime firstThursday = DateTime(adjusted.year, 1, 1);
+    DateTime firstThursday = DateTime(adjusted.year);
     while (firstThursday.weekday != DateTime.thursday) {
       firstThursday = firstThursday.add(const Duration(days: 1));
     }
@@ -343,7 +342,6 @@ extension DateTimeX on DateTime {
         DateTime(
           newYear,
           newMonth + 1,
-          1,
         ).subtract(const Duration(days: 1)).day;
     final newDay = day > lastDay ? lastDay : day;
     return DateTime(

@@ -6,11 +6,6 @@ import 'package:coore/src/environment/environment_config.dart';
 import 'package:equatable/equatable.dart';
 
 class CoreConfigEntity extends Equatable {
-  final Environment currentEnvironment;
-  final NetworkConfigEntity networkConfigEntity;
-  final LocalizationConfigEntity localizationConfigEntity;
-  final NavigationConfigEntity navigationConfigEntity;
-  final ThemeConfigEntity themeConfigEntity;
 
   const CoreConfigEntity({
     required this.currentEnvironment,
@@ -19,6 +14,11 @@ class CoreConfigEntity extends Equatable {
     required this.navigationConfigEntity,
     required this.themeConfigEntity,
   });
+  final Environment currentEnvironment;
+  final NetworkConfigEntity networkConfigEntity;
+  final LocalizationConfigEntity localizationConfigEntity;
+  final NavigationConfigEntity navigationConfigEntity;
+  final ThemeConfigEntity themeConfigEntity;
 
   @override
   List<Object> get props => [

@@ -1,4 +1,4 @@
-import 'failure.dart';
+import 'package:coore/src/error_handling/failures/failure.dart';
 
 abstract class NetworkFailure extends Failure {
   const NetworkFailure(super.message, [super.stackTrace]);

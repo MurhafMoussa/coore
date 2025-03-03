@@ -2,9 +2,9 @@ import 'package:coore/src/local_database/local_database_interface.dart';
 import 'package:flutter/material.dart';
 
 class ConfigService {
-  final LocalDatabaseInterface localDatabaseInterface;
 
   ConfigService(this.localDatabaseInterface);
+  final LocalDatabaseInterface localDatabaseInterface;
 
   Future<void> saveLanguageCode(String languageCode) async {
     localDatabaseInterface.save<String>('languageCode', languageCode).run();

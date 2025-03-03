@@ -112,7 +112,7 @@ class CoreNavigator {
       ctx.pop(result);
     } else {
       getIt<CoreLogger>().warning('NavigationService.pop: Cannot pop screen');
-      throw Exception("Cannot pop - no previous screen available");
+      throw Exception('Cannot pop - no previous screen available');
     }
   }
 
@@ -140,9 +140,9 @@ class CoreNavigator {
 }
 
 class CoreNavigationObserver extends NavigatorObserver {
-  final CoreLogger _logger;
 
   CoreNavigationObserver(this._logger);
+  final CoreLogger _logger;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {

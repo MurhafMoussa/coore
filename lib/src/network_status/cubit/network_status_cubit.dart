@@ -1,16 +1,13 @@
 import 'dart:async';
 
+import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../service/network_status_interface.dart';
 
 /// A Cubit that manages the current network connection status.
 ///
 /// It listens to changes from [NetworkStatusInterface.connectionStream]
 /// and emits corresponding [ConnectionStatus] updates.
 class NetworkStatusCubit extends Cubit<ConnectionStatus> {
-  final NetworkStatusInterface _networkStatus;
-  late final StreamSubscription<ConnectionStatus> _subscription;
 
   /// Creates a new [NetworkStatusCubit] with the provided [NetworkStatusInterface].
   ///
@@ -21,6 +18,8 @@ class NetworkStatusCubit extends Cubit<ConnectionStatus> {
       super(ConnectionStatus.disconnected) {
     _initialize();
   }
+  final NetworkStatusInterface _networkStatus;
+  late final StreamSubscription<ConnectionStatus> _subscription;
 
   /// Initializes the cubit by checking the current connection status and
   /// subscribing to changes from the network status stream.

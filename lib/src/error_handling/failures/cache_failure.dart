@@ -1,4 +1,4 @@
-import 'failure.dart';
+import 'package:coore/src/error_handling/failures/failure.dart';
 
 /// Abstract class for cache related failures.
 abstract class CacheFailure extends Failure {

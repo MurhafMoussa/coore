@@ -6,7 +6,7 @@ extension ObjectExtensions on Object? {
   /// For String, blank means empty or only whitespace.
   bool get isNullOrBlank {
     if (this == null) return true;
-    if (this is String) return (this as String).trim().isEmpty;
+    if (this is String) return (this! as String).trim().isEmpty;
     if (this is Iterable || this is Map) return (this as dynamic).isEmpty;
     return false;
   }
@@ -14,7 +14,7 @@ extension ObjectExtensions on Object? {
   /// Checks if a String, Iterable, or Map is blank.
   bool get isBlank {
     if (this == null) return true;
-    if (this is String) return (this as String).trim().isEmpty;
+    if (this is String) return (this! as String).trim().isEmpty;
     if (this is Iterable || this is Map) return (this as dynamic).isEmpty;
     return false;
   }
@@ -30,8 +30,8 @@ extension LengthExtensions on Object? {
     if (this is String || this is Iterable || this is Map) {
       return (this as dynamic).length as int;
     }
-    if (this is int) return this.toString().length;
-    if (this is double) return this.toString().replaceAll('.', '').length;
+    if (this is int) return toString().length;
+    if (this is double) return toString().replaceAll('.', '').length;
     return null;
   }
 

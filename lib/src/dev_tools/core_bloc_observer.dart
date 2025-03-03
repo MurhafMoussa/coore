@@ -4,11 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// A Bloc observer that logs events, state changes, transitions, errors,
 /// creation, and closure of blocs using an injected [AppLogger] instance.
 class CoreBlocObserver extends BlocObserver {
-  /// The logger instance used for logging Bloc events and changes.
-  final CoreLogger logger;
 
   /// Creates a new [CoreBlocObserver] with the given [logger].
   CoreBlocObserver(this.logger);
+  /// The logger instance used for logging Bloc events and changes.
+  final CoreLogger logger;
 
   @override
   void onEvent(Bloc bloc, Object? event) {

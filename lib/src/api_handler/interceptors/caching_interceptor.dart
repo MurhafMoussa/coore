@@ -1,9 +1,8 @@
 import 'dart:async';
 
+import 'package:coore/src/api_handler/base_cache_store/base_cache_store_interface.dart';
+import 'package:coore/src/api_handler/base_cache_store/cache_entry.dart';
 import 'package:dio/dio.dart';
-
-import '../base_cache_store/base_cache_store_interface.dart';
-import '../base_cache_store/cache_entry.dart';
 
 /// A Dio interceptor that handles caching of GET requests.
 ///
@@ -16,17 +15,6 @@ import '../base_cache_store/cache_entry.dart';
 /// The interceptor uses a [BaseCacheStore] to persist cache entries and
 /// utilizes configurable keys and durations for cache management.
 class CachingInterceptor extends Interceptor {
-  /// The cache store used for saving and retrieving cached responses.
-  final BaseCacheStore cacheStore;
-
-  /// The default duration for which a cached response is considered valid.
-  final Duration defaultCacheDuration;
-
-  /// The key in the request's extra data used to store/retrieve the cache key.
-  final String cacheKeyExtra;
-
-  /// The key in the request's extra data that forces a refresh, bypassing the cache.
-  final String forceRefreshExtra;
 
   /// Creates a new [CachingInterceptor] instance.
   ///
@@ -40,6 +28,17 @@ class CachingInterceptor extends Interceptor {
     this.cacheKeyExtra = 'cacheKey',
     this.forceRefreshExtra = 'forceRefresh',
   });
+  /// The cache store used for saving and retrieving cached responses.
+  final BaseCacheStore cacheStore;
+
+  /// The default duration for which a cached response is considered valid.
+  final Duration defaultCacheDuration;
+
+  /// The key in the request's extra data used to store/retrieve the cache key.
+  final String cacheKeyExtra;
+
+  /// The key in the request's extra data that forces a refresh, bypassing the cache.
+  final String forceRefreshExtra;
 
   /// Intercepts outgoing requests.
   ///

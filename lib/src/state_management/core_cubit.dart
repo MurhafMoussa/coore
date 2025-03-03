@@ -1,6 +1,5 @@
+import 'package:coore/src/state_management/api_state_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'api_state_mixin.dart';
 
 /// Abstract class for a Cubit that utilizes `ApiStateMixin`.
 ///

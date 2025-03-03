@@ -1,9 +1,8 @@
 import 'package:coore/src/api_handler/cancel_request_adapter.dart';
+import 'package:coore/src/api_handler/form_data_adapter.dart';
 import 'package:coore/src/error_handling/failures/network_failure.dart';
+import 'package:coore/src/typedefs/core_typedefs.dart';
 import 'package:fpdart/fpdart.dart';
-
-import '../typedefs/core_typedefs.dart';
-import 'form_data_adapter.dart';
 
 /// An abstract interface for handling API requests using a functional
 /// programming style with [TaskEither].

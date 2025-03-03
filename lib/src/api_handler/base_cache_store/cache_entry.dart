@@ -1,12 +1,6 @@
 import 'package:dio/dio.dart';
 
 class CacheEntry {
-  final dynamic data;
-  final Headers headers;
-  final int statusCode;
-  final String statusMessage;
-  final DateTime expiresAt;
-  final DateTime timestamp;
 
   CacheEntry({
     required this.data,
@@ -27,6 +21,12 @@ class CacheEntry {
       timestamp: DateTime.now(),
     );
   }
+  final dynamic data;
+  final Headers headers;
+  final int statusCode;
+  final String statusMessage;
+  final DateTime expiresAt;
+  final DateTime timestamp;
 
   Response<dynamic> toResponse(RequestOptions options) {
     return Response<dynamic>(
@@ -35,7 +35,6 @@ class CacheEntry {
       statusCode: statusCode,
       statusMessage: statusMessage,
       requestOptions: options,
-      isRedirect: false,
       extra: {'fromCache': true},
     );
   }

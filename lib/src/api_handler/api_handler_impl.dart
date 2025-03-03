@@ -1,12 +1,11 @@
+import 'package:coore/src/api_handler/api_handler_interface.dart';
 import 'package:coore/src/api_handler/cancel_request_adapter.dart';
+import 'package:coore/src/api_handler/form_data_adapter.dart';
 import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
 import 'package:coore/src/error_handling/failures/network_failure.dart';
+import 'package:coore/src/typedefs/core_typedefs.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
-
-import '../typedefs/core_typedefs.dart';
-import 'api_handler_interface.dart';
-import 'form_data_adapter.dart';
 
 /// An API handler implementation using Dio.
 ///
@@ -17,8 +16,6 @@ import 'form_data_adapter.dart';
 /// via [NetworkFailure]. Additional options for caching and authorization are
 /// included in the request options.
 class DioApiHandler implements ApiHandlerInterface {
-  final Dio _dio;
-  final NetworkExceptionMapper _exceptionMapper;
 
   /// Creates a new instance of [DioApiHandler] with the provided Dio instance
   /// and [NetworkExceptionMapper].
@@ -26,6 +23,8 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [dio]: The Dio instance to be used for HTTP calls.
   /// [exceptionMapper]: A mapper to convert Network exceptions into [NetworkFailure] instances.
   DioApiHandler(this._dio, this._exceptionMapper);
+  final Dio _dio;
+  final NetworkExceptionMapper _exceptionMapper;
 
   /// Builds Dio [Options] with extra headers based on [isAuthorized] and [shouldCache].
   ///
@@ -34,8 +33,8 @@ class DioApiHandler implements ApiHandlerInterface {
   /// is added. The headers are stored in the [extra] field of the options.
   Options _buildOptions(bool isAuthorized, [bool shouldCache = false]) {
     final headers = <String, dynamic>{
-      "isAuthorized": isAuthorized,
-      "shouldCache": shouldCache,
+      'isAuthorized': isAuthorized,
+      'shouldCache': shouldCache,
     };
 
     return Options(extra: headers);

@@ -1,6 +1,6 @@
-import '../../utils/lock.dart';
-import 'base_cache_store_interface.dart';
-import 'cache_entry.dart';
+import 'package:coore/src/api_handler/base_cache_store/base_cache_store_interface.dart';
+import 'package:coore/src/api_handler/base_cache_store/cache_entry.dart';
+import 'package:coore/src/utils/lock.dart';
 
 class MemoryCacheStore implements BaseCacheStore {
   final Map<String, CacheEntry> _storage = {};

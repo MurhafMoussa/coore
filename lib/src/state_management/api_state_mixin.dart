@@ -3,10 +3,9 @@
 import 'package:coore/src/api_handler/cancel_request_adapter.dart';
 import 'package:coore/src/api_handler/params/base_params.dart';
 import 'package:coore/src/error_handling/failures/failure.dart';
+import 'package:coore/src/state_management/api_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
-
-import 'api_state.dart';
 
 /// A generic mixin for BLoCs/Cubits that manage composite states containing API state.
 ///
