@@ -4,3 +4,4 @@
 export 'dto_to_entity_generator.dart';
 export 'lock.dart';
 export 'validators/validators.dart';
+export 'value_tester.dart';
