@@ -13,9 +13,14 @@ import 'package:fpdart/fpdart.dart';
 /// a BLoC/Cubit, ensuring consistent loading, success, and failure state handling.
 ///
 /// Type Parameters:
-/// - `S`: The composite state type managed by the BLoC.
-/// - `T`: The success data type returned by the API call.
-mixin ApiStateMixin<S, T> on BlocBase<S> {
+/// - `CompositeState`: The composite state type managed by the BLoC.
+/// - `SuccessData`: The success data type returned by the API call.
+mixin ApiStateMixin<
+  CompositeState,
+  SuccessData,
+  FunctionParam extends BaseParams
+>
+    on BlocBase<CompositeState> {
   /// Adapter to manage cancellation of API requests.
   CancelRequestAdapter? cancelRequestAdapter;
 
@@ -27,12 +32,15 @@ mixin ApiStateMixin<S, T> on BlocBase<S> {
   /// Retrieves the current API state from the composite state.
   ///
   /// Must be implemented by the consuming BLoC/Cubit.
-  ApiState<T> getApiState(S state);
+  ApiState<SuccessData> getApiState(CompositeState state);
 
   /// Updates the composite state with a new API state.
   ///
   /// Must be implemented by the consuming BLoC/Cubit.
-  S setApiState(S state, ApiState<T> apiState);
+  CompositeState setApiState(
+    CompositeState state,
+    ApiState<SuccessData> apiState,
+  );
 
   /// Handles an API call lifecycle and updates the state accordingly.
   ///
@@ -45,9 +53,10 @@ mixin ApiStateMixin<S, T> on BlocBase<S> {
   /// - `onSuccess`: (Optional) A callback executed when the API call is successful.
   /// - `onFailure`: (Optional) A callback executed when the API call fails.
   Future<void> handleApiCall({
-    required Future<Either<Failure, T>> Function(BaseParams params) apiCall,
-    required BaseParams params,
-    void Function(T data)? onSuccess,
+    required Future<Either<Failure, SuccessData>> Function(FunctionParam params)
+    apiCall,
+    required FunctionParam params,
+    void Function(SuccessData data)? onSuccess,
     void Function(Failure failure)? onFailure,
   }) async {
     // Prevents duplicate API calls while a request is already in progress
@@ -61,7 +70,8 @@ mixin ApiStateMixin<S, T> on BlocBase<S> {
 
     // Execute the API call
     final result = await apiCall(
-      params.attachCancelToken(cancelTokenAdapter: cancelRequestAdapter),
+      (params.attachCancelToken(cancelTokenAdapter: cancelRequestAdapter))
+          as FunctionParam,
     );
 
     // Handle API response

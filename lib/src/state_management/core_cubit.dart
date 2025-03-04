@@ -1,3 +1,4 @@
+import 'package:coore/lib.dart';
 import 'package:coore/src/state_management/api_state_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -6,9 +7,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// This class serves as a base for creating Cubits that manage API state.
 ///
 /// Type Parameters:
-/// - `S`: The composite state type managed by the Cubit.
-/// - `T`: The success data type returned by the API call.
-abstract class CoreCubit<S, T> extends Cubit<S> with ApiStateMixin<S, T> {
+/// - `CompositeState`: The composite state type managed by the Cubit.
+/// - `SuccessData`: The success data type returned by the API call.
+abstract class CoreCubit<
+  CompositeState,
+  SuccessData,
+  FunctionParam extends BaseParams
+>
+    extends Cubit<CompositeState>
+    with ApiStateMixin<CompositeState, SuccessData, FunctionParam> {
   CoreCubit(super.initialState);
 
   @override
