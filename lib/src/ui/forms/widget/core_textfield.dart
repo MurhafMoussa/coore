@@ -87,8 +87,9 @@ class CoreTextField extends StatefulWidget {
   const CoreTextField({
     super.key,
     required this.name,
-    this.obscureText = false,
+
     this.enabled = true,
+    this.obscureText = false,
     this.expands = false,
     this.readOnly = false,
     this.enableClear = false,
@@ -125,9 +126,6 @@ class CoreTextField extends StatefulWidget {
   /// Unique identifier for the text field within the form.
   final String name;
 
-  /// If true, the text will be obscured (e.g., for password fields).
-  final bool obscureText;
-
   /// Determines if the text field is interactive.
   final bool enabled;
 
@@ -158,6 +156,9 @@ class CoreTextField extends StatefulWidget {
 
   /// Autofill hints to facilitate autofill operations.
   final Iterable<String>? autoFillHints;
+
+  /// If true, the text will be obscured (e.g., for password fields).
+  final bool obscureText;
 
   /// A list of [TextInputFormatter]s to control or format input.
   final List<TextInputFormatter>? inputFormatters;
@@ -222,34 +223,39 @@ class CoreTextField extends StatefulWidget {
 
 class _CoreTextFieldState extends State<CoreTextField> {
   bool obscureText = false;
+  late final InputDecoration effectiveDecoration;
+  late final TextEditingController textEditingController;
   @override
   void initState() {
     _updateCubit(widget.initialText);
     obscureText = widget.obscureText;
+    textEditingController = TextEditingController(text: widget.initialText);
+    effectiveDecoration = (widget.decoration ?? const InputDecoration())
+        .copyWith(
+          suffixIcon: _buildSuffixIcons(),
+          prefix: _buildPrefixIcons(),
+          labelText: widget.labelText,
+          hintText: widget.hintText,
+        );
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    textEditingController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CoreFormCubit, CoreFormState>(
       builder: (context, state) {
-        // Merge the provided [InputDecoration] with error text from the form state.
-        InputDecoration effectiveDecoration = (widget.decoration ??
-                const InputDecoration())
-            .copyWith(errorText: state.errors[widget.name]);
-
-        // If the clear button is enabled, add it as a suffix icon.
-
-        effectiveDecoration = effectiveDecoration.copyWith(
-          suffixIcon: _buildSuffixIcons(),
-          prefix: widget.prefixIcon,
-          labelText: widget.labelText,
-          hintText: widget.hintText,
-        );
-
         return TextFormField(
+          controller: textEditingController,
           obscureText: obscureText,
-          decoration: effectiveDecoration,
+          decoration: effectiveDecoration.copyWith(
+            errorText: state.errors[widget.name],
+          ),
           inputFormatters: widget.inputFormatters,
           onChanged: _updateCubit,
           onFieldSubmitted: _updateCubit,
@@ -260,7 +266,6 @@ class _CoreTextFieldState extends State<CoreTextField> {
           buildCounter: widget.counterBuilder,
           enabled: widget.enabled,
           expands: widget.expands,
-          initialValue: widget.initialText,
           readOnly: widget.readOnly,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
@@ -287,6 +292,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
     return IconButton(
       icon: widget.customClearIcon ?? const Icon(Icons.clear),
       onPressed: () {
+        textEditingController.clear();
         _updateCubit('');
       },
     );
@@ -304,15 +310,12 @@ class _CoreTextFieldState extends State<CoreTextField> {
 
   Widget? _buildSuffixIcons() {
     final List<Widget> suffixWidgets = [];
-
-    if (widget.enableClear) {
-      suffixWidgets.add(_buildClearIcon());
-    }
-    if (obscureText) {
-      suffixWidgets.add(_buildVisibilityIcon());
-    }
     if (widget.suffixIcon != null) {
       suffixWidgets.add(widget.suffixIcon!);
+    }
+
+    if (widget.obscureText) {
+      suffixWidgets.add(_buildVisibilityIcon());
     }
 
     // If we have more than one widget, wrap them in a Row.
@@ -329,6 +332,33 @@ class _CoreTextFieldState extends State<CoreTextField> {
     }
 
     return finalSuffix;
+  }
+
+  Widget? _buildPrefixIcons() {
+    final List<Widget> prefixWidgets = [];
+
+    if (widget.enableClear) {
+      prefixWidgets.add(_buildClearIcon());
+    }
+
+    if (widget.prefixIcon != null) {
+      prefixWidgets.add(widget.suffixIcon!);
+    }
+
+    // If we have more than one widget, wrap them in a Row.
+    Widget? finalPrefix;
+    if (prefixWidgets.isNotEmpty) {
+      finalPrefix =
+          prefixWidgets.length == 1
+              ? prefixWidgets.first
+              : Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: prefixWidgets,
+              );
+    }
+
+    return finalPrefix;
   }
 
   void _updateCubit(String? text) {
