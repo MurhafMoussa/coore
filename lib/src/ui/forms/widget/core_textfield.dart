@@ -1,3 +1,4 @@
+import 'package:coore/lib.dart';
 import 'package:coore/src/ui/forms/cubit/core_form_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -246,7 +247,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
       builder: (context, state) {
         InputDecoration effectiveDecoration =
             (widget.decoration ?? const InputDecoration()).copyWith(
-              suffixIcon: _buildSuffixIcons(),
+              suffixIcon: _buildSuffixIcons(state),
               prefix: _buildPrefixIcons(),
               prefixIconConstraints: const BoxConstraints(),
               labelText: widget.labelText,
@@ -336,10 +337,10 @@ class _CoreTextFieldState extends State<CoreTextField> {
     return finalPrefix;
   }
 
-  Widget? _buildSuffixIcons() {
+  Widget? _buildSuffixIcons(CoreFormState state) {
     final List<Widget> suffixWidgets = [];
 
-    if (widget.enableClear) {
+    if (widget.enableClear && !ValueTester.isBlank(state.values[widget.name])) {
       suffixWidgets.add(_buildClearIcon());
     }
 
