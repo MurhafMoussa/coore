@@ -7,7 +7,7 @@ part 'core_form_state.dart';
 
 class CoreFormCubit extends Cubit<CoreFormState> {
   CoreFormCubit({this.validators = const {}}) : super(CoreFormState.initial());
-  final Map<String, List<FormFieldValidator>> validators;
+  final Map<String, List<FormFieldValidator<dynamic>>> validators;
 
   void updateField(String fieldName, dynamic value) {
     final newValues = Map<String, dynamic>.from(state.values)
