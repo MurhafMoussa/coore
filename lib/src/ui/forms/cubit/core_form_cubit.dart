@@ -21,7 +21,6 @@ class CoreFormCubit extends Cubit<CoreFormState> {
   late final Map<String, CompositeValidator> _validators;
   final ValidationType validationType;
   void updateField(String fieldName, dynamic value) {
-    if (ValueTester.isNullOrBlank(value)) return;
     final newValues = Map<String, dynamic>.from(state.values)
       ..[fieldName] = value;
 
