@@ -140,7 +140,6 @@ class CoreNavigator {
 }
 
 class CoreNavigationObserver extends NavigatorObserver {
-
   CoreNavigationObserver(this._logger);
   final CoreLogger _logger;
 

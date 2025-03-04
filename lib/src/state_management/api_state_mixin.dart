@@ -45,7 +45,7 @@ mixin ApiStateMixin<S, T> on BlocBase<S> {
   /// - `onSuccess`: (Optional) A callback executed when the API call is successful.
   /// - `onFailure`: (Optional) A callback executed when the API call fails.
   Future<void> handleApiCall({
-    required TaskEither<Failure, T> Function(BaseParams params) apiCall,
+    required Future<Either<Failure, T>> Function(BaseParams params) apiCall,
     required BaseParams params,
     void Function(T data)? onSuccess,
     void Function(Failure failure)? onFailure,
@@ -60,10 +60,9 @@ mixin ApiStateMixin<S, T> on BlocBase<S> {
     cancelRequestAdapter = DioCancelRequestAdapter();
 
     // Execute the API call
-    final result =
-        await apiCall(
-          params.attachCancelToken(cancelTokenAdapter: cancelRequestAdapter),
-        ).run();
+    final result = await apiCall(
+      params.attachCancelToken(cancelTokenAdapter: cancelRequestAdapter),
+    );
 
     // Handle API response
     if (!isClosed) {
