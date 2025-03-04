@@ -51,7 +51,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ) async {
     try {
       final response = await dioMethod();
-      return response.data;
+      return right(response.data);
     } catch (error, stackTrace) {
       if (error is DioException) {
         return left(_exceptionMapper.mapException(error, stackTrace));
