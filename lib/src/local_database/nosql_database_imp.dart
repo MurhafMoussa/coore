@@ -6,7 +6,6 @@ import 'package:fpdart/fpdart.dart';
 import 'package:hive_ce/hive.dart';
 
 class HiveLocalDatabase implements LocalDatabaseInterface {
-
   HiveLocalDatabase(this._boxName) {
     initialize();
   }
@@ -15,41 +14,52 @@ class HiveLocalDatabase implements LocalDatabaseInterface {
   late Box _box;
 
   @override
-  CacheResponse<Unit> initialize() {
-    return TaskEither.tryCatch(() async {
+  CacheResponse<Unit> initialize() async {
+    try {
       _box = await Hive.openBox(_boxName);
-      return unit;
-    }, (error, stackTrace) => CacheInitializationFailure(stackTrace),);
+      return right(unit);
+    } catch (e, stackTrace) {
+      return left(CacheInitializationFailure(stackTrace));
+    }
   }
 
   @override
-  CacheResponse<Unit> close() {
-    return TaskEither.tryCatch(() async {
+  CacheResponse<Unit> close() async {
+    try {
       await _box.close();
-      return unit;
-    }, (error, stackTrace) => CacheCorruptedFailure(stackTrace),);
+      return right(unit);
+    } catch (e, stackTrace) {
+      return left(CacheCorruptedFailure(stackTrace));
+    }
   }
 
   @override
-  CacheResponse<Unit> save<T>(String key, T value) {
-    return TaskEither.tryCatch(() async {
-      await _box.put(key, value);
-      return unit;
-    }, (error, stackTrace) => CacheWriteFailure(stackTrace),);
+  CacheResponse<Unit> save<T>(String key, T value) async {
+    try {
+      await _box.close();
+      return right(unit);
+    } catch (e, stackTrace) {
+      return left(CacheWriteFailure(stackTrace));
+    }
   }
 
   @override
-  CacheResponse<T?> get<T>(String key) {
-    return TaskEither.tryCatch(() async {
-      return _box.get(key) as T?;
-    }, (error, stackTrace) => CacheReadFailure(stackTrace),);
+  CacheResponse<T?> get<T>(String key) async {
+    try {
+      await _box.close();
+      return right(_box.get(key) as T?);
+    } catch (e, stackTrace) {
+      return left(CacheReadFailure(stackTrace));
+    }
   }
 
   @override
-  CacheResponse<Unit> delete(String key) {
-    return TaskEither.tryCatch(() async {
+  CacheResponse<Unit> delete(String key) async {
+    try {
       await _box.delete(key);
-      return unit;
-    }, (error, stackTrace) => CacheDeleteFailure(stackTrace),);
+      return right(unit);
+    } catch (e, stackTrace) {
+      return left(CacheDeleteFailure(stackTrace));
+    }
   }
 }

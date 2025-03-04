@@ -46,19 +46,18 @@ class DioApiHandler implements ApiHandlerInterface {
   /// response data as a [Map<String, dynamic>]. On error, if the error is a [DioException],
   /// it is mapped to a [NetworkFailure] using the exception mapper; otherwise,
   /// the error is thrown.
-  ApiHandlerResponse _handleResponse(Future<Response> Function() dioMethod) {
-    return TaskEither.tryCatch(
-      () async {
-        final response = await dioMethod();
-        return response.data;
-      },
-      (error, stackTrace) {
-        if (error is DioException) {
-          return _exceptionMapper.mapException(error, stackTrace);
-        }
-        throw error;
-      },
-    );
+  ApiHandlerResponse _handleResponse(
+    Future<Response> Function() dioMethod,
+  ) async {
+    try {
+      final response = await dioMethod();
+      return response.data;
+    } catch (error, stackTrace) {
+      if (error is DioException) {
+        return left(_exceptionMapper.mapException(error, stackTrace));
+      }
+      rethrow;
+    }
   }
 
   /// Sends an HTTP GET request to the specified [path].
