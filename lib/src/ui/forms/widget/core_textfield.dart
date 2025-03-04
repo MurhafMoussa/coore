@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-//todo(Murhaf): if you want more types go to https://pub.dev/packages/flutter_form_builder
 /// An enterprise-level text field widget that integrates with the [CoreFormCubit]
-/// for state management. This widget builds upon [FormBuilderTextField] from the
+/// for state management. This widget builds upon [TextFormField] from the
 /// flutter_form_builder package and exposes a wide range of customization options
 /// to suit various projects. It is designed to ensure consistency across multiple
 /// projects while allowing advanced customization of behavior and appearance.
@@ -18,72 +17,56 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 ///
 /// * **name**: Unique identifier for the text field. This key is used to store and
 ///   retrieve the field’s value from the form state.
-///
 /// * **obscureText**: If true, the text input will be obscured (e.g., for password fields).
-///
 /// * **enabled**: Determines if the text field accepts user input. When false, the field is disabled.
-///
 /// * **expands**: If true, the text field will expand to fill its parent widget.
 ///   **Note:** When set to true, both [maxLines] and [minLines] must be null.
 ///   This is enforced via an assert in the constructor.
-///
 /// * **readOnly**: If true, the text field will not allow changes to its text, though it may be focusable.
-///
 /// * **enableClear**: When true, a clear button is displayed inside the field allowing the
 ///   user to clear its contents. The clear action also updates the form state via the Cubit.
-///
 /// * **enableSuggestions**: Enables or disables text suggestions and autocorrect for the field.
-///
 /// * **showCursor**: Controls whether the text cursor is visible in the text field.
-///
 /// * **decoration**: Visual styling for the text field. This includes borders, labels,
 ///   icons, and error messages. The effective decoration merges any provided decoration
 ///   with error text fetched from the form state.
-///
 /// * **keyboardType**: Defines the type of keyboard to be displayed (e.g., email, number, text).
-///
 /// * **textInputAction**: Determines the action button shown on the keyboard (e.g., next, done).
-///
 /// * **autoFillHints**: Provides hints for autofill services to suggest relevant user data.
-///
 /// * **inputFormatters**: A list of [TextInputFormatter]s that can be used to restrict or
 ///   format the user input in real time.
-///
 /// * **focusNode**: An optional [FocusNode] to control the focus of this text field.
-///
 /// * **maxLines**: The maximum number of lines the text field will occupy.
 ///   Must be null if [expands] is true.
-///
 /// * **minLines**: The minimum number of lines for the text field.
 ///   Must be null if [expands] is true.
-///
 /// * **maxLength**: The maximum number of characters that can be entered into the text field.
-///
 /// * **autovalidateMode**: Configures when the text field should automatically validate its input.
-///
 /// * **textAlign**: How the text is horizontally aligned within the text field (e.g., start, center, end).
-///
 /// * **textAlignVertical**: How the text is vertically aligned inside the field.
-///
 /// * **textCapitalization**: Defines the capitalization behavior (e.g., none, words, sentences, characters).
-///
 /// * **initialText**: The initial text that will be displayed in the text field.
-///
 /// * **onTap**: Callback invoked when the text field is tapped. Useful for triggering
 ///   additional behavior when the field gains focus.
-///
 /// * **onEditingComplete**: Callback invoked when the user completes editing the field.
 ///   This is often used to update UI state or to shift focus to another field.
-///
 /// * **onTapOutside**: Callback that triggers when a user taps outside of the text field.
 ///   This can be used to dismiss the keyboard or to trigger validation on loss of focus.
-///
 /// * **customClearIcon**: A custom widget to display as the clear button icon. If not provided,
 ///   a default clear icon is used.
-///
 /// * **counterBuilder**: A custom builder function for constructing a character counter widget.
 ///   It receives the current text length, whether the field is focused, and the maximum allowed
 ///   length, then returns a widget to display the counter.
+/// * **prefixIcon**: A widget displayed at the beginning of the text field.
+/// * **suffixIcon**: A widget displayed at the end of the text field.
+/// * **labelText**: Text that describes the input field.
+/// * **hintText**: Text that suggests what sort of input the field accepts.
+/// * **switchBetweenPrefixAndSuffix**: When true, the widget swaps the positions of the
+///   prefix and suffix icons. This allows for dynamic UI adjustments where the normal
+///   prefix icons appear as suffix icons and vice versa.
+///
+/// This widget provides flexible layout and styling options, allowing you to tailor
+/// the input field’s appearance and behavior to meet your specific application needs.
 class CoreTextField extends StatefulWidget {
   const CoreTextField({
     super.key,
@@ -91,6 +74,7 @@ class CoreTextField extends StatefulWidget {
 
     this.enabled = true,
     this.obscureText = false,
+    this.switchBetweenPrefixAndSuffix = false,
     this.expands = false,
     this.readOnly = false,
     this.enableClear = false,
@@ -205,6 +189,9 @@ class CoreTextField extends StatefulWidget {
   /// A custom widget to use as the clear button icon.
   final Widget? customClearIcon;
 
+  /// A boolean that replaces suffix with prefix and prefix with suffix
+  final bool switchBetweenPrefixAndSuffix;
+
   /// Custom builder for the counter widget.
   final Widget? Function(
     BuildContext, {
@@ -247,9 +234,15 @@ class _CoreTextFieldState extends State<CoreTextField> {
       builder: (context, state) {
         InputDecoration effectiveDecoration =
             (widget.decoration ?? const InputDecoration()).copyWith(
-              suffixIcon: _buildSuffixIcons(state),
-              prefix: _buildPrefixIcons(),
-              prefixIconConstraints: const BoxConstraints(),
+              suffixIcon:
+                  widget.switchBetweenPrefixAndSuffix
+                      ? _buildPrefixIcons()
+                      : _buildSuffixIcons(state),
+              prefixIcon:
+                  widget.switchBetweenPrefixAndSuffix
+                      ? _buildSuffixIcons(state)
+                      : _buildPrefixIcons(),
+
               labelText: widget.labelText,
               hintText: widget.hintText,
             );
