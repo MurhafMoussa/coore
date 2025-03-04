@@ -1,4 +1,4 @@
-extension ObjectExtensions on Object? {
+extension ObjectExtensions on dynamic {
   /// Checks if the object is null.
   bool get isNull => this == null;
 
@@ -22,7 +22,7 @@ extension ObjectExtensions on Object? {
 
 /// Extension for obtaining a “dynamic length” from values that are
 /// String, Iterable, Map, int, or double.
-extension LengthExtensions on Object? {
+extension LengthExtensions on dynamic? {
   /// Returns length if applicable.
   /// For int/double, length of its string representation is returned.
   int? get dynamicLength {
