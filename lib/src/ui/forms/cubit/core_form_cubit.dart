@@ -11,25 +11,33 @@ part 'core_form_state.dart';
 class CoreFormCubit extends Cubit<CoreFormState> {
   CoreFormCubit({
     Map<String, List<Validator>> validators = const {},
-    this.validationType = ValidationType.allFields,
+    ValidationType validationType = ValidationType.allFields,
   }) : super(CoreFormState.initial().copyWith(validationType: validationType)) {
     _validators = {};
+    _touchedFields = {};
     Map<String, dynamic> values = {};
     validators.forEach((key, value) {
       values.putIfAbsent(key, () => null);
       _validators.putIfAbsent(key, () => CompositeValidator(value));
+      // Initially, mark each field as untouched.
+      _touchedFields[key] = false;
     });
     emit(state.copyWith(values: values));
   }
+
   late final Map<String, CompositeValidator> _validators;
-  final ValidationType validationType;
+  late final Map<String, bool> _touchedFields;
+
   void updateField(String fieldName, dynamic value) {
     final newValues = Map<String, dynamic>.from(state.values)
       ..[fieldName] = value;
 
-    Map<String, String> newErrors;
+    // Mark this field as touched.
+    _touchedFields[fieldName] = true;
 
-    switch (validationType) {
+    Map<String, String> newErrors = Map<String, String>.from(state.errors);
+
+    switch (state.validationType) {
       case ValidationType.onSubmit:
         // Do not validate on field update; validation will occur on submit.
         newErrors = state.errors;
@@ -39,8 +47,7 @@ class CoreFormCubit extends Cubit<CoreFormState> {
         newErrors = _validateFields(newValues);
         break;
       case ValidationType.fieldsBeingEdited:
-        // Validate only the field currently being edited.
-        newErrors = Map<String, String>.from(state.errors);
+        // Validate only the field being edited.
         final error = _validators[fieldName]?.validate(value);
         if (error != null) {
           newErrors[fieldName] = error;
@@ -53,18 +60,35 @@ class CoreFormCubit extends Cubit<CoreFormState> {
         break;
     }
 
+    // Compute overall validity:
+    // The form is valid only if every field has been touched and passes validation.
+    bool overallValid = true;
+    for (final field in state.values.keys) {
+      // If the field hasn't been touched yet, consider it invalid.
+      if (_touchedFields[field] != true) {
+        overallValid = false;
+        break;
+      }
+      // If the field was touched but fails validation, consider it invalid.
+      if (_validators[field]?.validate(newValues[field]) != null) {
+        overallValid = false;
+        break;
+      }
+    }
+
     emit(
       state.copyWith(
         values: newValues,
         errors: newErrors,
-        isValid: newErrors.isEmpty,
+        isValid: overallValid,
       ),
     );
   }
 
   dynamic getValueByName(String name) => state.values[name];
+
   Map<String, String> _validateFields(Map<String, dynamic> values) {
-    if (validationType == ValidationType.disabled) {
+    if (state.validationType == ValidationType.disabled) {
       return {};
     }
     final errors = <String, String>{};
@@ -81,11 +105,12 @@ class CoreFormCubit extends Cubit<CoreFormState> {
 
   void setValidationType(ValidationType validationType) =>
       emit(state.copyWith(validationType: validationType));
+
   void validateForm({
     required VoidCallback onValidationPass,
     VoidCallback? onValidationFail,
   }) {
-    if (validationType == ValidationType.onSubmit) {
+    if (state.validationType == ValidationType.onSubmit) {
       final newErrors = _validateFields(state.values);
       emit(state.copyWith(errors: newErrors, isValid: newErrors.isEmpty));
     }
@@ -103,10 +128,10 @@ enum ValidationType {
   /// must call validateForm to trigger validation
   onSubmit,
 
-  /// whenever the user start typing the validation is triggered for all fields that the cubit wraps
+  /// whenever the user starts typing the validation is triggered for all fields
   allFields,
 
-  /// whenever the user start typing the validation is triggered for the field being edited only
+  /// whenever the user starts typing the validation is triggered for the field being edited only
   fieldsBeingEdited,
 
   /// the validation is disabled
