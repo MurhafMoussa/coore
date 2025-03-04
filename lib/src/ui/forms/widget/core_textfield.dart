@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 //todo(Murhaf): if you want more types go to https://pub.dev/packages/flutter_form_builder
 /// An enterprise-level text field widget that integrates with the [CoreFormCubit]
@@ -101,12 +100,12 @@ class CoreTextField extends StatefulWidget {
     this.textInputAction,
     this.autoFillHints,
     this.focusNode,
-    this.maxLines,
+    this.maxLines = 1,
     this.minLines,
     this.maxLength,
-    this.autovalidateMode,
+    this.autovalidateMode = AutovalidateMode.onUserInteraction,
     this.initialText,
-    this.textAlignVertical,
+    this.textAlignVertical = TextAlignVertical.center,
     this.textCapitalization = TextCapitalization.none,
     this.textAlign = TextAlign.start,
     this.counterBuilder,
@@ -175,7 +174,7 @@ class CoreTextField extends StatefulWidget {
   final int? maxLength;
 
   /// Determines when the text field should auto-validate its input.
-  final AutovalidateMode? autovalidateMode;
+  final AutovalidateMode autovalidateMode;
 
   /// Horizontal alignment of the text within the field.
   final TextAlign textAlign;
@@ -215,20 +214,10 @@ class CoreTextField extends StatefulWidget {
 }
 
 class _CoreTextFieldState extends State<CoreTextField> {
-  late final TextEditingController textEditingController;
-
   @override
   void initState() {
+    _updateCubit(widget.initialText);
     super.initState();
-    // Initialize the controller with the provided initial text.
-    textEditingController = TextEditingController(text: widget.initialText);
-  }
-
-  @override
-  void dispose() {
-    // Dispose the controller to free up resources.
-    textEditingController.dispose();
-    super.dispose();
   }
 
   @override
@@ -246,37 +235,26 @@ class _CoreTextFieldState extends State<CoreTextField> {
             suffixIcon: IconButton(
               icon: widget.customClearIcon ?? const Icon(Icons.clear),
               onPressed: () {
-                // Clear the text field and update the form state accordingly.
-                textEditingController.clear();
                 context.read<CoreFormCubit>().updateField(widget.name, '');
               },
             ),
           );
         }
 
-        // Build the [FormBuilderTextField] with all the provided configurations.
-        return FormBuilderTextField(
-          name: widget.name,
-          controller: textEditingController,
+        return TextFormField(
           obscureText: widget.obscureText,
           decoration: effectiveDecoration,
           inputFormatters: widget.inputFormatters,
-          // Update the form state on changes, submission, or saving.
-          onChanged:
-              (value) =>
-                  context.read<CoreFormCubit>().updateField(widget.name, value),
-          onSubmitted:
-              (value) =>
-                  context.read<CoreFormCubit>().updateField(widget.name, value),
-          onSaved:
-              (value) =>
-                  context.read<CoreFormCubit>().updateField(widget.name, value),
+          onChanged: _updateCubit,
+          onFieldSubmitted: _updateCubit,
+          onSaved: _updateCubit,
           onTap: widget.onTap,
           onTapOutside: widget.onTapOutside,
           onEditingComplete: widget.onEditingComplete,
           buildCounter: widget.counterBuilder,
           enabled: widget.enabled,
           expands: widget.expands,
+          initialValue: widget.initialText,
           readOnly: widget.readOnly,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
@@ -294,5 +272,9 @@ class _CoreTextFieldState extends State<CoreTextField> {
         );
       },
     );
+  }
+
+  void _updateCubit(String? text) {
+    context.read<CoreFormCubit>().updateField(widget.name, text);
   }
 }
