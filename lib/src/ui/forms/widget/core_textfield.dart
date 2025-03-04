@@ -326,7 +326,11 @@ class _CoreTextFieldState extends State<CoreTextField> {
       finalPrefix =
           prefixWidgets.length == 1
               ? prefixWidgets.first
-              : Row(mainAxisSize: MainAxisSize.min, children: prefixWidgets);
+              : Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: prefixWidgets,
+              );
     }
 
     return finalPrefix;
