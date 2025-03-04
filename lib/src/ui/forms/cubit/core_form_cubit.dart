@@ -1,4 +1,4 @@
-import 'package:coore/src/extensions/object_extensions.dart';
+import 'package:coore/src/extensions/dynamic_extensions.dart';
 import 'package:coore/src/utils/validators/composit_validator.dart';
 import 'package:coore/src/utils/validators/validator.dart';
 import 'package:flutter/widgets.dart';
