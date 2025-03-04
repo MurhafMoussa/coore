@@ -15,7 +15,7 @@ class CoreBlocObserver extends BlocObserver {
     super.onEvent(bloc, event);
     logger.verbose('''
 [Event] ${bloc.runtimeType}:
-  Event: $event
+Event: $event
 ''');
   }
 
@@ -24,7 +24,8 @@ class CoreBlocObserver extends BlocObserver {
     super.onChange(bloc, change);
     logger.debug('''
 [Change] ${bloc.runtimeType}:
-  Change: $change
+CurrentState: ${change.currentState}
+NextState: ${change.nextState}
 ''');
   }
 
@@ -33,7 +34,9 @@ class CoreBlocObserver extends BlocObserver {
     super.onTransition(bloc, transition);
     logger.info('''
 [Transition] ${bloc.runtimeType}:
-  Transition: $transition
+CurrentState: ${transition.currentState}
+NextState: ${transition.nextState}
+Event: ${transition.event}
 ''');
   }
 
@@ -42,8 +45,8 @@ class CoreBlocObserver extends BlocObserver {
     super.onError(bloc, error, stackTrace);
     logger.error('''
 [Error] in ${bloc.runtimeType}:
-  Error: $error
-  StackTrace: $stackTrace
+Error: $error
+StackTrace: $stackTrace
 ''');
   }
 
