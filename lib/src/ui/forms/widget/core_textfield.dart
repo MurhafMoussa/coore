@@ -248,7 +248,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
             (widget.decoration ?? const InputDecoration()).copyWith(
               suffixIcon: _buildSuffixIcons(),
               prefix: _buildPrefixIcons(),
-
+              prefixIconConstraints: const BoxConstraints(),
               labelText: widget.labelText,
               hintText: widget.hintText,
             );
