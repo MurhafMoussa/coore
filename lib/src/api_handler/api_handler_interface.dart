@@ -22,7 +22,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  ApiResponse get(
+  ApiHandlerResponse get(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelRequestAdapter? cancelRequestAdapter,
@@ -43,7 +43,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  ApiResponse post(
+  ApiHandlerResponse post(
     String path, {
     Map<String, dynamic>? body,
     FormDataAdapter? formData,
@@ -62,7 +62,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  ApiResponse delete(
+  ApiHandlerResponse delete(
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelRequestAdapter? cancelRequestAdapter,
@@ -81,7 +81,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  ApiResponse put(
+  ApiHandlerResponse put(
     String path, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
@@ -102,7 +102,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
-  ApiResponse patch(
+  ApiHandlerResponse patch(
     String path, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
@@ -122,7 +122,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success, which could be the file path or a success message.
-  ApiResponse download(
+  ApiHandlerResponse download(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,
