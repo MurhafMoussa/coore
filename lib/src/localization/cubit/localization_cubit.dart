@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LocalizationCubit extends Cubit<Locale> {
-
   LocalizationCubit({required this.service, required this.config})
     : super(config.defaultLocale) {
     _initialize();
@@ -18,7 +17,7 @@ class LocalizationCubit extends Cubit<Locale> {
 
   List<LocalizationsDelegate<dynamic>> get delegates =>
       config.localizationsDelegates;
-
+  List<Locale> get supportedLocales => config.supportedLocales;
   Future<void> _fetchLocale() async {
     final languageCode = await service.getLanguageCode();
     final locale =
