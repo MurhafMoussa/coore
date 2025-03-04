@@ -114,6 +114,10 @@ class CoreTextField extends StatefulWidget {
     this.onEditingComplete,
     this.customClearIcon,
     this.inputFormatters,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.hintText,
+    this.labelText,
   }) : assert(
          !expands || (maxLines == null && minLines == null),
          'When expands is true, maxLines and minLines must both be null.',
@@ -208,15 +212,21 @@ class CoreTextField extends StatefulWidget {
     required int? maxLength,
   })?
   counterBuilder;
+  final Widget? suffixIcon;
 
+  final Widget? prefixIcon;
+  final String? labelText;
+  final String? hintText;
   @override
   State<CoreTextField> createState() => _CoreTextFieldState();
 }
 
 class _CoreTextFieldState extends State<CoreTextField> {
+  bool obscureText = false;
   @override
   void initState() {
     _updateCubit(widget.initialText);
+    obscureText = widget.obscureText;
     super.initState();
   }
 
@@ -230,19 +240,16 @@ class _CoreTextFieldState extends State<CoreTextField> {
             .copyWith(errorText: state.errors[widget.name]);
 
         // If the clear button is enabled, add it as a suffix icon.
-        if (widget.enableClear) {
-          effectiveDecoration = effectiveDecoration.copyWith(
-            suffixIcon: IconButton(
-              icon: widget.customClearIcon ?? const Icon(Icons.clear),
-              onPressed: () {
-                context.read<CoreFormCubit>().updateField(widget.name, '');
-              },
-            ),
-          );
-        }
+
+        effectiveDecoration = effectiveDecoration.copyWith(
+          suffixIcon: _buildSuffixIcons(),
+          prefix: widget.prefixIcon,
+          labelText: widget.labelText,
+          hintText: widget.hintText,
+        );
 
         return TextFormField(
-          obscureText: widget.obscureText,
+          obscureText: obscureText,
           decoration: effectiveDecoration,
           inputFormatters: widget.inputFormatters,
           onChanged: _updateCubit,
@@ -263,7 +270,10 @@ class _CoreTextFieldState extends State<CoreTextField> {
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           maxLength: widget.maxLength,
-          autovalidateMode: widget.autovalidateMode,
+          autovalidateMode:
+              state.validationType == ValidationType.disabled
+                  ? AutovalidateMode.disabled
+                  : widget.autovalidateMode,
           enableSuggestions: widget.enableSuggestions,
           showCursor: widget.showCursor,
           textAlignVertical: widget.textAlignVertical,
@@ -272,6 +282,54 @@ class _CoreTextFieldState extends State<CoreTextField> {
         );
       },
     );
+  }
+
+  IconButton _buildClearIcon() {
+    return IconButton(
+      icon: widget.customClearIcon ?? const Icon(Icons.clear),
+      onPressed: () {
+        _updateCubit('');
+      },
+    );
+  }
+
+  IconButton _buildVisibilityIcon() {
+    return IconButton(
+      icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+      onPressed:
+          () => setState(() {
+            obscureText = !obscureText;
+          }),
+    );
+  }
+
+  Widget? _buildSuffixIcons() {
+    final List<Widget> suffixWidgets = [];
+
+    if (widget.enableClear) {
+      suffixWidgets.add(_buildClearIcon());
+    }
+    if (obscureText) {
+      suffixWidgets.add(_buildVisibilityIcon());
+    }
+    if (widget.suffixIcon != null) {
+      suffixWidgets.add(widget.suffixIcon!);
+    }
+
+    // If we have more than one widget, wrap them in a Row.
+    Widget? finalSuffix;
+    if (suffixWidgets.isNotEmpty) {
+      finalSuffix =
+          suffixWidgets.length == 1
+              ? suffixWidgets.first
+              : Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: suffixWidgets,
+              );
+    }
+
+    return finalSuffix;
   }
 
   void _updateCubit(String? text) {

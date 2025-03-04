@@ -1,4 +1,4 @@
-class ValueTester {
+abstract final class ValueTester {
   /// Checks if the given object is null.
   static bool isNull(dynamic value) => value == null;
 

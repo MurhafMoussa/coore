@@ -6,6 +6,7 @@ abstract class CoreFormState with _$CoreFormState {
     required Map<String, dynamic> values,
     required Map<String, String> errors,
     required bool isValid,
+    @Default(ValidationType.fieldsBeingEdited) ValidationType validationType,
   }) = _CoreFormState;
   factory CoreFormState.initial() =>
       const CoreFormState(values: {}, errors: {}, isValid: false);
