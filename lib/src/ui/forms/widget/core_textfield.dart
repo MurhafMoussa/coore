@@ -186,8 +186,8 @@ class CoreTextField extends StatefulWidget {
   /// Called when the user taps outside the text field.
   final void Function(PointerDownEvent)? onTapOutside;
 
-  /// A custom widget to use as the clear button icon.
-  final Widget? customClearIcon;
+  /// A custom Icon to use as the clear button icon.
+  final Icon? customClearIcon;
 
   /// A boolean that replaces suffix with prefix and prefix with suffix
   final bool switchBetweenPrefixAndSuffix;
@@ -215,7 +215,9 @@ class _CoreTextFieldState extends State<CoreTextField> {
   late final TextEditingController textEditingController;
   @override
   void initState() {
-    _updateCubit(widget.initialText);
+    if (!ValueTester.isNull(widget.initialText)) {
+      _updateCubit(widget.initialText);
+    }
     obscureText = widget.obscureText;
     textEditingController = TextEditingController(text: widget.initialText);
 
@@ -320,11 +322,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
       finalPrefix =
           prefixWidgets.length == 1
               ? prefixWidgets.first
-              : Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: prefixWidgets,
-              );
+              : Row(mainAxisSize: MainAxisSize.min, children: prefixWidgets);
     }
 
     return finalPrefix;
@@ -333,7 +331,8 @@ class _CoreTextFieldState extends State<CoreTextField> {
   Widget? _buildSuffixIcons(CoreFormState state) {
     final List<Widget> suffixWidgets = [];
 
-    if (widget.enableClear && !ValueTester.isBlank(state.values[widget.name])) {
+    if (widget.enableClear &&
+        !ValueTester.isNullOrBlank(state.values[widget.name])) {
       suffixWidgets.add(_buildClearIcon());
     }
 
