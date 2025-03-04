@@ -1,4 +1,3 @@
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:coore/src/utils/validators/composit_validator.dart';
 import 'package:coore/src/utils/validators/validator.dart';

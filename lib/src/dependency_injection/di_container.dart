@@ -7,7 +7,6 @@ import 'package:coore/src/config/entities/core_config_entity.dart';
 import 'package:coore/src/config/entities/network_config_entity.dart';
 import 'package:coore/src/config/service/config_service.dart';
 import 'package:coore/src/dev_tools/core_logger.dart';
-import 'package:coore/src/environment/environment_config.dart';
 import 'package:coore/src/error_handling/exception_mapper/dio_exception_mapper.dart';
 import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
 import 'package:coore/src/local_database/local_database_interface.dart';

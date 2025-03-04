@@ -1,7 +1,6 @@
 import 'package:coore/src/ui/forms/cubit/core_form_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 //todo(Murhaf): if you want more types go to https://pub.dev/packages/flutter_form_builder
