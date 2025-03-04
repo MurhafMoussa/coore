@@ -1,4 +1,3 @@
-
 import 'package:coore/src/utils/validators/composit_validator.dart';
 import 'package:coore/src/utils/validators/validator.dart';
 import 'package:coore/src/utils/value_tester.dart';
@@ -93,8 +92,21 @@ class CoreFormCubit extends Cubit<CoreFormState> {
       onValidationPass();
     } else {
       onValidationFail?.call();
+      setValidationType(ValidationType.fieldsBeingEdited);
     }
   }
 }
 
-enum ValidationType { onSubmit, allFields, fieldsBeingEdited, disabled }
+enum ValidationType {
+  /// must call validateForm to trigger validation
+  onSubmit,
+
+  /// whenever the user start typing the validation is triggered for all fields that the cubit wraps
+  allFields,
+
+  /// whenever the user start typing the validation is triggered for the field being edited only
+  fieldsBeingEdited,
+
+  /// the validation is disabled
+  disabled,
+}
