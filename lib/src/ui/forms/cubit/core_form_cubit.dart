@@ -1,6 +1,6 @@
-import 'package:coore/src/extensions/object_extensions.dart';
 import 'package:coore/src/utils/validators/composit_validator.dart';
 import 'package:coore/src/utils/validators/validator.dart';
+import 'package:coore/src/utils/value_tester.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -19,7 +19,7 @@ class CoreFormCubit extends Cubit<CoreFormState> {
   late final Map<String, CompositeValidator> _validators;
 
   void updateField(String fieldName, dynamic value) {
-    if (value.isNull) return;
+    if (ValueTester.isNullOrBlank(value)) return;
     final newValues = Map<String, dynamic>.from(state.values)
       ..[fieldName] = value;
     final newErrors = _validateFields(newValues);
