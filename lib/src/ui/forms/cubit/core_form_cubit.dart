@@ -14,9 +14,12 @@ class CoreFormCubit extends Cubit<CoreFormState> {
     this.validationType = ValidationType.allFields,
   }) : super(CoreFormState.initial().copyWith(validationType: validationType)) {
     _validators = {};
+    Map<String, dynamic> values = {};
     validators.forEach((key, value) {
+      values.putIfAbsent(key, () => null);
       _validators.putIfAbsent(key, () => CompositeValidator(value));
     });
+    emit(state.copyWith(values: values));
   }
   late final Map<String, CompositeValidator> _validators;
   final ValidationType validationType;
