@@ -51,8 +51,8 @@ $ApiStateCopyWith(ApiState<T> _, $Res Function(ApiState<T>) __);
 /// @nodoc
 
 
-class _Initial<T> extends ApiState<T> with DiagnosticableTreeMixin {
-  const _Initial(): super._();
+class Initial<T> extends ApiState<T> with DiagnosticableTreeMixin {
+  const Initial(): super._();
   
 
 
@@ -68,7 +68,7 @@ void debugFillProperties(DiagnosticPropertiesBuilder properties) {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initial<T>);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Initial<T>);
 }
 
 
@@ -89,8 +89,8 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class _Loading<T> extends ApiState<T> with DiagnosticableTreeMixin {
-  const _Loading(): super._();
+class Loading<T> extends ApiState<T> with DiagnosticableTreeMixin {
+  const Loading(): super._();
   
 
 
@@ -106,7 +106,7 @@ void debugFillProperties(DiagnosticPropertiesBuilder properties) {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loading<T>);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Loading<T>);
 }
 
 
@@ -127,8 +127,8 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class _Success<T> extends ApiState<T> with DiagnosticableTreeMixin {
-  const _Success(this.successValue): super._();
+class Success<T> extends ApiState<T> with DiagnosticableTreeMixin {
+  const Success(this.successValue): super._();
   
 
  final  T successValue;
@@ -137,7 +137,7 @@ class _Success<T> extends ApiState<T> with DiagnosticableTreeMixin {
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$SuccessCopyWith<T, _Success<T>> get copyWith => __$SuccessCopyWithImpl<T, _Success<T>>(this, _$identity);
+$SuccessCopyWith<T, Success<T>> get copyWith => _$SuccessCopyWithImpl<T, Success<T>>(this, _$identity);
 
 
 @override
@@ -149,7 +149,7 @@ void debugFillProperties(DiagnosticPropertiesBuilder properties) {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success<T>&&const DeepCollectionEquality().equals(other.successValue, successValue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Success<T>&&const DeepCollectionEquality().equals(other.successValue, successValue));
 }
 
 
@@ -165,8 +165,8 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 }
 
 /// @nodoc
-abstract mixin class _$SuccessCopyWith<T,$Res> implements $ApiStateCopyWith<T, $Res> {
-  factory _$SuccessCopyWith(_Success<T> value, $Res Function(_Success<T>) _then) = __$SuccessCopyWithImpl;
+abstract mixin class $SuccessCopyWith<T,$Res> implements $ApiStateCopyWith<T, $Res> {
+  factory $SuccessCopyWith(Success<T> value, $Res Function(Success<T>) _then) = _$SuccessCopyWithImpl;
 @useResult
 $Res call({
  T successValue
@@ -177,17 +177,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$SuccessCopyWithImpl<T,$Res>
-    implements _$SuccessCopyWith<T, $Res> {
-  __$SuccessCopyWithImpl(this._self, this._then);
+class _$SuccessCopyWithImpl<T,$Res>
+    implements $SuccessCopyWith<T, $Res> {
+  _$SuccessCopyWithImpl(this._self, this._then);
 
-  final _Success<T> _self;
-  final $Res Function(_Success<T>) _then;
+  final Success<T> _self;
+  final $Res Function(Success<T>) _then;
 
 /// Create a copy of ApiState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? successValue = freezed,}) {
-  return _then(_Success<T>(
+  return _then(Success<T>(
 freezed == successValue ? _self.successValue : successValue // ignore: cast_nullable_to_non_nullable
 as T,
   ));
@@ -199,8 +199,8 @@ as T,
 /// @nodoc
 
 
-class _Failure<T> extends ApiState<T> with DiagnosticableTreeMixin {
-  const _Failure(this.failure, {this.retryFunction}): super._();
+class Failure<T> extends ApiState<T> with DiagnosticableTreeMixin {
+  const Failure(this.failure, {this.retryFunction}): super._();
   
 
  final  Failure failure;
@@ -210,7 +210,7 @@ class _Failure<T> extends ApiState<T> with DiagnosticableTreeMixin {
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$FailureCopyWith<T, _Failure<T>> get copyWith => __$FailureCopyWithImpl<T, _Failure<T>>(this, _$identity);
+$FailureCopyWith<T, Failure<T>> get copyWith => _$FailureCopyWithImpl<T, Failure<T>>(this, _$identity);
 
 
 @override
@@ -222,7 +222,7 @@ void debugFillProperties(DiagnosticPropertiesBuilder properties) {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Failure<T>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.retryFunction, retryFunction) || other.retryFunction == retryFunction));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Failure<T>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.retryFunction, retryFunction) || other.retryFunction == retryFunction));
 }
 
 
@@ -238,8 +238,8 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 }
 
 /// @nodoc
-abstract mixin class _$FailureCopyWith<T,$Res> implements $ApiStateCopyWith<T, $Res> {
-  factory _$FailureCopyWith(_Failure<T> value, $Res Function(_Failure<T>) _then) = __$FailureCopyWithImpl;
+abstract mixin class $FailureCopyWith<T,$Res> implements $ApiStateCopyWith<T, $Res> {
+  factory $FailureCopyWith(Failure<T> value, $Res Function(Failure<T>) _then) = _$FailureCopyWithImpl;
 @useResult
 $Res call({
  Failure failure, VoidCallback? retryFunction
@@ -250,17 +250,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$FailureCopyWithImpl<T,$Res>
-    implements _$FailureCopyWith<T, $Res> {
-  __$FailureCopyWithImpl(this._self, this._then);
+class _$FailureCopyWithImpl<T,$Res>
+    implements $FailureCopyWith<T, $Res> {
+  _$FailureCopyWithImpl(this._self, this._then);
 
-  final _Failure<T> _self;
-  final $Res Function(_Failure<T>) _then;
+  final Failure<T> _self;
+  final $Res Function(Failure<T>) _then;
 
 /// Create a copy of ApiState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? failure = null,Object? retryFunction = freezed,}) {
-  return _then(_Failure<T>(
+  return _then(Failure<T>(
 null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as Failure,retryFunction: freezed == retryFunction ? _self.retryFunction : retryFunction // ignore: cast_nullable_to_non_nullable
 as VoidCallback?,

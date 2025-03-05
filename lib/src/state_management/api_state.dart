@@ -9,20 +9,18 @@ part 'api_state.freezed.dart';
 sealed class ApiState<T> with _$ApiState<T> {
   const ApiState._();
 
-  const factory ApiState.initial() = _Initial;
+  const factory ApiState.initial() = Initial;
 
-  const factory ApiState.loading() = _Loading;
+  const factory ApiState.loading() = Loading;
 
-  const factory ApiState.success(T successValue) = _Success;
+  const factory ApiState.success(T successValue) = Success;
 
   const factory ApiState.failure(
     Failure failure, {
     VoidCallback? retryFunction,
-  }) = _Failure;
-  bool get isInitial => this is _Initial<T>;
-  bool get isLoading => this is _Loading<T>;
-  bool get isSuccess => this is _Success<T>;
-  bool get isFailure => this is _Failure<T>;
+  }) = Failure;
+  bool get isInitial => this is Initial<T>;
+  bool get isLoading => this is Loading<T>;
+  bool get isSuccess => this is Success<T>;
+  bool get isFailure => this is Failure<T>;
 }
-
-
