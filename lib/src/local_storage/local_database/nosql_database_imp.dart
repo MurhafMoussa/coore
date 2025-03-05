@@ -1,6 +1,6 @@
 // hive_local_database.dart
 import 'package:coore/src/error_handling/failures/cache_failure.dart';
-import 'package:coore/src/local_database/local_database_interface.dart';
+import 'package:coore/src/local_storage/local_database/local_database_interface.dart';
 import 'package:coore/src/typedefs/core_typedefs.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:hive_ce/hive.dart';

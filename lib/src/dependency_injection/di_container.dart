@@ -9,8 +9,10 @@ import 'package:coore/src/config/service/config_service.dart';
 import 'package:coore/src/dev_tools/core_logger.dart';
 import 'package:coore/src/error_handling/exception_mapper/dio_exception_mapper.dart';
 import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
-import 'package:coore/src/local_database/local_database_interface.dart';
-import 'package:coore/src/local_database/nosql_database_imp.dart';
+import 'package:coore/src/local_storage/local_database/local_database_interface.dart';
+import 'package:coore/src/local_storage/local_database/nosql_database_imp.dart';
+import 'package:coore/src/local_storage/secure_database/secure_database_imp.dart';
+import 'package:coore/src/local_storage/secure_database/secure_database_interface.dart';
 import 'package:coore/src/localization/cubit/localization_cubit.dart';
 import 'package:coore/src/navigation/core_navigator.dart';
 import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
@@ -19,6 +21,7 @@ import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:coore/src/theme/cubit/theme_cubit.dart';
 import 'package:coore/src/ui/message_viewers/toaster.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -42,6 +45,7 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
         level: logger.Level.all,
       ),
     )
+    ..registerLazySingleton(_createFlutterSecureStorage)
     ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
     ..registerLazySingleton(() => _createDio(coreEntity.networkConfigEntity))
     ..registerLazySingleton<NetworkExceptionMapper>(
@@ -79,7 +83,22 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
         repository: getIt(),
         themeConfigEntity: coreEntity.themeConfigEntity,
       ),
+    )
+    ..registerLazySingleton<SecureDatabaseInterface>(
+      () => SecureDatabaseImp(getIt()),
     );
+}
+
+//todo(Murhaf): requires additional setup for other platforms
+FlutterSecureStorage _createFlutterSecureStorage() {
+  const iosOptions = IOSOptions(
+    accessibility: KeychainAccessibility.first_unlock,
+  );
+  const androidOptions = AndroidOptions(encryptedSharedPreferences: true);
+  return const FlutterSecureStorage(
+    aOptions: androidOptions,
+    iOptions: iosOptions,
+  );
 }
 
 Dio _createDio(NetworkConfigEntity entity) {

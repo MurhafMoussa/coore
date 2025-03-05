@@ -9,7 +9,7 @@ export 'dev_tools/dev_tools.dart';
 export 'environment/environment.dart';
 export 'error_handling/error_handling.dart';
 export 'extensions/extensions.dart';
-export 'local_database/local_database.dart';
+export 'local_storage/local_database.dart';
 export 'localization/localization.dart';
 export 'navigation/navigation.dart';
 export 'network_status/network_status.dart';
