@@ -15,14 +15,13 @@ import 'package:fpdart/fpdart.dart';
 Future<Either<Failure, T>> safeRepositoryCall<T>({
   required Future<Either<Failure, T>> Function() onConnect,
   Future<Either<Failure, T>> Function()? onDisconnect,
-  required String Function() getNoInternetConnectionMessage,
+  String getNoInternetConnectionMessage =
+      'No internet connection, please try again',
 }) async {
   try {
     if (!await getIt<NetworkStatusInterface>().isConnected) {
       if (onDisconnect != null) return await onDisconnect.call();
-      return left(
-        NoInternetConnectionFailure(getNoInternetConnectionMessage()),
-      );
+      return left(NoInternetConnectionFailure(getNoInternetConnectionMessage));
     }
     return await onConnect();
   } on Exception catch (_, stackTrace) {
