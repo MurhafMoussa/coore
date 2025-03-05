@@ -1,11 +1,12 @@
 import 'package:coore/src/error_handling/failures/failure.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'api_state.freezed.dart';
 
 @freezed
-abstract class ApiState<T> with _$ApiState<T> {
+sealed class ApiState<T> with _$ApiState<T> {
   const ApiState._();
 
   const factory ApiState.initial() = _Initial;
@@ -18,6 +19,10 @@ abstract class ApiState<T> with _$ApiState<T> {
     Failure failure, {
     VoidCallback? retryFunction,
   }) = _Failure;
-
-  bool get isLoading => this is _Loading;
+  bool get isInitial => this is _Initial<T>;
+  bool get isLoading => this is _Loading<T>;
+  bool get isSuccess => this is _Success<T>;
+  bool get isFailure => this is _Failure<T>;
 }
+
+
