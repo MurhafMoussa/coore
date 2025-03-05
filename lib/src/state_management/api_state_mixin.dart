@@ -75,7 +75,7 @@ mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
           emit(
             setApiState(
               state,
-              ApiState.failure(
+              ApiState.failed(
                 failure,
                 retryFunction:
                     () => handleApiCall(
@@ -92,7 +92,7 @@ mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
         },
         (success) {
           // Emit success state
-          emit(setApiState(state, ApiState.success(success)));
+          emit(setApiState(state, ApiState.succeeded(success)));
           // Invoke success callback if provided
           onSuccess?.call(success);
         },

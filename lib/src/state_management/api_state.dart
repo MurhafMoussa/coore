@@ -14,22 +14,22 @@ sealed class ApiState<T> with _$ApiState<T> {
 
   const factory ApiState.loading() = Loading;
 
-  const factory ApiState.success(T successValue) = Success;
+  const factory ApiState.succeeded(T successValue) = Succeeded;
 
-  const factory ApiState.failure(
+  const factory ApiState.failed(
     Failure failure, {
     VoidCallback? retryFunction,
-  }) = Failure;
+  }) = Failed;
   bool get isInitial => this is Initial<T>;
   bool get isLoading => this is Loading<T>;
-  bool get isSuccess => this is Success<T>;
-  bool get isFailure => this is Failure<T>;
+  bool get isSuccess => this is Succeeded<T>;
+  bool get isError => this is Failed<T>;
   Option<T> get data => switch (this) {
-    Success<T>(:final successValue) => some(successValue),
+    Succeeded<T>(:final successValue) => some(successValue),
     _ => none(),
   };
   Option<Failure> get failureObject => switch (this) {
-    Failure(:final failure) => some(failure),
+    Failed(:final failure) => some(failure),
     _ => none(),
   };
 }

@@ -127,8 +127,8 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class Success<T> extends ApiState<T> with DiagnosticableTreeMixin {
-  const Success(this.successValue): super._();
+class Succeeded<T> extends ApiState<T> with DiagnosticableTreeMixin {
+  const Succeeded(this.successValue): super._();
   
 
  final  T successValue;
@@ -137,19 +137,19 @@ class Success<T> extends ApiState<T> with DiagnosticableTreeMixin {
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$SuccessCopyWith<T, Success<T>> get copyWith => _$SuccessCopyWithImpl<T, Success<T>>(this, _$identity);
+$SucceededCopyWith<T, Succeeded<T>> get copyWith => _$SucceededCopyWithImpl<T, Succeeded<T>>(this, _$identity);
 
 
 @override
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
-    ..add(DiagnosticsProperty('type', 'ApiState<$T>.success'))
+    ..add(DiagnosticsProperty('type', 'ApiState<$T>.succeeded'))
     ..add(DiagnosticsProperty('successValue', successValue));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Success<T>&&const DeepCollectionEquality().equals(other.successValue, successValue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Succeeded<T>&&const DeepCollectionEquality().equals(other.successValue, successValue));
 }
 
 
@@ -158,15 +158,15 @@ int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'ApiState<$T>.success(successValue: $successValue)';
+  return 'ApiState<$T>.succeeded(successValue: $successValue)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $SuccessCopyWith<T,$Res> implements $ApiStateCopyWith<T, $Res> {
-  factory $SuccessCopyWith(Success<T> value, $Res Function(Success<T>) _then) = _$SuccessCopyWithImpl;
+abstract mixin class $SucceededCopyWith<T,$Res> implements $ApiStateCopyWith<T, $Res> {
+  factory $SucceededCopyWith(Succeeded<T> value, $Res Function(Succeeded<T>) _then) = _$SucceededCopyWithImpl;
 @useResult
 $Res call({
  T successValue
@@ -177,17 +177,17 @@ $Res call({
 
 }
 /// @nodoc
-class _$SuccessCopyWithImpl<T,$Res>
-    implements $SuccessCopyWith<T, $Res> {
-  _$SuccessCopyWithImpl(this._self, this._then);
+class _$SucceededCopyWithImpl<T,$Res>
+    implements $SucceededCopyWith<T, $Res> {
+  _$SucceededCopyWithImpl(this._self, this._then);
 
-  final Success<T> _self;
-  final $Res Function(Success<T>) _then;
+  final Succeeded<T> _self;
+  final $Res Function(Succeeded<T>) _then;
 
 /// Create a copy of ApiState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? successValue = freezed,}) {
-  return _then(Success<T>(
+  return _then(Succeeded<T>(
 freezed == successValue ? _self.successValue : successValue // ignore: cast_nullable_to_non_nullable
 as T,
   ));
@@ -199,8 +199,8 @@ as T,
 /// @nodoc
 
 
-class Failure<T> extends ApiState<T> with DiagnosticableTreeMixin {
-  const Failure(this.failure, {this.retryFunction}): super._();
+class Failed<T> extends ApiState<T> with DiagnosticableTreeMixin {
+  const Failed(this.failure, {this.retryFunction}): super._();
   
 
  final  Failure failure;
@@ -210,19 +210,19 @@ class Failure<T> extends ApiState<T> with DiagnosticableTreeMixin {
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$FailureCopyWith<T, Failure<T>> get copyWith => _$FailureCopyWithImpl<T, Failure<T>>(this, _$identity);
+$FailedCopyWith<T, Failed<T>> get copyWith => _$FailedCopyWithImpl<T, Failed<T>>(this, _$identity);
 
 
 @override
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
-    ..add(DiagnosticsProperty('type', 'ApiState<$T>.failure'))
+    ..add(DiagnosticsProperty('type', 'ApiState<$T>.failed'))
     ..add(DiagnosticsProperty('failure', failure))..add(DiagnosticsProperty('retryFunction', retryFunction));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Failure<T>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.retryFunction, retryFunction) || other.retryFunction == retryFunction));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Failed<T>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.retryFunction, retryFunction) || other.retryFunction == retryFunction));
 }
 
 
@@ -231,15 +231,15 @@ int get hashCode => Object.hash(runtimeType,failure,retryFunction);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'ApiState<$T>.failure(failure: $failure, retryFunction: $retryFunction)';
+  return 'ApiState<$T>.failed(failure: $failure, retryFunction: $retryFunction)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $FailureCopyWith<T,$Res> implements $ApiStateCopyWith<T, $Res> {
-  factory $FailureCopyWith(Failure<T> value, $Res Function(Failure<T>) _then) = _$FailureCopyWithImpl;
+abstract mixin class $FailedCopyWith<T,$Res> implements $ApiStateCopyWith<T, $Res> {
+  factory $FailedCopyWith(Failed<T> value, $Res Function(Failed<T>) _then) = _$FailedCopyWithImpl;
 @useResult
 $Res call({
  Failure failure, VoidCallback? retryFunction
@@ -250,17 +250,17 @@ $Res call({
 
 }
 /// @nodoc
-class _$FailureCopyWithImpl<T,$Res>
-    implements $FailureCopyWith<T, $Res> {
-  _$FailureCopyWithImpl(this._self, this._then);
+class _$FailedCopyWithImpl<T,$Res>
+    implements $FailedCopyWith<T, $Res> {
+  _$FailedCopyWithImpl(this._self, this._then);
 
-  final Failure<T> _self;
-  final $Res Function(Failure<T>) _then;
+  final Failed<T> _self;
+  final $Res Function(Failed<T>) _then;
 
 /// Create a copy of ApiState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? failure = null,Object? retryFunction = freezed,}) {
-  return _then(Failure<T>(
+  return _then(Failed<T>(
 null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as Failure,retryFunction: freezed == retryFunction ? _self.retryFunction : retryFunction // ignore: cast_nullable_to_non_nullable
 as VoidCallback?,
