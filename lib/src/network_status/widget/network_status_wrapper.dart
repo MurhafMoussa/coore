@@ -1,7 +1,7 @@
+import 'package:coore/lib.dart';
 import 'package:coore/src/dependency_injection/di_container.dart';
 import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
 import 'package:coore/src/network_status/service/network_status_interface.dart';
-import 'package:coore/src/ui/message_viewers/toaster.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,10 +39,16 @@ class NetworkStatusWrapper extends StatelessWidget {
                     if (onConnect != null) {
                       onConnect!();
                     } else {
-                      getIt<Toaster>().showToastNoContext(
-                        message: 'You are online!',
-                        backgroundColor: Colors.lightGreenAccent,
-                        textColor: Colors.black54,
+                      context.scaffoldMessenger.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'You are online!',
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          backgroundColor: context.colorScheme.primary,
+                        ),
                       );
                     }
                   }
@@ -51,10 +57,16 @@ class NetworkStatusWrapper extends StatelessWidget {
                     if (onDisconnect != null) {
                       onDisconnect!();
                     } else {
-                      getIt<Toaster>().showToastNoContext(
-                        message:
-                            'You are offline, check your internet connection',
-                        backgroundColor: Theme.of(context).colorScheme.error,
+                      context.scaffoldMessenger.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'You are offline',
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          backgroundColor: context.colorScheme.error,
+                        ),
                       );
                     }
                   }

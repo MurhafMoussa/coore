@@ -2,7 +2,6 @@ import 'package:coore/src/config/entities/core_config_entity.dart';
 import 'package:coore/src/dependency_injection/di_container.dart';
 import 'package:coore/src/dev_tools/core_bloc_observer.dart';
 import 'package:coore/src/dev_tools/core_logger.dart';
-import 'package:coore/src/ui/message_viewers/toaster.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,11 +12,5 @@ class CoreConfig {
     await setupCoreDependencies(configEntity);
 
     Bloc.observer = CoreBlocObserver(getIt<CoreLogger>());
-  }
-
-  static Future<void> initializeCoreDependenciesWithContext(
-    BuildContext context,
-  ) async {
-    getIt<Toaster>().init(context);
   }
 }

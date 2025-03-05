@@ -19,7 +19,6 @@ import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
 import 'package:coore/src/network_status/service/network_status_imp.dart';
 import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:coore/src/theme/cubit/theme_cubit.dart';
-import 'package:coore/src/ui/message_viewers/toaster.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -59,7 +58,6 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       () => NetworkStatusImp(getIt()),
     )
     ..registerLazySingleton(() => NetworkStatusCubit(networkStatus: getIt()))
-    ..registerLazySingleton(() => Toaster())
     ..registerFactoryParam<LocalDatabaseInterface, String, void>(
       (boxName, _) => HiveLocalDatabase(boxName),
     )
