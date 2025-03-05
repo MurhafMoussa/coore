@@ -15,12 +15,7 @@ import 'package:fpdart/fpdart.dart';
 /// Type Parameters:
 /// - `CompositeState`: The composite state type managed by the BLoC.
 /// - `SuccessData`: The success data type returned by the API call.
-mixin ApiStateMixin<
-  CompositeState,
-  SuccessData,
-  FunctionParam extends BaseParams
->
-    on BlocBase<CompositeState> {
+mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
   /// Adapter to manage cancellation of API requests.
   CancelRequestAdapter? cancelRequestAdapter;
 
@@ -53,9 +48,9 @@ mixin ApiStateMixin<
   /// - `onSuccess`: (Optional) A callback executed when the API call is successful.
   /// - `onFailure`: (Optional) A callback executed when the API call fails.
   Future<void> handleApiCall({
-    required Future<Either<Failure, SuccessData>> Function(FunctionParam params)
+    required Future<Either<Failure, SuccessData>> Function(BaseParams params)
     apiCall,
-    required FunctionParam params,
+    required covariant BaseParams params,
     void Function(SuccessData data)? onSuccess,
     void Function(Failure failure)? onFailure,
   }) async {
@@ -70,8 +65,7 @@ mixin ApiStateMixin<
 
     // Execute the API call
     final result = await apiCall(
-      (params.attachCancelToken(cancelTokenAdapter: cancelRequestAdapter))
-          as FunctionParam,
+      params.attachCancelToken(cancelTokenAdapter: cancelRequestAdapter),
     );
 
     // Handle API response

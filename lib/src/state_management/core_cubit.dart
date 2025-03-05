@@ -9,13 +9,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// Type Parameters:
 /// - `CompositeState`: The composite state type managed by the Cubit.
 /// - `SuccessData`: The success data type returned by the API call.
-abstract class CoreCubit<
-  CompositeState,
-  SuccessData,
-  FunctionParam extends BaseParams
->
+abstract class CoreCubit<CompositeState, SuccessData>
     extends Cubit<CompositeState>
-    with ApiStateMixin<CompositeState, SuccessData, FunctionParam> {
+    with ApiStateMixin<CompositeState, SuccessData> {
   CoreCubit(super.initialState);
 
   @override

@@ -10,14 +10,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// - `EventType`: The event type that the Bloc processes.
 /// - `CompositeState`: The composite state type managed by the Bloc.
 /// - `SuccessData`: The success data type returned by the API call.
-abstract class CoreBloc<
-  EventType,
-  CompositeState,
-  SuccessData,
-  FunctionParam extends BaseParams
->
+abstract class CoreBloc<EventType, CompositeState, SuccessData>
     extends Bloc<EventType, CompositeState>
-    with ApiStateMixin<CompositeState, SuccessData, FunctionParam> {
+    with ApiStateMixin<CompositeState, SuccessData> {
   CoreBloc(super.initialState);
 
   @override
