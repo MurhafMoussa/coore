@@ -11,7 +11,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// It then listens to connectivity changes and, if
 /// the device is disconnected, displays a banner at the bottom of the screen.
 class NetworkStatusWrapper extends StatelessWidget {
-
   /// Creates a new [NetworkStatusWrapper].
   const NetworkStatusWrapper({
     super.key,
@@ -19,6 +18,7 @@ class NetworkStatusWrapper extends StatelessWidget {
     this.onConnect,
     this.onDisconnect,
   });
+
   /// The widget to display as the main content (e.g., your MaterialApp).
   final Widget child;
 
