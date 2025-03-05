@@ -1,6 +1,7 @@
 import 'package:coore/src/api_handler/api_handler_impl.dart';
 import 'package:coore/src/api_handler/api_handler_interface.dart';
 import 'package:coore/src/api_handler/base_cache_store/mem_cache_store.dart';
+import 'package:coore/src/api_handler/interceptors/auth_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/caching_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/logging_interceptor.dart';
 import 'package:coore/src/config/entities/core_config_entity.dart';
@@ -47,6 +48,9 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
     ..registerLazySingleton(_createFlutterSecureStorage)
     ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
     ..registerLazySingleton(() => _createDio(coreEntity.networkConfigEntity))
+    ..registerLazySingleton<SecureDatabaseInterface>(
+      () => SecureDatabaseImp(getIt()),
+    )
     ..registerLazySingleton<NetworkExceptionMapper>(
       () => DioNetworkExceptionMapper(),
     )
@@ -81,9 +85,6 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
         repository: getIt(),
         themeConfigEntity: coreEntity.themeConfigEntity,
       ),
-    )
-    ..registerLazySingleton<SecureDatabaseInterface>(
-      () => SecureDatabaseImp(getIt()),
     );
 }
 
@@ -121,6 +122,7 @@ Dio _createDio(NetworkConfigEntity entity) {
           cacheStore: MemoryCacheStore(),
           defaultCacheDuration: entity.cacheDuration,
         ),
+      AuthInterceptor(getIt()),
       ...entity.interceptors,
     ]);
 }

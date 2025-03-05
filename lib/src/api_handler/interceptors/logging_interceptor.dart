@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 class LoggingInterceptor extends Interceptor {
-
   LoggingInterceptor({
     required this.logger,
     this.maxBodyLength = 1024,
@@ -48,9 +47,10 @@ class LoggingInterceptor extends Interceptor {
   }
 
   String _formatRequest(RequestOptions options) {
-    final buffer = StringBuffer();
-    buffer.writeln('*** Request ***');
-    buffer.writeln('[${options.method}] ${options.uri}');
+    final buffer =
+        StringBuffer()
+          ..writeln('*** Request ***')
+          ..writeln('[${options.method}] ${options.uri}');
 
     // Headers
     if (options.headers.isNotEmpty) {
@@ -84,9 +84,10 @@ class LoggingInterceptor extends Interceptor {
   }
 
   String _formatResponse(Response response) {
-    final buffer = StringBuffer();
-    buffer.writeln('*** Response ***');
-    buffer.writeln('[${response.statusCode}] ${response.requestOptions.uri}');
+    final buffer =
+        StringBuffer()
+          ..writeln('*** Response ***')
+          ..writeln('[${response.statusCode}] ${response.requestOptions.uri}');
 
     // Headers
     if (!response.headers.isEmpty) {
@@ -98,8 +99,9 @@ class LoggingInterceptor extends Interceptor {
 
     // Body
     if (response.data != null) {
-      buffer.writeln('Body:');
-      buffer.writeln(_convertData(response.data, maxBodyLength));
+      buffer
+        ..writeln('Body:')
+        ..writeln(_convertData(response.data, maxBodyLength));
     }
 
     buffer.writeln('*** End Response ***');
@@ -107,24 +109,26 @@ class LoggingInterceptor extends Interceptor {
   }
 
   String _formatError(DioException err) {
-    final buffer = StringBuffer();
-    buffer.writeln('*** Error ***');
-    buffer.writeln('[${err.type}] ${err.message}');
-    buffer.writeln('URI: ${err.requestOptions.uri}');
+    final buffer =
+        StringBuffer()
+          ..writeln('*** Error ***')
+          ..writeln('[${err.type}] ${err.message}')
+          ..writeln('URI: ${err.requestOptions.uri}');
 
     if (err.response != null) {
       buffer.writeln('Status Code: ${err.response?.statusCode}');
     }
 
     if (err.error != null) {
-      buffer.writeln('Error Details:');
-      buffer.writeln(err.error.toString());
+      buffer
+        ..writeln('Error Details:')
+        ..writeln(err.response?.data);
     }
 
-    buffer.writeln('Stack Trace:');
-    buffer.writeln(err.stackTrace.toString());
-
-    buffer.writeln('*** End Error ***');
+    buffer
+      ..writeln('Stack Trace:')
+      ..writeln(err.stackTrace.toString())
+      ..writeln('*** End Error ***');
     return buffer.toString();
   }
 

@@ -30,7 +30,10 @@ class DioApiHandler implements ApiHandlerInterface {
   /// If [isAuthorized] is true, an "Authorization" header is added (in production,
   /// replace with a real token). If [shouldCache] is true, a "Cache-Control" header
   /// is added. The headers are stored in the [extra] field of the options.
-  Options _buildOptions(bool isAuthorized, [bool shouldCache = false]) {
+  Options _buildOptions({
+    required bool isAuthorized,
+    bool shouldCache = false,
+  }) {
     final headers = <String, dynamic>{
       'isAuthorized': isAuthorized,
       'shouldCache': shouldCache,
@@ -82,7 +85,10 @@ class DioApiHandler implements ApiHandlerInterface {
       () => _dio.get(
         path,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized, shouldCache),
+        options: _buildOptions(
+          isAuthorized: isAuthorized,
+          shouldCache: shouldCache,
+        ),
         cancelToken: _cancelToken(cancelRequestAdapter),
       ),
     );
@@ -119,7 +125,7 @@ class DioApiHandler implements ApiHandlerInterface {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized),
+        options: _buildOptions(isAuthorized: isAuthorized),
         onSendProgress:
             onSendProgress != null
                 ? (count, total) => onSendProgress(count / total)
@@ -149,7 +155,7 @@ class DioApiHandler implements ApiHandlerInterface {
       () => _dio.delete(
         path,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized),
+        options: _buildOptions(isAuthorized: isAuthorized),
         cancelToken: _cancelToken(cancelRequestAdapter),
       ),
     );
@@ -184,7 +190,7 @@ class DioApiHandler implements ApiHandlerInterface {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized),
+        options: _buildOptions(isAuthorized: isAuthorized),
         cancelToken: _cancelToken(cancelRequestAdapter),
       );
     });
@@ -219,7 +225,7 @@ class DioApiHandler implements ApiHandlerInterface {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized),
+        options: _buildOptions(isAuthorized: isAuthorized),
         cancelToken: _cancelToken(cancelRequestAdapter),
       );
     });
@@ -250,7 +256,7 @@ class DioApiHandler implements ApiHandlerInterface {
         url,
         downloadDestinationPath,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized),
+        options: _buildOptions(isAuthorized: isAuthorized),
         onReceiveProgress:
             onReceiveProgress != null
                 ? (count, total) => onReceiveProgress(count / total)
