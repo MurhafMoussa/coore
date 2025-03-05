@@ -47,10 +47,11 @@ mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
   /// - `params`: The parameters required for the API call.
   /// - `onSuccess`: (Optional) A callback executed when the API call is successful.
   /// - `onFailure`: (Optional) A callback executed when the API call fails.
-  Future<void> handleApiCall({
-    required Future<Either<Failure, SuccessData>> Function(BaseParams params)
+  Future<void> handleApiCall<T extends BaseParams>({
+    required Future<Either<Failure, SuccessData>>
+    Function<T extends BaseParams>(T params)
     apiCall,
-    required covariant BaseParams params,
+    required T params,
     void Function(SuccessData data)? onSuccess,
     void Function(Failure failure)? onFailure,
   }) async {
