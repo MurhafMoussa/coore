@@ -33,13 +33,14 @@ class NetworkStatusWrapper extends StatelessWidget {
         builder: (context) {
           return BlocListener<NetworkStatusCubit, ConnectionStatus>(
             listener: (context, status) {
+              final scaffoldMessengerKey = ScaffoldMessenger.maybeOf(context);
               switch (status) {
                 case ConnectionStatus.connected:
                   {
                     if (onConnect != null) {
                       onConnect!();
                     } else {
-                      context.scaffoldMessenger.showSnackBar(
+                      scaffoldMessengerKey?.showSnackBar(
                         SnackBar(
                           content: Text(
                             'You are online!',
@@ -57,7 +58,7 @@ class NetworkStatusWrapper extends StatelessWidget {
                     if (onDisconnect != null) {
                       onDisconnect!();
                     } else {
-                      context.scaffoldMessenger.showSnackBar(
+                      scaffoldMessengerKey?.showSnackBar(
                         SnackBar(
                           content: Text(
                             'You are offline',
