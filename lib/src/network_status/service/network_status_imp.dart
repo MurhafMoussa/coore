@@ -13,7 +13,7 @@ class NetworkStatusImp implements NetworkStatusInterface {
   final StreamController<ConnectionStatus> _controller =
       StreamController<ConnectionStatus>.broadcast();
   StreamSubscription<InternetStatus>? _subscription;
-
+  ConnectionStatus _latestStatus = ConnectionStatus.connected;
   @override
   Stream<ConnectionStatus> get connectionStream => _controller.stream;
 
@@ -25,16 +25,18 @@ class NetworkStatusImp implements NetworkStatusInterface {
 
   @override
   Future<bool> get isConnected async =>
-      await _internetConnection.hasInternetAccess;
+      _latestStatus == ConnectionStatus.connected;
 
   Future<void> _init() async {
     _subscription = _internetConnection.onStatusChange.listen((status) {
       switch (status) {
         case InternetStatus.connected:
+          _latestStatus = ConnectionStatus.connected;
           _controller.add(ConnectionStatus.connected);
 
           break;
         case InternetStatus.disconnected:
+          _latestStatus = ConnectionStatus.disconnected;
           _controller.add(ConnectionStatus.disconnected);
           break;
       }
