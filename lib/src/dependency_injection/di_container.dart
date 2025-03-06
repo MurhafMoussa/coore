@@ -60,7 +60,7 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
     )
     ..registerLazySingleton(() => InternetConnection())
     ..registerLazySingleton<NetworkStatusInterface>(
-      () => NetworkStatusImp(getIt()),
+      () => NetworkStatusImp(getIt(), getIt()),
     )
     ..registerLazySingleton(() => NetworkStatusCubit(networkStatus: getIt()))
     ..registerFactoryParam<LocalDatabaseInterface, String, void>(
