@@ -4,6 +4,7 @@ import 'package:coore/src/api_handler/base_cache_store/mem_cache_store.dart';
 import 'package:coore/src/api_handler/interceptors/auth_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/caching_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/logging_interceptor.dart';
+import 'package:coore/src/config/entities/core_config_after_run_app_entity.dart';
 import 'package:coore/src/config/entities/core_config_entity.dart';
 import 'package:coore/src/config/entities/network_config_entity.dart';
 import 'package:coore/src/config/service/config_service.dart';
@@ -75,12 +76,6 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       ),
     )
     ..registerLazySingleton(
-      () => CoreNavigator(
-        logger: getIt(),
-        navigationConfigEntity: coreEntity.navigationConfigEntity,
-      ),
-    )
-    ..registerLazySingleton(
       () => ThemeCubit(
         repository: getIt(),
         themeConfigEntity: coreEntity.themeConfigEntity,
@@ -125,4 +120,15 @@ Dio _createDio(NetworkConfigEntity entity) {
       if (entity.enableLogging)
         LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
     ]);
+}
+
+Future<void> configureDependenciesAfterRunApp(
+  CoreConfigAfterRunAppEntity coreEntity,
+) async {
+  getIt.registerLazySingleton(
+    () => CoreNavigator(
+      logger: getIt(),
+      navigationConfigEntity: coreEntity.navigationConfigEntity,
+    ),
+  );
 }

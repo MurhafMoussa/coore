@@ -10,13 +10,13 @@ class CoreConfigEntity extends Equatable {
     required this.currentEnvironment,
     required this.networkConfigEntity,
     required this.localizationConfigEntity,
-    required this.navigationConfigEntity,
+
     required this.themeConfigEntity,
   });
   final CoreEnvironment currentEnvironment;
   final NetworkConfigEntity networkConfigEntity;
   final LocalizationConfigEntity localizationConfigEntity;
-  final NavigationConfigEntity navigationConfigEntity;
+
   final ThemeConfigEntity themeConfigEntity;
 
   @override
@@ -24,6 +24,5 @@ class CoreConfigEntity extends Equatable {
     currentEnvironment,
     networkConfigEntity,
     localizationConfigEntity,
-    navigationConfigEntity,
   ];
 }
