@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// It listens to changes from [NetworkStatusInterface.connectionStream]
 /// and emits corresponding [ConnectionStatus] updates.
 class NetworkStatusCubit extends Cubit<ConnectionStatus> {
-
   /// Creates a new [NetworkStatusCubit] with the provided [NetworkStatusInterface].
   ///
   /// The cubit initializes with an initial connection status and subscribes to
@@ -24,12 +23,6 @@ class NetworkStatusCubit extends Cubit<ConnectionStatus> {
   /// Initializes the cubit by checking the current connection status and
   /// subscribing to changes from the network status stream.
   Future<void> _initialize() async {
-    // Get the initial connection status.
-    final connected = await _networkStatus.isConnected;
-    emit(
-      connected ? ConnectionStatus.connected : ConnectionStatus.disconnected,
-    );
-
     // Listen to connection changes and emit them.
     _subscription = _networkStatus.connectionStream.listen((status) {
       emit(status);
