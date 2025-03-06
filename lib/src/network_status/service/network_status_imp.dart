@@ -1,17 +1,19 @@
 import 'dart:async';
 
 import 'package:coore/src/network_status/service/network_status_interface.dart';
+import 'package:coore/src/src.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class NetworkStatusImp implements NetworkStatusInterface {
-
-  NetworkStatusImp(this._internetConnection) {
+  NetworkStatusImp(this._internetConnection, this._logger) {
     _init();
   }
   final InternetConnection _internetConnection;
+  final CoreLogger _logger;
   final StreamController<ConnectionStatus> _controller =
       StreamController<ConnectionStatus>.broadcast();
   StreamSubscription<InternetStatus>? _subscription;
+  ConnectionStatus? _lastStatus;
 
   @override
   Stream<ConnectionStatus> get connectionStream => _controller.stream;
@@ -24,18 +26,23 @@ class NetworkStatusImp implements NetworkStatusInterface {
 
   @override
   Future<bool> get isConnected async =>
-      await _internetConnection.hasInternetAccess;
+      _lastStatus != null && _lastStatus == ConnectionStatus.connected;
 
   Future<void> _init() async {
     _subscription = _internetConnection.onStatusChange.listen((status) {
       switch (status) {
         case InternetStatus.connected:
+          _lastStatus = ConnectionStatus.connected;
           _controller.add(ConnectionStatus.connected);
+
+          break;
         case InternetStatus.disconnected:
+          _lastStatus = ConnectionStatus.disconnected;
           _controller.add(ConnectionStatus.disconnected);
+          break;
       }
-    })..onError((_, _) {
-      _controller.add(ConnectionStatus.disconnected);
+    })..onError((e, s) {
+      _logger.error('Some thing went wrong in NetworkStatus', e, s);
     });
   }
 }
