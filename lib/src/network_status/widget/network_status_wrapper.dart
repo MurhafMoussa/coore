@@ -1,7 +1,4 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/dependency_injection/di_container.dart';
-import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
-import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -33,43 +30,15 @@ class NetworkStatusWrapper extends StatelessWidget {
         builder: (context) {
           return BlocListener<NetworkStatusCubit, ConnectionStatus>(
             listener: (context, status) {
-              final scaffoldMessengerKey = ScaffoldMessenger.maybeOf(context);
+              ScaffoldMessenger.maybeOf(context);
               switch (status) {
                 case ConnectionStatus.connected:
                   {
-                    if (onConnect != null) {
-                      onConnect!();
-                    } else {
-                      scaffoldMessengerKey?.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'You are online!',
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                          backgroundColor: context.colorScheme.primary,
-                        ),
-                      );
-                    }
+                    onConnect?.call();
                   }
                 case ConnectionStatus.disconnected:
                   {
-                    if (onDisconnect != null) {
-                      onDisconnect!();
-                    } else {
-                      scaffoldMessengerKey?.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'You are offline',
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                          backgroundColor: context.colorScheme.error,
-                        ),
-                      );
-                    }
+                    onDisconnect?.call();
                   }
               }
             },
