@@ -115,8 +115,6 @@ Dio _createDio(NetworkConfigEntity entity) {
       ),
     )
     ..interceptors.addAll([
-      if (entity.enableLogging)
-        LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
       if (entity.enableCache)
         CachingInterceptor(
           cacheStore: MemoryCacheStore(),
@@ -124,5 +122,7 @@ Dio _createDio(NetworkConfigEntity entity) {
         ),
       AuthInterceptor(getIt()),
       ...entity.interceptors,
+      if (entity.enableLogging)
+        LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
     ]);
 }
