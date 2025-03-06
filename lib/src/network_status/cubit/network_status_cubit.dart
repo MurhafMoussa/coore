@@ -14,7 +14,7 @@ class NetworkStatusCubit extends Cubit<ConnectionStatus> {
   /// further updates from the network status service.
   NetworkStatusCubit({required NetworkStatusInterface networkStatus})
     : _networkStatus = networkStatus,
-      super(ConnectionStatus.disconnected) {
+      super(ConnectionStatus.connected) {
     _initialize();
   }
   final NetworkStatusInterface _networkStatus;
