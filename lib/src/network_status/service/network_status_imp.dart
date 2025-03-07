@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:coore/src/src.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 

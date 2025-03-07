@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -12,7 +11,6 @@ class CustomImage extends StatelessWidget {
   const CustomImage._({
     this.imageUrl,
     this.imagePath,
-    this.imageBytes,
     this.imageFile,
     this.scale,
     this.width,

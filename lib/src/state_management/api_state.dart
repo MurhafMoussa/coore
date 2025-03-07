@@ -1,6 +1,5 @@
 import 'package:coore/src/error_handling/failures/failure.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 

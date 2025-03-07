@@ -1,5 +1,4 @@
 import 'package:coore/src/config/entities/localization_config_entity.dart';
-import 'package:coore/src/config/entities/navigation_config_entity.dart';
 import 'package:coore/src/config/entities/network_config_entity.dart';
 import 'package:coore/src/config/entities/theme_config_entity.dart';
 import 'package:coore/src/environment/environment_config.dart';

@@ -1,9 +1,6 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/local_storage/secure_database/secure_database_interface.dart';
-import 'package:coore/src/typedefs/core_typedefs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:fpdart/src/unit.dart';
 
 class SecureDatabaseImp implements SecureDatabaseInterface {
   SecureDatabaseImp(this._flutterSecureStorage);

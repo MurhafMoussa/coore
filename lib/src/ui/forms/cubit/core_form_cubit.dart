@@ -1,6 +1,5 @@
 import 'package:coore/src/utils/validators/composit_validator.dart';
 import 'package:coore/src/utils/validators/validator.dart';
-import 'package:coore/src/utils/value_tester.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';

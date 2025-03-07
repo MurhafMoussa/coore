@@ -1,4 +1,3 @@
-import 'package:coore/src/api_handler/api_handler.dart';
 import 'package:coore/src/state_management/api_state_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
