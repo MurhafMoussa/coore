@@ -170,7 +170,7 @@ class CustomImage extends StatelessWidget {
 
   final String? imageUrl;
   final String? imagePath;
-  final Uint8List? imageBytes;
+
   final File? imageFile;
   final double? scale;
   final double? width;
@@ -258,18 +258,6 @@ class CustomImage extends StatelessWidget {
         imageFile!,
         key: key,
         scale: scale ?? 1,
-        width: width,
-        height: height,
-        color: color,
-        fit: fit,
-        alignment: alignment,
-        colorBlendMode: colorBlendMode,
-      );
-    } else if (imageBytes != null) {
-      return Image.memory(
-        imageBytes!,
-        key: key,
-        scale: scale!,
         width: width,
         height: height,
         color: color,
