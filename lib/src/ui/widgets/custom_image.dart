@@ -170,40 +170,6 @@ class CustomImage extends StatelessWidget {
     );
   }
 
-  /// Factory constructor for memory image
-  factory CustomImage.memory(
-    String base64Image, {
-    double scale = 1.0,
-    double? width,
-    double? height,
-    Color? color,
-    BlendMode? colorBlendMode,
-    BoxFit? fit = BoxFit.fill,
-    Alignment alignment = Alignment.center,
-  }) {
-    try {
-      final Uint8List bytes = base64Decode(base64Image);
-      return CustomImage._(
-        imageBytes: bytes,
-        scale: scale,
-        width: width,
-        height: height,
-        color: color,
-        colorBlendMode: colorBlendMode,
-        fit: fit,
-        alignment: alignment,
-      );
-    } catch (e) {
-      return CustomImage._(
-        imagePath: 'assets/images/image_placeholder.svg',
-
-        width: width,
-        height: height,
-        fit: fit ?? BoxFit.contain,
-        alignment: alignment,
-      );
-    }
-  }
   final String? imageUrl;
   final String? imagePath;
   final Uint8List? imageBytes;
@@ -331,20 +297,24 @@ class CustomImage extends StatelessWidget {
             fit: fit ?? BoxFit.contain,
             alignment: alignment,
           )
-          : Image.asset(
-            imagePath!,
-            key: key,
-            scale: scale,
-            width: width,
-            height: height,
-            color: color,
-            fit: fit,
-            alignment: alignment,
-            colorBlendMode: colorBlendMode,
-          );
+          : _buildAssetImage();
     } else {
       return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildAssetImage() {
+    return Image.asset(
+      imagePath!,
+      key: key,
+      scale: scale,
+      width: width,
+      height: height,
+      color: color,
+      fit: fit,
+      alignment: alignment,
+      colorBlendMode: colorBlendMode,
+    );
   }
 
   Widget Function(BuildContext context, String url)
@@ -363,21 +333,30 @@ class CustomImage extends StatelessWidget {
     };
   }
 
-  SvgPicture _buildSvgPlaceHolder() {
-    return SvgPicture.asset(
-      'assets/images/image_placeholder.svg',
-      width: width,
-      height: height,
-      fit: fit ?? BoxFit.fill,
-      alignment: alignment,
-      colorFilter: ColorFilter.mode(
-        placeholderForegroundColor ?? Colors.grey.shade300,
-        BlendMode.srcIn,
-      ),
-    );
+  Widget _buildSvgPlaceHolder() {
+    return placeholderAssetImage != null
+        ? (placeholderAssetImage!.endsWith('svg')
+            ? SvgPicture.asset(
+              placeholderAssetImage!,
+              width: width,
+              height: height,
+              fit: fit ?? BoxFit.fill,
+              alignment: alignment,
+              colorFilter: ColorFilter.mode(
+                placeholderForegroundColor ?? Colors.grey.shade300,
+                BlendMode.srcIn,
+              ),
+            )
+            : _buildAssetImage())
+        : Icon(
+          Icons.image,
+          size: width,
+          color: placeholderForegroundColor ?? Colors.grey.shade300,
+          blendMode: BlendMode.srcIn,
+        );
   }
 
-  StatelessWidget Function(BuildContext context, String url, Object error)
+  Widget Function(BuildContext context, String url, Object error)
   _defaultErrorBuilder(BuildContext context) {
     return (BuildContext context, String url, Object error) {
       return placeholderAssetImage == null
