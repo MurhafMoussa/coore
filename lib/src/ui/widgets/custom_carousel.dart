@@ -112,26 +112,13 @@ class CustomCarousel extends StatelessWidget {
   // Internal flag to determine which mode to use.
   final _CarouselType _carouselType;
 
-  /// Computes the effective item count based on the mode.
-  ///
-  /// For the separated mode, the count is adjusted to include separator widgets.
-  int get _effectiveItemCount {
-    switch (_carouselType) {
-      case _CarouselType.normal:
-      case _CarouselType.builder:
-        return itemCount ?? 0;
-      case _CarouselType.separated:
-        return (itemCount != null && itemCount! > 0) ? itemCount! * 2 - 1 : 0;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: margin,
       child: CarouselSlider.builder(
         carouselController: carouselController,
-        itemCount: _effectiveItemCount,
+        itemCount: itemCount,
         itemBuilder: (context, index, realIndex) {
           switch (_carouselType) {
             case _CarouselType.normal:
