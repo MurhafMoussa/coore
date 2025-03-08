@@ -146,7 +146,7 @@ class CustomCarousel extends StatelessWidget {
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    itemBuilder!(context, index, realIndex),
+                    Expanded(child: itemBuilder!(context, index, realIndex)),
                     // Build the separator after the item.
                     separatorBuilder!(context, index),
                   ],
