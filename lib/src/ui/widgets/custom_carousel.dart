@@ -71,3 +71,5 @@ class CustomCarousel extends StatelessWidget {
     );
   }
 }
+
+class CoreCarouselController extends CarouselSliderControllerImpl {}
