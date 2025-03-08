@@ -141,13 +141,18 @@ class CustomCarousel extends StatelessWidget {
               // Builder mode: use the provided itemBuilder.
               return itemBuilder!(context, index, realIndex);
             case _CarouselType.separated:
-              // Separated mode: alternate between itemBuilder and separatorBuilder.
-              if (index.isEven) {
-                final int itemIndex = index ~/ 2;
-                return itemBuilder!(context, itemIndex, realIndex);
+              // Separated mode: combine the item with its separator (except for the last one)
+              if (index < itemCount! - 1) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    itemBuilder!(context, index, realIndex),
+                    // Build the separator after the item.
+                    separatorBuilder!(context, index),
+                  ],
+                );
               } else {
-                final int itemIndex = index ~/ 2;
-                return separatorBuilder!(context, itemIndex);
+                return itemBuilder!(context, index, realIndex);
               }
           }
         },
