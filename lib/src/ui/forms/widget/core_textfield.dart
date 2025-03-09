@@ -356,6 +356,6 @@ class _CoreTextFieldState extends State<CoreTextField> {
   }
 
   void _updateCubit(String? text) {
-    context.read<CoreFormCubit>().updateField(widget.name, text);
+    context.read<CoreFormCubit>().updateField(widget.name, text, context);
   }
 }

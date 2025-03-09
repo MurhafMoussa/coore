@@ -45,7 +45,7 @@ class CoreFormCubit extends Cubit<CoreFormState> {
 
   /// Updates the value for a specific field identified by [fieldName] and revalidates
   /// based on the current [ValidationType]. Also marks the field as touched.
-  void updateField(String fieldName, dynamic value) {
+  void updateField(String fieldName, dynamic value, BuildContext context) {
     final newValues = Map<String, dynamic>.from(state.values)
       ..[fieldName] = value;
 
@@ -62,11 +62,11 @@ class CoreFormCubit extends Cubit<CoreFormState> {
         break;
       case ValidationType.allFields:
         // Validate all fields when any field is updated.
-        newErrors = _validateFields(newValues);
+        newErrors = _validateFields(newValues, context);
         break;
       case ValidationType.fieldsBeingEdited:
         // Validate only the field being edited.
-        final error = _validators[fieldName]?.validate(value);
+        final error = _validators[fieldName]?.validate(value, context);
         if (error != null) {
           newErrors[fieldName] = error;
         } else {
@@ -80,7 +80,7 @@ class CoreFormCubit extends Cubit<CoreFormState> {
 
     // Compute overall validity:
     // The form is valid only if every field has been touched and passes its validation.
-    final overallValid = _computeOverallValidity(newValues);
+    final overallValid = _computeOverallValidity(newValues, context);
 
     emit(
       state.copyWith(
@@ -96,14 +96,17 @@ class CoreFormCubit extends Cubit<CoreFormState> {
 
   /// Validates all fields based on the provided [values] map and returns a map of errors.
   /// If validation is disabled, an empty map is returned.
-  Map<String, String> _validateFields(Map<String, dynamic> values) {
+  Map<String, String> _validateFields(
+    Map<String, dynamic> values,
+    BuildContext context,
+  ) {
     if (state.validationType == ValidationType.disabled) {
       return {};
     }
     final errors = <String, String>{};
 
     _validators.forEach((fieldName, validator) {
-      final error = validator.validate(values[fieldName]);
+      final error = validator.validate(values[fieldName], context);
       if (error != null) {
         errors[fieldName] = error;
       }
@@ -115,12 +118,16 @@ class CoreFormCubit extends Cubit<CoreFormState> {
   /// Computes the overall form validity using [newValues] by ensuring:
   ///  - Every field has been touched.
   ///  - Every touched field passes its validation.
-  bool _computeOverallValidity(Map<String, dynamic> newValues) {
+  bool _computeOverallValidity(
+    Map<String, dynamic> newValues,
+    BuildContext context,
+  ) {
     for (final field in state.values.keys) {
       // If the field hasn't been touched yet, the form is not valid.
       if (_touchedFields[field] != true) return false;
       // If the field fails its validation, the form is not valid.
-      if (_validators[field]?.validate(newValues[field]) != null) return false;
+      if (_validators[field]?.validate(newValues[field], context) != null)
+        return false;
     }
     return true;
   }
@@ -134,12 +141,13 @@ class CoreFormCubit extends Cubit<CoreFormState> {
   /// If the form is valid, [onValidationPass] is invoked.
   /// Otherwise, [onValidationFail] is invoked (if provided) and the validation strategy
   /// is switched to [ValidationType.fieldsBeingEdited] to provide immediate feedback.
-  void validateForm({
+  void validateForm(
+    BuildContext context, {
     required VoidCallback onValidationPass,
     VoidCallback? onValidationFail,
   }) {
     if (state.validationType == ValidationType.onSubmit) {
-      final newErrors = _validateFields(state.values);
+      final newErrors = _validateFields(state.values, context);
       emit(state.copyWith(errors: newErrors, isValid: newErrors.isEmpty));
     }
 
