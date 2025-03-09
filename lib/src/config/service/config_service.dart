@@ -1,3 +1,5 @@
+import 'package:coore/lib.dart';
+import 'package:coore/src/dependency_injection/di_container.dart';
 import 'package:coore/src/local_storage/local_database/local_database_interface.dart';
 import 'package:flutter/material.dart';
 
@@ -28,16 +30,19 @@ class ConfigService {
   }
 
   Future<ThemeMode> getThemeMode(ThemeMode defaultThemeMode) async {
-    final themeConfigEither = await localDatabaseInterface.get<ThemeMode>(
+    final themeConfigEither = await localDatabaseInterface.get<String>(
       'themeMode',
     );
     return themeConfigEither.fold(
       (l) => defaultThemeMode,
-      (r) => r ?? defaultThemeMode,
+      (r) =>
+          r != null
+              ? ThemeMode.values.firstWhere((element) => element.name == r)
+              : defaultThemeMode,
     );
   }
 
   Future<void> setThemeMode(ThemeMode themeMode) async {
-    localDatabaseInterface.save<ThemeMode>('themeMode', themeMode);
+    localDatabaseInterface.save<String>('themeMode', themeMode.name);
   }
 }
