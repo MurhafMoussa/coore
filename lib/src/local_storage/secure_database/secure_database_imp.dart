@@ -12,7 +12,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       await _flutterSecureStorage.delete(key: key);
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(stackTrace));
+      return left(CacheDeleteFailure(e, stackTrace));
     }
   }
 
@@ -22,7 +22,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       await _flutterSecureStorage.deleteAll();
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(stackTrace));
+      return left(CacheDeleteFailure(e, stackTrace));
     }
   }
 
@@ -31,7 +31,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
     try {
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheInitializationFailure(stackTrace));
+      return left(CacheInitializationFailure(e, stackTrace));
     }
   }
 
@@ -41,7 +41,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       final value = await _flutterSecureStorage.read(key: key);
       return right(value);
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(stackTrace));
+      return left(CacheReadFailure(e, stackTrace));
     }
   }
 
@@ -51,7 +51,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       final value = await _flutterSecureStorage.readAll();
       return right(value);
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(stackTrace));
+      return left(CacheReadFailure(e, stackTrace));
     }
   }
 
@@ -61,7 +61,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       await _flutterSecureStorage.write(key: key, value: value);
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheWriteFailure(stackTrace));
+      return left(CacheWriteFailure(e, stackTrace));
     }
   }
 }
