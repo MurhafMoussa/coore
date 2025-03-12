@@ -169,8 +169,19 @@ class _CoreReadMoreTextState extends State<CoreReadMoreText> {
         return Row(
           children: [
             if (widget._isSelectable)
-              SelectableText(
-                widget.text,
+              SelectableText.rich(
+                TextSpan(
+                  text: '${widget.text} ',
+                  children: [
+                    TextSpan(
+                      text:
+                          _isTextExpanded
+                              ? widget.readLessText
+                              : widget.readMoreText,
+                      style: widget.readMoreTextStyle ?? defaultShowMoreStyle,
+                    ),
+                  ],
+                ),
                 key: widget.textKey,
                 maxLines: _isTextExpanded ? null : widget.numLines,
                 style: widget.style,
