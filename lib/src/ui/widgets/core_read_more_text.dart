@@ -7,7 +7,7 @@ import 'package:readmore/readmore.dart';
 ///
 /// Example usage with clickable URLs:
 /// ```dart
-/// CustomReadMoreText(
+/// CoreReadMoreText(
 ///   'Visit https://example.com for more details. '
 ///   'Follow #flutter on social media!',
 ///   trimLength: 50,
@@ -38,9 +38,9 @@ import 'package:readmore/readmore.dart';
 ///   ],
 /// )
 /// ```
-class CustomReadMoreText extends StatefulWidget {
+class CoreReadMoreText extends StatefulWidget {
   /// Creates an expandable/collapsible text widget with rich formatting options
-  const CustomReadMoreText(
+  const CoreReadMoreText(
     this.data, {
     super.key,
     this.isCollapsed,
@@ -141,10 +141,10 @@ class CustomReadMoreText extends StatefulWidget {
   final bool isExpandable;
 
   @override
-  State<CustomReadMoreText> createState() => _CustomReadMoreTextState();
+  State<CoreReadMoreText> createState() => _CoreReadMoreTextState();
 }
 
-class _CustomReadMoreTextState extends State<CustomReadMoreText> {
+class _CoreReadMoreTextState extends State<CoreReadMoreText> {
   @override
   Widget build(BuildContext context) {
     return ReadMoreText(
