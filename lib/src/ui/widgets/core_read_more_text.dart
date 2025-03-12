@@ -1,4 +1,5 @@
 import 'package:coore/lib.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// A customizable text widget that truncates content with "read more/less" functionality.
@@ -24,22 +25,15 @@ class CoreReadMoreText extends StatefulWidget {
     required this.readMoreText,
     required this.readLessText,
 
-    this.readMoreIcon,
-    this.readLessIcon,
     this.readMoreTextStyle,
 
     this.style,
     this.locale,
     this.onReadMoreClicked,
-    this.readMoreKey,
+
     this.textKey,
     super.key,
-  }) : assert(
-         (readMoreIcon != null && readLessIcon != null) ||
-             readMoreIcon == null && readLessIcon == null,
-         'You need to specify both read more and read less icons ',
-       ),
-       cursorHeight = null,
+  }) : cursorHeight = null,
        _isSelectable = false,
        showCursor = null,
        cursorWidth = null,
@@ -59,10 +53,8 @@ class CoreReadMoreText extends StatefulWidget {
     required this.readMoreText,
     required this.readLessText,
 
-    this.readMoreKey,
     this.textKey,
-    this.readMoreIcon,
-    this.readLessIcon,
+
     this.readMoreTextStyle,
 
     this.style,
@@ -87,16 +79,6 @@ class CoreReadMoreText extends StatefulWidget {
 
   /// The style of read more/less text.
   final TextStyle? readMoreTextStyle;
-
-  /// The icon that needs to be shown when the text is collapsed.
-  ///
-  /// When you specify [readMoreIcon] you also need to specify [readLessIcon].
-  final Widget? readMoreIcon;
-
-  /// The icon that needs to be shown when the text is expanded.
-  ///
-  /// When you specify [readMoreIcon] you also need to specify [readLessIcon].
-  final Widget? readLessIcon;
 
   /// The show more text.
   final String readMoreText;
@@ -138,15 +120,24 @@ class CoreReadMoreText extends StatefulWidget {
   /// The key for the content text.
   final Key? textKey;
 
-  /// The key for read more button.
-  final Key? readMoreKey;
-
   @override
   State<CoreReadMoreText> createState() => _CoreReadMoreTextState();
 }
 
 class _CoreReadMoreTextState extends State<CoreReadMoreText> {
   var _isTextExpanded = false;
+  late final TapGestureRecognizer _tapGestureRecognizer;
+  @override
+  void initState() {
+    super.initState();
+    _tapGestureRecognizer = TapGestureRecognizer()..onTap = _onReadMoreClicked;
+  }
+
+  @override
+  void dispose() {
+    _tapGestureRecognizer.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,72 +149,37 @@ class _CoreReadMoreTextState extends State<CoreReadMoreText> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final locale = widget.locale ?? Localizations.maybeLocaleOf(context);
-        final span = TextSpan(text: widget.text);
-        final tp = TextPainter(
-          text: span,
-          locale: locale,
-          maxLines: widget.numLines,
-          textDirection: Directionality.of(context),
-        )..layout(maxWidth: constraints.maxWidth);
-        return Row(
+        final textSpan = TextSpan(
+          text: '${widget.text} ',
           children: [
-            if (widget._isSelectable)
-              SelectableText.rich(
-                TextSpan(
-                  text: '${widget.text} ',
-                  children: [
-                    TextSpan(
-                      text:
-                          _isTextExpanded
-                              ? widget.readLessText
-                              : widget.readMoreText,
-                      style: widget.readMoreTextStyle ?? defaultShowMoreStyle,
-                    ),
-                  ],
-                ),
-                key: widget.textKey,
-                maxLines: _isTextExpanded ? null : widget.numLines,
-                style: widget.style,
-                cursorColor: widget.cursorColor,
-                cursorWidth: widget.cursorWidth ?? 2,
-                cursorHeight: widget.cursorHeight,
-                cursorRadius: widget.cursorRadius,
-                showCursor: widget.showCursor ?? false,
-
-                contextMenuBuilder: widget.contextMenuBuilder,
-                scrollPhysics: const NeverScrollableScrollPhysics(),
-              )
-            else
-              Text.rich(
-                TextSpan(
-                  text: '${widget.text} ',
-                  children: [
-                    TextSpan(
-                      text:
-                          _isTextExpanded
-                              ? widget.readLessText
-                              : widget.readMoreText,
-                      style: widget.readMoreTextStyle ?? defaultShowMoreStyle,
-                    ),
-                  ],
-                ),
-                key: widget.textKey,
-                maxLines: _isTextExpanded ? null : widget.numLines,
-                style: widget.style,
-              ),
-
-            if (tp.didExceedMaxLines && widget.readMoreIcon != null)
-              GestureDetector(
-                key: widget.readMoreKey,
-                onTap: _onReadMoreClicked,
-                child:
-                    _isTextExpanded
-                        ? widget.readLessIcon!
-                        : widget.readMoreIcon!,
-              ),
+            TextSpan(
+              text: _isTextExpanded ? widget.readLessText : widget.readMoreText,
+              style: widget.readMoreTextStyle ?? defaultShowMoreStyle,
+              recognizer: _tapGestureRecognizer,
+            ),
           ],
         );
+        return (widget._isSelectable)
+            ? SelectableText.rich(
+              textSpan,
+              key: widget.textKey,
+              maxLines: _isTextExpanded ? null : widget.numLines,
+              style: widget.style,
+              cursorColor: widget.cursorColor,
+              cursorWidth: widget.cursorWidth ?? 2,
+              cursorHeight: widget.cursorHeight,
+              cursorRadius: widget.cursorRadius,
+              showCursor: widget.showCursor ?? false,
+
+              contextMenuBuilder: widget.contextMenuBuilder,
+              scrollPhysics: const NeverScrollableScrollPhysics(),
+            )
+            : Text.rich(
+              textSpan,
+              key: widget.textKey,
+              maxLines: _isTextExpanded ? null : widget.numLines,
+              style: widget.style,
+            );
       },
     );
   }
