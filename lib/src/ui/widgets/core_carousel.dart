@@ -11,14 +11,14 @@ enum _CarouselType { normal, builder, separated }
 /// - Separated: Uses an [itemBuilder] and a [separatorBuilder] to insert a widget
 ///   between items (mimicking ListView.separated).
 ///
-/// Depending on the constructor used, the [CustomCarousel] will build its content
+/// Depending on the constructor used, the [CoreCarousel] will build its content
 /// accordingly.
-class CustomCarousel extends StatelessWidget {
+class CoreCarousel extends StatelessWidget {
   /// Normal Constructor:
   /// Use this when you have a fixed list of child widgets.
   ///
   /// [children] is the list of widgets to display.
-  const CustomCarousel({
+  const CoreCarousel({
     super.key,
     required List<Widget> this.children,
     this.carouselController,
@@ -41,7 +41,7 @@ class CustomCarousel extends StatelessWidget {
   ///
   /// [itemCount] is the total number of items (without separators). The effective
   /// item count will be calculated as (itemCount * 2 - 1).
-  const CustomCarousel.separated({
+  const CoreCarousel.separated({
     super.key,
     required Widget Function(BuildContext context, int index, int realIndex)
     this.itemBuilder,
@@ -65,7 +65,7 @@ class CustomCarousel extends StatelessWidget {
   /// Use this when you want to build items on-demand with an [itemBuilder] callback.
   ///
   /// [itemCount] is the total number of items (without separators).
-  const CustomCarousel.builder({
+  const CoreCarousel.builder({
     super.key,
     required Widget Function(BuildContext context, int index, int realIndex)
     this.itemBuilder,

@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
 
-class CustomImage extends StatelessWidget {
-  const CustomImage._({
+class CoreImage extends StatelessWidget {
+  const CoreImage._({
     this.imageUrl,
     this.imagePath,
     this.imageFile,
@@ -48,7 +48,7 @@ class CustomImage extends StatelessWidget {
   });
 
   /// Factory constructor for network image
-  factory CustomImage.network(
+  factory CoreImage.network(
     String imageUrl, {
     String? placeholderAssetImage,
     Widget Function(BuildContext context, String)? placeholderBuilder,
@@ -85,7 +85,7 @@ class CustomImage extends StatelessWidget {
     BlendMode? colorBlendMode,
     Duration? placeholderFadeInDuration,
   }) {
-    return CustomImage._(
+    return CoreImage._(
       imageUrl: imageUrl,
       placeholderAssetImage: placeholderAssetImage,
       placeholderBuilder: placeholderBuilder,
@@ -123,7 +123,7 @@ class CustomImage extends StatelessWidget {
   }
 
   /// Factory constructor for asset image
-  factory CustomImage.asset(
+  factory CoreImage.asset(
     String imagePath, {
     double? scale,
     double? width,
@@ -133,7 +133,7 @@ class CustomImage extends StatelessWidget {
     BoxFit? fit = BoxFit.fill,
     Alignment alignment = Alignment.center,
   }) {
-    return CustomImage._(
+    return CoreImage._(
       imagePath: imagePath,
       scale: scale,
       width: width,
@@ -146,7 +146,7 @@ class CustomImage extends StatelessWidget {
   }
 
   /// Factory constructor for file image
-  factory CustomImage.file(
+  factory CoreImage.file(
     String imagePath, {
     double? scale,
     double? width,
@@ -156,7 +156,7 @@ class CustomImage extends StatelessWidget {
     BoxFit? fit = BoxFit.fill,
     Alignment alignment = Alignment.center,
   }) {
-    return CustomImage._(
+    return CoreImage._(
       imageFile: File(imagePath),
       scale: scale,
       width: width,
@@ -347,7 +347,7 @@ class CustomImage extends StatelessWidget {
     return (BuildContext context, String url, Object error) {
       return placeholderAssetImage == null
           ? _buildSvgPlaceHolder()
-          : CustomImage.asset(
+          : CoreImage.asset(
             placeholderAssetImage!,
             width: width,
             height: height,

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 /// A reusable widget that wraps scrollable content with a scroll-to-top FAB.
 /// The scrollable content is built using the provided [scrollableBuilder] that receives a [ScrollController].
-class ScrollableContentWithFab extends StatefulWidget {
-  const ScrollableContentWithFab({
+class CoreScrollableContentWithFab extends StatefulWidget {
+  const CoreScrollableContentWithFab({
     super.key,
     required this.scrollableBuilder,
     this.padding,
@@ -26,11 +26,12 @@ class ScrollableContentWithFab extends StatefulWidget {
   final Curve scrollCurve;
 
   @override
-  _ScrollableContentWithFabState createState() =>
-      _ScrollableContentWithFabState();
+  _CoreScrollableContentWithFabState createState() =>
+      _CoreScrollableContentWithFabState();
 }
 
-class _ScrollableContentWithFabState extends State<ScrollableContentWithFab> {
+class _CoreScrollableContentWithFabState
+    extends State<CoreScrollableContentWithFab> {
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<bool> _isFabVisible = ValueNotifier<bool>(false);
 
