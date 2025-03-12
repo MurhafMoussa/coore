@@ -1,191 +1,178 @@
-import 'package:coore/lib.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:readmore/readmore.dart';
 
-/// A customizable text widget that truncates content with "read more/less" functionality.
+/// A highly customizable text widget that can expand and collapse long text
+/// content with rich text annotations and styling options.
 ///
-/// Supports both selectable and non-selectable text modes. Automatically detects when
-/// text content exceeds specified line limits and shows expand/collapse controls.
-///
-/// Example:
+/// Example usage with clickable URLs:
 /// ```dart
-/// CoreReadMore(
-///   text: 'Long text content...',
-///   trimLines: 3,
-///   expandText: 'Show more',
-///   collapseText: 'Show less',
+/// CustomReadMoreText(
+///   'Visit https://example.com for more details. '
+///   'Follow #flutter on social media!',
+///   trimLength: 50,
+///   trimMode: TrimMode.Length,
+///   moreStyle: TextStyle(color: Colors.blue),
+///   lessStyle: TextStyle(color: Colors.blue),
+///   annotations: [
+///     Annotation(
+///       regExp: RegExp(r'https?://\S+'),
+///       spanBuilder: ({text, textStyle}) =&gt; TextSpan(
+///         text: text,
+///         style: textStyle?.copyWith(color: Colors.blue),
+///         recognizer: TapGestureRecognizer()..onTap = () {
+///           launchUrl(Uri.parse(text));
+///         },
+///       ),
+///     ),
+///     Annotation(
+///       regExp: RegExp(r'#(\w+)'),
+///       spanBuilder: ({text, textStyle}) =&gt; TextSpan(
+///         text: text,
+///         style: textStyle?.copyWith(
+///           color: Colors.green,
+///           fontWeight: FontWeight.bold,
+///         ),
+///       ),
+///     ),
+///   ],
 /// )
 /// ```
-
-class CoreReadMoreText extends StatefulWidget {
-  const CoreReadMoreText(
-    this.text, {
-    required this.numLines,
-    required this.readMoreText,
-    required this.readLessText,
-
-    this.readMoreTextStyle,
-
-    this.style,
-    this.locale,
-    this.onReadMoreClicked,
-
-    this.textKey,
+class CustomReadMoreText extends StatefulWidget {
+  /// Creates an expandable/collapsible text widget with rich formatting options
+  const CustomReadMoreText(
+    this.data, {
     super.key,
-  }) : cursorHeight = null,
-       _isSelectable = false,
-       showCursor = null,
-       cursorWidth = null,
-       cursorColor = null,
-       cursorRadius = null,
-       contextMenuBuilder = null;
-
-  /// Show a read more text widget with the use of [SelectableText] instead
-  /// of normal [Text] widget.
-  ///
-  /// You can customize the look and feel of the [SelectableText] like cursor
-  /// width, cursor height, cursor color, etc...
-  const CoreReadMoreText.selectable(
-    this.text, {
-    super.key,
-    required this.numLines,
-    required this.readMoreText,
-    required this.readLessText,
-
-    this.textKey,
-
-    this.readMoreTextStyle,
-
+    this.isCollapsed,
+    this.preDataText,
+    this.postDataText,
+    this.preDataTextStyle,
+    this.postDataTextStyle,
+    this.trimExpandedText = 'show less',
+    this.trimCollapsedText = 'read more',
+    this.colorClickableText,
+    this.trimLength = 240,
+    this.trimLines = 2,
+    this.trimMode = TrimMode.Length,
     this.style,
+    this.textAlign,
+    this.textDirection,
     this.locale,
-    this.onReadMoreClicked,
-    this.cursorColor,
-    this.cursorRadius,
-    this.cursorWidth,
-    this.showCursor,
-    this.contextMenuBuilder,
-    this.cursorHeight,
-  }) : _isSelectable = true;
+    this.textScaler,
+    this.semanticsLabel,
+    this.moreStyle,
+    this.lessStyle,
+    this.delimiter = '… ',
+    this.delimiterStyle,
+    this.annotations,
+    this.isExpandable = true,
+  });
 
-  /// The main text that needs to be shown.
-  final String text;
+  /// The primary text content to be displayed
+  final String data;
 
-  /// The number of lines before trim the text.
-  final int numLines;
+  /// External controller for collapse/expand state
+  final ValueNotifier<bool>? isCollapsed;
 
-  /// The main text style.
+  /// Text displayed before the main content
+  final String? preDataText;
+
+  /// Text displayed after the main content and before the expand/collapse button
+  final String? postDataText;
+
+  /// Style for the preDataText content
+  final TextStyle? preDataTextStyle;
+
+  /// Style for the postDataText content
+  final TextStyle? postDataTextStyle;
+
+  /// Text to show when content is expanded (default: 'show less')
+  final String trimExpandedText;
+
+  /// Text to show when content is collapsed (default: 'read more')
+  final String trimCollapsedText;
+
+  /// Color for the expand/collapse button text (inherits from theme if null)
+  final Color? colorClickableText;
+
+  /// Maximum character count when trimMode == Length (default: 240)
+  final int trimLength;
+
+  /// Maximum line count when trimMode == Lines (default: 2)
+  final int trimLines;
+
+  /// Determines text truncation method (characters vs lines)
+  final TrimMode trimMode;
+
+  /// Base text style for the content
   final TextStyle? style;
 
-  /// The style of read more/less text.
-  final TextStyle? readMoreTextStyle;
+  /// Text alignment for the content
+  final TextAlign? textAlign;
 
-  /// The show more text.
-  final String readMoreText;
+  /// Text direction for the content
+  final TextDirection? textDirection;
 
-  /// The show less text.
-  final String readLessText;
-
-  /// Called when clicked on read more.
-  final VoidCallback? onReadMoreClicked;
-
-  /// The locale of the main text, that allows the widget calculate the
-  /// number of lines accurately.
-  ///
-  /// It's optional and should be used when the passed text locale is different
-  /// from the app locale.
-  ///
-  /// e.g: The app locale is `en` but you pass a german text.
+  /// Locale for the text
   final Locale? locale;
 
-  /// Whether to show the cursor or not.
-  final bool? showCursor;
+  /// Text scaling factor
+  final TextScaler? textScaler;
 
-  /// The cursor width if the cursor is shown.
-  final double? cursorWidth;
+  /// Semantic label for accessibility
+  final String? semanticsLabel;
 
-  /// The cursor height if the cursor is shown.
-  final double? cursorHeight;
+  /// Style for the expand button text
+  final TextStyle? moreStyle;
 
-  /// The cursor color if the cursor is shown.
-  final Color? cursorColor;
+  /// Style for the collapse button text
+  final TextStyle? lessStyle;
 
-  /// The cursor radius if the cursor is shown.
-  final Radius? cursorRadius;
+  /// Delimiter between text and expand/collapse button (default: '… ')
+  final String delimiter;
 
-  /// The toolbar options of the selection area.
-  final Widget Function(BuildContext, EditableTextState)? contextMenuBuilder;
-  final bool _isSelectable;
+  /// Style for the delimiter text
+  final TextStyle? delimiterStyle;
 
-  /// The key for the content text.
-  final Key? textKey;
+  /// Custom text annotations for rich text formatting
+  final List<Annotation>? annotations;
+
+  /// Enables/disables expand functionality (default: true)
+  final bool isExpandable;
 
   @override
-  State<CoreReadMoreText> createState() => _CoreReadMoreTextState();
+  State<CustomReadMoreText> createState() => _CustomReadMoreTextState();
 }
 
-class _CoreReadMoreTextState extends State<CoreReadMoreText> {
-  var _isTextExpanded = false;
-  late final TapGestureRecognizer _tapGestureRecognizer;
-  @override
-  void initState() {
-    super.initState();
-    _tapGestureRecognizer = TapGestureRecognizer()..onTap = _onReadMoreClicked;
-  }
-
-  @override
-  void dispose() {
-    _tapGestureRecognizer.dispose();
-    super.dispose();
-  }
-
+class _CustomReadMoreTextState extends State<CustomReadMoreText> {
   @override
   Widget build(BuildContext context) {
-    final defaultShowMoreStyle = context.textTheme.bodyMedium?.copyWith(
-      decoration: TextDecoration.underline,
-      color: context.primaryColor,
-      decorationColor: context.primaryColor,
+    return ReadMoreText(
+      widget.data,
+      key: widget.key,
+      isCollapsed: widget.isCollapsed,
+      preDataText: widget.preDataText,
+      postDataText: widget.postDataText,
+      preDataTextStyle: widget.preDataTextStyle,
+      postDataTextStyle: widget.postDataTextStyle,
+      trimExpandedText: widget.trimExpandedText,
+      trimCollapsedText: widget.trimCollapsedText,
+      colorClickableText: widget.colorClickableText,
+      trimLength: widget.trimLength,
+      trimLines: widget.trimLines,
+      trimMode: widget.trimMode,
+      style: widget.style,
+      textAlign: widget.textAlign,
+      textDirection: widget.textDirection,
+      locale: widget.locale,
+      textScaler: widget.textScaler,
+      semanticsLabel: widget.semanticsLabel,
+      moreStyle: widget.moreStyle,
+      lessStyle: widget.lessStyle,
+      delimiter: widget.delimiter,
+      delimiterStyle: widget.delimiterStyle,
+      annotations: widget.annotations,
+      isExpandable: widget.isExpandable,
     );
-
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final textSpan = TextSpan(
-          text: '${widget.text} ',
-          children: [
-            TextSpan(
-              text: _isTextExpanded ? widget.readLessText : widget.readMoreText,
-              style: widget.readMoreTextStyle ?? defaultShowMoreStyle,
-              recognizer: _tapGestureRecognizer,
-            ),
-          ],
-        );
-        return (widget._isSelectable)
-            ? SelectableText.rich(
-              textSpan,
-              key: widget.textKey,
-              maxLines: _isTextExpanded ? null : widget.numLines,
-              style: widget.style,
-              cursorColor: widget.cursorColor,
-              cursorWidth: widget.cursorWidth ?? 2,
-              cursorHeight: widget.cursorHeight,
-              cursorRadius: widget.cursorRadius,
-              showCursor: widget.showCursor ?? false,
-
-              contextMenuBuilder: widget.contextMenuBuilder,
-              scrollPhysics: const NeverScrollableScrollPhysics(),
-            )
-            : Text.rich(
-              textSpan,
-              key: widget.textKey,
-              maxLines: _isTextExpanded ? null : widget.numLines,
-              style: widget.style,
-            );
-      },
-    );
-  }
-
-  void _onReadMoreClicked() {
-    _isTextExpanded = !_isTextExpanded;
-    setState(() {});
-    widget.onReadMoreClicked?.call();
   }
 }

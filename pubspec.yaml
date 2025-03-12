@@ -33,6 +33,7 @@ dependencies:
   path: any
   path_provider: ^2.1.5
 
+  readmore: ^3.0.0
   shimmer: ^3.0.0
   skeletonizer: ^1.4.3
   talker_bloc_logger: ^4.6.14
