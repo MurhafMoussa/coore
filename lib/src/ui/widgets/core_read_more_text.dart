@@ -1,3 +1,4 @@
+import 'package:coore/lib.dart';
 import 'package:flutter/material.dart';
 
 /// A customizable text widget that truncates content with "read more/less" functionality.
@@ -22,11 +23,11 @@ class CoreReadMoreText extends StatefulWidget {
     required this.numLines,
     required this.readMoreText,
     required this.readLessText,
-    this.readMoreAlign = AlignmentDirectional.bottomEnd,
+
     this.readMoreIcon,
     this.readLessIcon,
     this.readMoreTextStyle,
-    this.readMoreIconColor = Colors.blue,
+
     this.style,
     this.locale,
     this.onReadMoreClicked,
@@ -57,13 +58,13 @@ class CoreReadMoreText extends StatefulWidget {
     required this.numLines,
     required this.readMoreText,
     required this.readLessText,
-    this.readMoreAlign = AlignmentDirectional.bottomEnd,
+
     this.readMoreKey,
     this.textKey,
     this.readMoreIcon,
     this.readLessIcon,
     this.readMoreTextStyle,
-    this.readMoreIconColor = Colors.blue,
+
     this.style,
     this.locale,
     this.onReadMoreClicked,
@@ -83,9 +84,6 @@ class CoreReadMoreText extends StatefulWidget {
 
   /// The main text style.
   final TextStyle? style;
-
-  /// The icon color next to read more/less text.
-  final Color readMoreIconColor;
 
   /// The style of read more/less text.
   final TextStyle? readMoreTextStyle;
@@ -108,10 +106,6 @@ class CoreReadMoreText extends StatefulWidget {
 
   /// Called when clicked on read more.
   final VoidCallback? onReadMoreClicked;
-
-  /// The alignment of the read more text and icon.
-  /// default is [AlignmentDirectional.bottomEnd]
-  final AlignmentGeometry readMoreAlign;
 
   /// The locale of the main text, that allows the widget calculate the
   /// number of lines accurately.
@@ -152,89 +146,76 @@ class CoreReadMoreText extends StatefulWidget {
 }
 
 class _CoreReadMoreTextState extends State<CoreReadMoreText> {
-  final _defaultShowMoreStyle = const TextStyle(
-    color: Colors.blue,
-    fontWeight: FontWeight.w500,
-    fontSize: 13,
-  );
-
   var _isTextExpanded = false;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (BuildContext context, BoxConstraints constraints) {
-      final locale = widget.locale ?? Localizations.maybeLocaleOf(context);
-      final span = TextSpan(text: widget.text);
-      final tp = TextPainter(
-        text: span,
-        locale: locale,
-        maxLines: widget.numLines,
-        textDirection: Directionality.of(context),
-      )..layout(maxWidth: constraints.maxWidth);
-      return Column(
-        children: [
-          if (widget._isSelectable)
-            SelectableText(
-              widget.text,
-              key: widget.textKey,
-              maxLines: _isTextExpanded ? null : widget.numLines,
-              style: widget.style,
-              cursorColor: widget.cursorColor,
-              cursorWidth: widget.cursorWidth ?? 2,
-              cursorHeight: widget.cursorHeight,
-              cursorRadius: widget.cursorRadius,
-              showCursor: widget.showCursor ?? false,
+  Widget build(BuildContext context) {
+    final defaultShowMoreStyle = context.textTheme.bodyMedium?.copyWith(
+      decoration: TextDecoration.underline,
+      color: context.primaryColor,
+      decorationColor: context.primaryColor,
+    );
 
-              contextMenuBuilder: widget.contextMenuBuilder,
-              scrollPhysics: const NeverScrollableScrollPhysics(),
-            )
-          else
-            Text(
-              widget.text,
-              key: widget.textKey,
-              maxLines: _isTextExpanded ? null : widget.numLines,
-              style: widget.style,
-            ),
-          if (tp.didExceedMaxLines) const SizedBox(height: 8),
-          if (tp.didExceedMaxLines)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8),
-              child: GestureDetector(
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final locale = widget.locale ?? Localizations.maybeLocaleOf(context);
+        final span = TextSpan(text: widget.text);
+        final tp = TextPainter(
+          text: span,
+          locale: locale,
+          maxLines: widget.numLines,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: constraints.maxWidth);
+        return Row(
+          children: [
+            if (widget._isSelectable)
+              SelectableText(
+                widget.text,
+                key: widget.textKey,
+                maxLines: _isTextExpanded ? null : widget.numLines,
+                style: widget.style,
+                cursorColor: widget.cursorColor,
+                cursorWidth: widget.cursorWidth ?? 2,
+                cursorHeight: widget.cursorHeight,
+                cursorRadius: widget.cursorRadius,
+                showCursor: widget.showCursor ?? false,
+
+                contextMenuBuilder: widget.contextMenuBuilder,
+                scrollPhysics: const NeverScrollableScrollPhysics(),
+              )
+            else
+              Text.rich(
+                TextSpan(
+                  text: '${widget.text} ',
+                  children: [
+                    TextSpan(
+                      text:
+                          _isTextExpanded
+                              ? widget.readLessText
+                              : widget.readMoreText,
+                      style: widget.readMoreTextStyle ?? defaultShowMoreStyle,
+                    ),
+                  ],
+                ),
+                key: widget.textKey,
+                maxLines: _isTextExpanded ? null : widget.numLines,
+                style: widget.style,
+              ),
+
+            if (tp.didExceedMaxLines && widget.readMoreIcon != null)
+              GestureDetector(
                 key: widget.readMoreKey,
                 onTap: _onReadMoreClicked,
-                child: Align(
-                  alignment: widget.readMoreAlign,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _isTextExpanded
-                            ? widget.readLessText
-                            : widget.readMoreText,
-                        style:
-                            widget.readMoreTextStyle ?? _defaultShowMoreStyle,
-                      ),
-                      const SizedBox(width: 8),
-                      if (widget.readMoreIcon != null)
-                        _isTextExpanded
-                            ? widget.readLessIcon!
-                            : widget.readMoreIcon!,
-                      if (widget.readMoreIcon == null)
-                        Icon(
-                          _isTextExpanded
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          color: widget.readMoreIconColor,
-                        ),
-                    ],
-                  ),
-                ),
+                child:
+                    _isTextExpanded
+                        ? widget.readLessIcon!
+                        : widget.readMoreIcon!,
               ),
-            ),
-        ],
-      );
-    },
-  );
+          ],
+        );
+      },
+    );
+  }
 
   void _onReadMoreClicked() {
     _isTextExpanded = !_isTextExpanded;
