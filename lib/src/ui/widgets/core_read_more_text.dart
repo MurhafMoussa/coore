@@ -51,9 +51,9 @@ class CoreReadMoreText extends StatefulWidget {
     this.trimExpandedText = 'show less',
     this.trimCollapsedText = 'read more',
     this.colorClickableText,
-    this.trimLength = 240,
+    this.trimLength = 100,
     this.trimLines = 2,
-    this.trimMode = TrimMode.Length,
+    this.trimMode = CoreTrimMode.line,
     this.style,
     this.textAlign,
     this.textDirection,
@@ -64,7 +64,7 @@ class CoreReadMoreText extends StatefulWidget {
     this.lessStyle,
     this.delimiter = '… ',
     this.delimiterStyle,
-    this.annotations,
+
     this.isExpandable = true,
   });
 
@@ -102,7 +102,7 @@ class CoreReadMoreText extends StatefulWidget {
   final int trimLines;
 
   /// Determines text truncation method (characters vs lines)
-  final TrimMode trimMode;
+  final CoreTrimMode trimMode;
 
   /// Base text style for the content
   final TextStyle? style;
@@ -134,9 +134,6 @@ class CoreReadMoreText extends StatefulWidget {
   /// Style for the delimiter text
   final TextStyle? delimiterStyle;
 
-  /// Custom text annotations for rich text formatting
-  final List<Annotation>? annotations;
-
   /// Enables/disables expand functionality (default: true)
   final bool isExpandable;
 
@@ -145,10 +142,15 @@ class CoreReadMoreText extends StatefulWidget {
 }
 
 class _CoreReadMoreTextState extends State<CoreReadMoreText> {
+  TrimMode get trimMode => switch (widget.trimMode) {
+    CoreTrimMode.length => TrimMode.Length,
+
+    CoreTrimMode.line => TrimMode.Line,
+  };
   @override
   Widget build(BuildContext context) {
     return ReadMoreText(
-      widget.data,
+      '${widget.data} ',
       key: widget.key,
       isCollapsed: widget.isCollapsed,
       preDataText: widget.preDataText,
@@ -160,7 +162,7 @@ class _CoreReadMoreTextState extends State<CoreReadMoreText> {
       colorClickableText: widget.colorClickableText,
       trimLength: widget.trimLength,
       trimLines: widget.trimLines,
-      trimMode: widget.trimMode,
+      trimMode: trimMode,
       style: widget.style,
       textAlign: widget.textAlign,
       textDirection: widget.textDirection,
@@ -171,8 +173,10 @@ class _CoreReadMoreTextState extends State<CoreReadMoreText> {
       lessStyle: widget.lessStyle,
       delimiter: widget.delimiter,
       delimiterStyle: widget.delimiterStyle,
-      annotations: widget.annotations,
+
       isExpandable: widget.isExpandable,
     );
   }
 }
+
+enum CoreTrimMode { length, line }
