@@ -40,6 +40,29 @@ class CoreNavigator {
   static BuildContext _getContext(BuildContext? context) =>
       context ?? appContext;
 
+  /// Helper to process a path by replacing path parameters and appending query parameters.
+  static String _processPath(String path, BaseScreenParams? arguments) {
+    String processedPath = path;
+
+    // Replace path parameters
+    if (arguments?.pathParams.isNotEmpty ?? false) {
+      arguments!.pathParams.forEach((key, value) {
+        processedPath = processedPath.replaceAll(':$key', value);
+      });
+    }
+
+    // Append query parameters if any.
+    if (arguments?.queryParams.isNotEmpty ?? false) {
+      final uri = Uri.parse(
+        processedPath,
+      ).replace(queryParameters: arguments!.queryParams);
+      processedPath = uri.toString();
+    }
+
+    return processedPath;
+  }
+
+  /// Navigate using a named route, replacing the current route.
   static void toNamed(
     String routeName, {
     BaseScreenParams? arguments,
@@ -47,19 +70,18 @@ class CoreNavigator {
   }) {
     try {
       final ctx = _getContext(context);
-
       final location = ctx.namedLocation(
         routeName,
         queryParameters: arguments?.queryParams ?? {},
         pathParameters: arguments?.pathParams ?? {},
       );
-
       ctx.go(location, extra: arguments?.extra);
     } catch (ex, stackTrace) {
       getIt<CoreLogger>().error('Error in named navigation', ex, stackTrace);
     }
   }
 
+  /// Navigate using a path, replacing the current route.
   static void toPath(
     String path, {
     BaseScreenParams? arguments,
@@ -67,26 +89,51 @@ class CoreNavigator {
   }) {
     try {
       final ctx = _getContext(context);
-      String processedPath = path;
-
-      // Replace path parameters
-      if (arguments?.pathParams.isNotEmpty ?? false) {
-        arguments!.pathParams.forEach((key, value) {
-          processedPath = processedPath.replaceAll(':$key', value);
-        });
-      }
-
-      // Apply query parameters
-      if (arguments?.queryParams.isNotEmpty ?? false) {
-        final uri = Uri.parse(
-          processedPath,
-        ).replace(queryParameters: arguments!.queryParams);
-        processedPath = uri.toString();
-      }
-
+      final processedPath = _processPath(path, arguments);
       ctx.go(processedPath, extra: arguments?.extra);
     } catch (ex, stackTrace) {
       getIt<CoreLogger>().error('Error in path navigation', ex, stackTrace);
+    }
+  }
+
+  /// Push a named route onto the navigation stack.
+  static void pushNamed(
+    String routeName, {
+    BaseScreenParams? arguments,
+    BuildContext? context,
+  }) {
+    try {
+      _getContext(context).pushNamed(
+        routeName,
+        pathParameters: arguments?.pathParams ?? {},
+        queryParameters: arguments?.queryParams ?? {},
+        extra: arguments?.extra,
+      );
+    } catch (ex, stackTrace) {
+      getIt<CoreLogger>().error(
+        'Error in named push navigation',
+        ex,
+        stackTrace,
+      );
+    }
+  }
+
+  /// Push a route onto the navigation stack using its path.
+  static void pushPath(
+    String path, {
+    BaseScreenParams? arguments,
+    BuildContext? context,
+  }) {
+    try {
+      final ctx = _getContext(context);
+      final processedPath = _processPath(path, arguments);
+      ctx.push(processedPath, extra: arguments?.extra);
+    } catch (ex, stackTrace) {
+      getIt<CoreLogger>().error(
+        'Error in path push navigation',
+        ex,
+        stackTrace,
+      );
     }
   }
 

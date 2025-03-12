@@ -1,4 +1,5 @@
 import 'package:coore/lib.dart';
+import 'package:coore/src/ui/constants/animation_params_manager.dart';
 import 'package:flutter/material.dart';
 
 /// A reusable widget that wraps scrollable content with a scroll-to-top FAB.
@@ -8,8 +9,8 @@ class ScrollableContentWithFab extends StatefulWidget {
     super.key,
     required this.scrollableBuilder,
     this.padding,
-    this.scrollDuration = const Duration(milliseconds: 300),
-    this.scrollCurve = Curves.easeInOut,
+    this.scrollDuration = AnimationParamsManager.scrollToTopDuration,
+    this.scrollCurve = AnimationParamsManager.animateToCurve,
   });
 
   /// A builder function that receives a [ScrollController] and returns a scrollable widget.
@@ -53,7 +54,6 @@ class _ScrollableContentWithFabState extends State<ScrollableContentWithFab> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      // Use ValueNotifier to update the FAB visibility instead of setState.
       final shouldShow = _scrollController.offset > fabThreshold;
       _isFabVisible.value = shouldShow;
     });
