@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 ///   trimLines: 3,
 ///   expandText: 'Show more',
 ///   collapseText: 'Show less',
-///   iconColor: Theme.of(context).primaryColor,
 /// )
 /// ```
 
