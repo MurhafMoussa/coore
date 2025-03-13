@@ -69,7 +69,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
 
   @override
   Future<void> handleAuthorization(RequestOptions options) async {
-    final accessToken = _tokenManager.accessToken;
+    final accessToken = await _tokenManager.accessToken;
     if (accessToken.isEmpty) {
       throw DioException(requestOptions: options, error: 'Token not found');
     }
@@ -78,7 +78,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
 
   @override
   Future<bool> handleRefresh(DioException err) async {
-    final refreshToken = _tokenManager.refreshToken;
+    final refreshToken = await _tokenManager.refreshToken;
     if (refreshToken.isEmpty) return false;
 
     final refreshDio = Dio();
@@ -105,7 +105,7 @@ class CookieAuthInterceptor extends AuthInterceptor {
     options.extra['withCredentials'] = true; // Enable cookies
 
     //
-    final accessToken = _tokenManager.accessToken;
+    final accessToken = await _tokenManager.accessToken;
     if (accessToken.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $accessToken';
     }

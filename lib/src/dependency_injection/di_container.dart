@@ -52,7 +52,14 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       ),
     )
     ..registerLazySingleton(_createFlutterSecureStorage)
-    ..registerLazySingleton(() => AuthTokenManager())
+    ..registerLazySingleton(
+      () => AuthTokenManager(
+        getIt(),
+        secureStorageEnabled:
+            coreEntity.networkConfigEntity.authInterceptorType ==
+            AuthInterceptorType.tokenBased,
+      ),
+    )
     ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
     ..registerLazySingleton(
       () => _createDio(coreEntity.networkConfigEntity, directory),
