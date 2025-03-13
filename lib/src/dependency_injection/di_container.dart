@@ -52,8 +52,8 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       ),
     )
     ..registerLazySingleton(_createFlutterSecureStorage)
-    ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
     ..registerLazySingleton(() => AuthTokenManager())
+    ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
     ..registerLazySingleton(() => _createDio(coreEntity.networkConfigEntity))
     ..registerLazySingleton<SecureDatabaseInterface>(
       () => SecureDatabaseImp(getIt()),
@@ -101,57 +101,82 @@ FlutterSecureStorage _createFlutterSecureStorage() {
 }
 
 Future<Dio> _createDio(NetworkConfigEntity entity) async {
-  final interceptors = <Interceptor>[];
-  late final AuthInterceptor authInterceptor;
+  try {
+    final interceptors = <Interceptor>[];
+    late final AuthInterceptor authInterceptor;
 
-  switch (entity.authInterceptorType) {
-    case AuthInterceptorType.tokenBased:
-      {
-        authInterceptor = TokenAuthInterceptor(getIt());
-        interceptors.add(authInterceptor);
-      }
-    case AuthInterceptorType.cookieBased:
-      {
-        final Directory appDocDir = await getApplicationDocumentsDirectory();
-        final String appDocPath = appDocDir.path;
-        final jar = PersistCookieJar(
-          ignoreExpires: true,
-          storage: FileStorage('$appDocPath/.cookies/'),
-        );
-        authInterceptor = CookieAuthInterceptor(getIt());
-        interceptors
-          ..add(CookieManager(jar))
-          ..add(authInterceptor);
-      }
-  }
-
-  return Dio(
-      BaseOptions(
-        baseUrl: entity.baseUrl,
-        connectTimeout: entity.connectTimeout,
-        contentType: entity.defaultContentType,
-        followRedirects:
-            interceptors.first is TokenAuthInterceptor
-                ? entity.followRedirects
-                : false,
-        maxRedirects: entity.maxRedirects,
-        queryParameters: entity.defaultQueryParams,
-        sendTimeout: entity.sendTimeout,
-        receiveTimeout: entity.receiveTimeout,
-        headers: entity.staticHeaders,
-      ),
-    )
-    ..interceptors.addAll([
-      if (entity.enableCache)
-        CachingInterceptor(
-          cacheStore: MemoryCacheStore(),
-          defaultCacheDuration: entity.cacheDuration,
+    switch (entity.authInterceptorType) {
+      case AuthInterceptorType.tokenBased:
+        {
+          authInterceptor = TokenAuthInterceptor(getIt());
+        }
+      case AuthInterceptorType.cookieBased:
+        {
+          final Directory appDocDir = await getApplicationDocumentsDirectory();
+          final String appDocPath = appDocDir.path;
+          final jar = PersistCookieJar(
+            ignoreExpires: true,
+            storage: FileStorage('$appDocPath/.cookies/'),
+          );
+          authInterceptor = CookieAuthInterceptor(getIt());
+          interceptors.add(CookieManager(jar));
+        }
+    }
+    interceptors.add(authInterceptor);
+    return Dio(
+        BaseOptions(
+          baseUrl: entity.baseUrl,
+          connectTimeout: entity.connectTimeout,
+          contentType: entity.defaultContentType,
+          followRedirects:
+              interceptors.first is TokenAuthInterceptor
+                  ? entity.followRedirects
+                  : false,
+          maxRedirects: entity.maxRedirects,
+          queryParameters: entity.defaultQueryParams,
+          sendTimeout: entity.sendTimeout,
+          receiveTimeout: entity.receiveTimeout,
+          headers: entity.staticHeaders,
         ),
-      ...interceptors,
-      ...entity.interceptors,
-      if (entity.enableLogging)
-        LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
-    ]);
+      )
+      ..interceptors.addAll([
+        if (entity.enableCache)
+          CachingInterceptor(
+            cacheStore: MemoryCacheStore(),
+            defaultCacheDuration: entity.cacheDuration,
+          ),
+        ...interceptors,
+        ...entity.interceptors,
+        if (entity.enableLogging)
+          LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
+      ]);
+  } catch (e, s) {
+    getIt<CoreLogger>().error('error initializing dio', e, s);
+    return Dio(
+        BaseOptions(
+          baseUrl: entity.baseUrl,
+          connectTimeout: entity.connectTimeout,
+          contentType: entity.defaultContentType,
+          followRedirects: entity.followRedirects,
+          maxRedirects: entity.maxRedirects,
+          queryParameters: entity.defaultQueryParams,
+          sendTimeout: entity.sendTimeout,
+          receiveTimeout: entity.receiveTimeout,
+          headers: entity.staticHeaders,
+        ),
+      )
+      ..interceptors.addAll([
+        if (entity.enableCache)
+          CachingInterceptor(
+            cacheStore: MemoryCacheStore(),
+            defaultCacheDuration: entity.cacheDuration,
+          ),
+        TokenAuthInterceptor(getIt()),
+        ...entity.interceptors,
+        if (entity.enableLogging)
+          LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
+      ]);
+  }
 }
 
 Future<void> configureDependenciesAfterRunApp(
