@@ -18,7 +18,7 @@ abstract interface class ApiHandlerInterface {
   /// - [queryParameters]: Optional map of query parameters to append to the URL.
   /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
   /// - [shouldCache]: Indicates if the response should be cached. Defaults to false.
-  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to true.
+  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
@@ -27,7 +27,7 @@ abstract interface class ApiHandlerInterface {
     Map<String, dynamic>? queryParameters,
     CancelRequestAdapter? cancelRequestAdapter,
     bool shouldCache = false,
-    bool isAuthorized = true,
+    bool isAuthorized = false,
   });
 
   /// Sends an HTTP POST request to the specified [path].
@@ -39,7 +39,7 @@ abstract interface class ApiHandlerInterface {
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
   /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
-  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to true.
+  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
@@ -50,7 +50,7 @@ abstract interface class ApiHandlerInterface {
     Map<String, dynamic>? queryParameters,
     ProgressTrackerCallback? onSendProgress,
     CancelRequestAdapter? cancelRequestAdapter,
-    bool isAuthorized = true,
+    bool isAuthorized = false,
   });
 
   /// Sends an HTTP DELETE request to the specified [path].
@@ -58,7 +58,7 @@ abstract interface class ApiHandlerInterface {
   /// - [path]: The endpoint URL path.
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
-  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to true.
+  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
@@ -66,7 +66,7 @@ abstract interface class ApiHandlerInterface {
     String path, {
     Map<String, dynamic>? queryParameters,
     CancelRequestAdapter? cancelRequestAdapter,
-    bool isAuthorized = true,
+    bool isAuthorized = false,
   });
 
   /// Sends an HTTP PUT request to the specified [path].
@@ -77,7 +77,7 @@ abstract interface class ApiHandlerInterface {
   /// - [formData]: An optional adapter for constructing multipart/form-data,
   ///   useful for file uploads.
   /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
-  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to true.
+  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
@@ -87,7 +87,7 @@ abstract interface class ApiHandlerInterface {
     Map<String, dynamic>? queryParameters,
     FormDataAdapter? formData,
     CancelRequestAdapter? cancelRequestAdapter,
-    bool isAuthorized = true,
+    bool isAuthorized = false,
   });
 
   /// Sends an HTTP PATCH request to the specified [path].
@@ -98,7 +98,7 @@ abstract interface class ApiHandlerInterface {
   /// - [formData]: An optional adapter for constructing multipart/form-data,
   ///   useful for file uploads.
   /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
-  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to true.
+  /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success.
@@ -108,7 +108,7 @@ abstract interface class ApiHandlerInterface {
     Map<String, dynamic>? queryParameters,
     FormDataAdapter? formData,
     CancelRequestAdapter? cancelRequestAdapter,
-    bool isAuthorized = true,
+    bool isAuthorized = false,
   });
 
   /// Downloads a file from the given [url] and saves it to the [downloadDestinationPath].
@@ -118,7 +118,7 @@ abstract interface class ApiHandlerInterface {
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the download.
   /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
   /// - [queryParameters]: Optional query parameters to append to the URL.
-  /// - [isAuthorized]: Indicates if the download request requires authorization. Defaults to true.
+  /// - [isAuthorized]: Indicates if the download request requires authorization. Defaults to false.
   ///
   /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
   /// or a value of type Map<String,dynamic> on success, which could be the file path or a success message.
@@ -128,6 +128,6 @@ abstract interface class ApiHandlerInterface {
     ProgressTrackerCallback? onReceiveProgress,
     CancelRequestAdapter? cancelRequestAdapter,
     Map<String, dynamic>? queryParameters,
-    bool isAuthorized = true,
+    bool isAuthorized = false,
   });
 }

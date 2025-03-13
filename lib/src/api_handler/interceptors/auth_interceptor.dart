@@ -81,18 +81,19 @@ class TokenAuthInterceptor extends AuthInterceptor {
     final refreshToken = await _tokenManager.refreshToken;
     if (refreshToken.isEmpty) return false;
 
-    final refreshDio = getIt<Dio>();
+    final refreshDio = getIt<ApiHandlerInterface>();
     final response = await refreshDio.post(
       'auth/refresh',
-      data: {'refresh_token': refreshToken},
+      body: {'refresh_token': refreshToken},
+      isAuthorized: true,
     );
-
-    // Update tokens
-    _tokenManager.setTokens(
-      accessToken: response.data['data']['access_token'],
-      refreshToken: response.data['data']['refresh_token'],
-    );
-    return true;
+    return response.fold((l) => false, (r) {
+      _tokenManager.setTokens(
+        accessToken: r['data']['access_token'],
+        refreshToken: r['data']['refresh_token'],
+      );
+      return true;
+    });
   }
 }
 
@@ -107,16 +108,15 @@ class CookieAuthInterceptor extends AuthInterceptor {
 
   @override
   Future<bool> handleRefresh(DioException err) async {
-    final refreshDio = getIt<Dio>();
-    refreshDio.options.extra['withCredentials'] = true; // Cookies for refresh
-    try {
-      final response = await refreshDio.post('auth/refresh');
+    final refreshDio = getIt<ApiHandlerInterface>();
+
+    final response = await refreshDio.post('auth/refresh', isAuthorized: true);
+    return response.fold((l) => false, (r) {
       _tokenManager.setTokens(
-        accessToken: response.data['data']['access_token'],
+        accessToken: r['data']['access_token'],
+        refreshToken: r['data']['refresh_token'],
       );
       return true;
-    } catch (_) {
-      return false;
-    }
+    });
   }
 }

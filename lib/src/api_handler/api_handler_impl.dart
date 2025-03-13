@@ -1,3 +1,4 @@
+import 'package:coore/lib.dart';
 import 'package:coore/src/api_handler/api_handler_interface.dart';
 import 'package:coore/src/api_handler/cancel_request_adapter.dart';
 import 'package:coore/src/api_handler/form_data_adapter.dart';
@@ -59,7 +60,7 @@ class DioApiHandler implements ApiHandlerInterface {
       if (error is DioException) {
         return left(_exceptionMapper.mapException(error, stackTrace));
       }
-      rethrow;
+      return left(NoInternetConnectionFailure(error.toString(), stackTrace));
     }
   }
 
