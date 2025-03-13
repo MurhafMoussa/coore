@@ -54,7 +54,7 @@ abstract class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    final retryDio = Dio();
+    final retryDio = getIt<Dio>();
     final clonedRequest = await retryDio.fetch(err.requestOptions);
     handler.resolve(clonedRequest);
   }
