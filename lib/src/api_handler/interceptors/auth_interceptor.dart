@@ -1,8 +1,10 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/api_handler/auth_token_manager.dart';
 import 'package:dio/dio.dart';
 
 abstract class AuthInterceptor extends Interceptor {
+  AuthInterceptor(this._tokenManager);
+
+  final AuthTokenManager _tokenManager;
   @override
   Future<void> onRequest(
     RequestOptions options,
@@ -15,10 +17,11 @@ abstract class AuthInterceptor extends Interceptor {
       }
       handler.next(options);
     } on DioException catch (e) {
-      handler.reject(e);
+      handler.reject(e, true);
     } catch (e) {
       handler.reject(
         DioException(requestOptions: options, error: 'Auth setup failed: $e'),
+        true,
       );
     }
   }
@@ -60,22 +63,18 @@ abstract class AuthInterceptor extends Interceptor {
   }
 
   // Abstract methods for subclasses to implement
-  Future<void> handleAuthorization(RequestOptions options);
+  Future<void> handleAuthorization(RequestOptions options) async {
+    final accessToken = await _tokenManager.accessToken;
+    if (accessToken.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $accessToken';
+    }
+  }
+
   Future<bool> handleRefresh(DioException err);
 }
 
 class TokenAuthInterceptor extends AuthInterceptor {
-  TokenAuthInterceptor(this._tokenManager);
-  final AuthTokenManager _tokenManager; // Could be in-memory or secure storage
-
-  @override
-  Future<void> handleAuthorization(RequestOptions options) async {
-    final accessToken = await _tokenManager.accessToken;
-    if (accessToken.isEmpty) {
-      throw DioException(requestOptions: options, error: 'Token not found');
-    }
-    options.headers['Authorization'] = 'Bearer $accessToken';
-  }
+  TokenAuthInterceptor(super.tokenManager);
 
   @override
   Future<bool> handleRefresh(DioException err) async {
@@ -85,7 +84,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
     final refreshDio = getIt<Dio>();
     final response = await refreshDio.post(
       'auth/refresh',
-      data: {'refreshToken': refreshToken},
+      data: {'refresh_token': refreshToken},
     );
 
     // Update tokens
@@ -98,18 +97,12 @@ class TokenAuthInterceptor extends AuthInterceptor {
 }
 
 class CookieAuthInterceptor extends AuthInterceptor {
-  CookieAuthInterceptor(this._tokenManager); // Optional if using pure cookies
-  final AuthTokenManager _tokenManager;
+  CookieAuthInterceptor(super.tokenManager);
 
   @override
   Future<void> handleAuthorization(RequestOptions options) async {
-    options.extra['withCredentials'] = true; // Enable cookies
-
-    //
-    final accessToken = await _tokenManager.accessToken;
-    if (accessToken.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $accessToken';
-    }
+    options.extra['withCredentials'] = true;
+    super.handleAuthorization(options);
   }
 
   @override
