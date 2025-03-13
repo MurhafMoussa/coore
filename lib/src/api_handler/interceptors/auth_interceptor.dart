@@ -1,3 +1,4 @@
+import 'package:coore/lib.dart';
 import 'package:coore/src/api_handler/auth_token_manager.dart';
 import 'package:dio/dio.dart';
 
@@ -81,7 +82,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
     final refreshToken = await _tokenManager.refreshToken;
     if (refreshToken.isEmpty) return false;
 
-    final refreshDio = Dio();
+    final refreshDio = getIt<Dio>();
     final response = await refreshDio.post(
       'auth/refresh',
       data: {'refreshToken': refreshToken},
@@ -113,7 +114,7 @@ class CookieAuthInterceptor extends AuthInterceptor {
 
   @override
   Future<bool> handleRefresh(DioException err) async {
-    final refreshDio = Dio();
+    final refreshDio = getIt<Dio>();
     refreshDio.options.extra['withCredentials'] = true; // Cookies for refresh
     try {
       final response = await refreshDio.post('auth/refresh');
