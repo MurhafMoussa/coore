@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:coore/src/api_handler/api_handler_impl.dart';
 import 'package:coore/src/api_handler/api_handler_interface.dart';
+import 'package:coore/src/api_handler/auth_token_manager.dart';
 import 'package:coore/src/api_handler/base_cache_store/mem_cache_store.dart';
 import 'package:coore/src/api_handler/interceptors/auth_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/caching_interceptor.dart';
@@ -22,6 +26,7 @@ import 'package:coore/src/network_status/service/network_status_imp.dart';
 import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:coore/src/theme/cubit/theme_cubit.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_ce/hive.dart';
@@ -48,6 +53,7 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
     )
     ..registerLazySingleton(_createFlutterSecureStorage)
     ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
+    ..registerLazySingleton(() => AuthTokenManager())
     ..registerLazySingleton(() => _createDio(coreEntity.networkConfigEntity))
     ..registerLazySingleton<SecureDatabaseInterface>(
       () => SecureDatabaseImp(getIt()),
@@ -83,7 +89,6 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
     );
 }
 
-//todo(Murhaf): requires additional setup for other platforms
 FlutterSecureStorage _createFlutterSecureStorage() {
   const iosOptions = IOSOptions(
     accessibility: KeychainAccessibility.first_unlock,
@@ -95,13 +100,40 @@ FlutterSecureStorage _createFlutterSecureStorage() {
   );
 }
 
-Dio _createDio(NetworkConfigEntity entity) {
+Future<Dio> _createDio(NetworkConfigEntity entity) async {
+  final interceptors = <Interceptor>[];
+  late final AuthInterceptor authInterceptor;
+
+  switch (entity.authInterceptorType) {
+    case AuthInterceptorType.tokenBased:
+      {
+        authInterceptor = TokenAuthInterceptor(getIt());
+        interceptors.add(authInterceptor);
+      }
+    case AuthInterceptorType.cookieBased:
+      {
+        final Directory appDocDir = await getApplicationDocumentsDirectory();
+        final String appDocPath = appDocDir.path;
+        final jar = PersistCookieJar(
+          ignoreExpires: true,
+          storage: FileStorage('$appDocPath/.cookies/'),
+        );
+        authInterceptor = CookieAuthInterceptor(getIt());
+        interceptors
+          ..add(CookieManager(jar))
+          ..add(authInterceptor);
+      }
+  }
+
   return Dio(
       BaseOptions(
         baseUrl: entity.baseUrl,
         connectTimeout: entity.connectTimeout,
         contentType: entity.defaultContentType,
-        followRedirects: entity.followRedirects,
+        followRedirects:
+            interceptors.first is TokenAuthInterceptor
+                ? entity.followRedirects
+                : false,
         maxRedirects: entity.maxRedirects,
         queryParameters: entity.defaultQueryParams,
         sendTimeout: entity.sendTimeout,
@@ -115,7 +147,7 @@ Dio _createDio(NetworkConfigEntity entity) {
           cacheStore: MemoryCacheStore(),
           defaultCacheDuration: entity.cacheDuration,
         ),
-      AuthInterceptor(getIt()),
+      ...interceptors,
       ...entity.interceptors,
       if (entity.enableLogging)
         LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
