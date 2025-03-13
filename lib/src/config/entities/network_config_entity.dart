@@ -2,10 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
 class NetworkConfigEntity extends Equatable {
-
   const NetworkConfigEntity({
     required this.baseUrl,
-
+    this.authInterceptorType = AuthInterceptorType.cookieBased,
     this.connectTimeout = const Duration(seconds: 10),
     this.sendTimeout = const Duration(seconds: 10),
     this.receiveTimeout = const Duration(seconds: 10),
@@ -26,6 +25,7 @@ class NetworkConfigEntity extends Equatable {
     this.followRedirects = true,
     this.maxRedirects = 5,
   });
+
   /// Base URL for API endpoints (e.g., "https://api.example.com")
   final String baseUrl;
 
@@ -71,7 +71,7 @@ class NetworkConfigEntity extends Equatable {
   /// Maximum allowed redirects
   final int maxRedirects;
   final List<Interceptor> interceptors;
-
+  final AuthInterceptorType authInterceptorType;
   @override
   List<Object?> get props => [
     baseUrl,
@@ -95,3 +95,5 @@ class NetworkConfigEntity extends Equatable {
     maxRedirects,
   ];
 }
+
+enum AuthInterceptorType { tokenBased, cookieBased }
