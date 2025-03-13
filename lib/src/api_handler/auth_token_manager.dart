@@ -75,4 +75,16 @@ class AuthTokenManager {
       }
     }
   }
+
+  /// Clears tokens from memory and secure storage (if enabled).
+  Future<void> clearTokens() async {
+    _accessToken = null;
+    _refreshToken = null;
+
+    if (secureStorageEnabled) {
+      // Remove tokens from secure storage.
+      await _secureDatabaseInterface.delete('accessToken');
+      await _secureDatabaseInterface.delete('refreshToken');
+    }
+  }
 }
