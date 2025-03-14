@@ -37,7 +37,7 @@ Future<void> main() async {
 
   // Create a File instance for the given DTO file path.
   final file = File(dtoFilePath);
-  if (!await file.exists()) {
+  if (!file.existsSync()) {
     log('File not found at $dtoFilePath');
     return;
   }

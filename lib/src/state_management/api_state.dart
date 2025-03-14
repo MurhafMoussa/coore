@@ -22,7 +22,7 @@ sealed class ApiState<T> with _$ApiState<T> {
   bool get isInitial => this is Initial<T>;
   bool get isLoading => this is Loading<T>;
   bool get isSuccess => this is Succeeded<T>;
-  bool get isError => this is Failed<T>;
+  bool get isFailed => this is Failed<T>;
   Option<T> get data => switch (this) {
     Succeeded<T>(:final successValue) => some(successValue),
     _ => none(),
