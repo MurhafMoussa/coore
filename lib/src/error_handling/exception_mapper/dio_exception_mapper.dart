@@ -4,6 +4,75 @@ import 'package:coore/src/error_handling/failures/network_failure.dart';
 import 'package:dio/dio.dart';
 
 class DioNetworkExceptionMapper implements NetworkExceptionMapper {
+  final Map<int, NetworkFailure Function(Error, StackTrace?)>
+  _codeToFailureMap = {
+    400:
+        (Error error, StackTrace? stackTrace) =>
+            BadRequestFailure(error.message, stackTrace),
+    401:
+        (Error error, StackTrace? stackTrace) =>
+            UnauthorizedRequestFailure(error.message, stackTrace),
+
+    403:
+        (Error error, StackTrace? stackTrace) =>
+            ForbiddenFailure(error.message, stackTrace),
+
+    404:
+        (Error error, StackTrace? stackTrace) =>
+            NotFoundFailure(error.message, stackTrace),
+
+    405:
+        (Error error, StackTrace? stackTrace) =>
+            MethodNotAllowedFailure(_defaultErrorMessage, stackTrace),
+
+    406:
+        (Error error, StackTrace? stackTrace) =>
+            NotAcceptableFailure(_defaultErrorMessage, stackTrace),
+
+    409:
+        (Error error, StackTrace? stackTrace) =>
+            ConflictFailure(_defaultErrorMessage, stackTrace),
+
+    413:
+        (Error error, StackTrace? stackTrace) =>
+            PayloadTooLargeFailure(_defaultErrorMessage, stackTrace),
+    422:
+        (Error error, StackTrace? stackTrace) =>
+            ValidationFailure(error.message, stackTrace),
+
+    429:
+        (Error error, StackTrace? stackTrace) =>
+            TooManyRequestsFailure(_defaultErrorMessage, stackTrace),
+
+    418:
+        (Error error, StackTrace? stackTrace) =>
+            TeapotFailure(_defaultErrorMessage, stackTrace),
+
+    451:
+        (Error error, StackTrace? stackTrace) =>
+            UnavailableForLegalReasonsFailure(error.message, stackTrace),
+
+    500:
+        (Error error, StackTrace? stackTrace) =>
+            InternalServerErrorFailure(_defaultErrorMessage, stackTrace),
+
+    502:
+        (Error error, StackTrace? stackTrace) =>
+            BadGatewayFailure(_defaultErrorMessage, stackTrace),
+
+    503:
+        (Error error, StackTrace? stackTrace) =>
+            ServiceUnavailableFailure(_defaultErrorMessage, stackTrace),
+
+    504:
+        (Error error, StackTrace? stackTrace) =>
+            GatewayTimeoutFailure(_defaultErrorMessage, stackTrace),
+
+    505:
+        (Error error, StackTrace? stackTrace) =>
+            HttpVersionNotSupportedFailure(_defaultErrorMessage, stackTrace),
+  };
+
   @override
   NetworkFailure mapException(Exception exception, StackTrace? stackTrace) {
     if (exception is! DioException) {
@@ -44,45 +113,11 @@ class DioNetworkExceptionMapper implements NetworkExceptionMapper {
   NetworkFailure _mapBadResponse(Response? response, StackTrace? stackTrace) {
     final error = ErrorResponseModel.fromJson(response?.data).error;
     final statusCode = error.status;
-    switch (statusCode) {
-      case 400:
-        return BadRequestFailure(error.message, stackTrace);
-      case 401:
-        return UnauthorizedRequestFailure(error.message, stackTrace);
-      case 403:
-        return ForbiddenFailure(error.message, stackTrace);
-      case 404:
-        return NotFoundFailure(error.message, stackTrace);
-      case 405:
-        return MethodNotAllowedFailure(_defaultErrorMessage, stackTrace);
-      case 406:
-        return NotAcceptableFailure(_defaultErrorMessage, stackTrace);
-      case 409:
-        return ConflictFailure(_defaultErrorMessage, stackTrace);
-      case 413:
-        return PayloadTooLargeFailure(_defaultErrorMessage, stackTrace);
-      case 422:
-        return ValidationFailure(error.message, stackTrace);
-      case 429:
-        return TooManyRequestsFailure(_defaultErrorMessage, stackTrace);
-      case 418:
-        return TeapotFailure(_defaultErrorMessage, stackTrace);
-      case 451:
-        return UnavailableForLegalReasonsFailure(error.message, stackTrace);
-      case 500:
-        return InternalServerErrorFailure(_defaultErrorMessage, stackTrace);
-      case 502:
-        return BadGatewayFailure(_defaultErrorMessage, stackTrace);
-      case 503:
-        return ServiceUnavailableFailure(_defaultErrorMessage, stackTrace);
-      case 504:
-        return GatewayTimeoutFailure(_defaultErrorMessage, stackTrace);
-      case 505:
-        return HttpVersionNotSupportedFailure(_defaultErrorMessage, stackTrace);
-      default:
-        return InvalidStatusCodeFailure('Invalid status code', stackTrace);
+    if (_codeToFailureMap[statusCode] != null) {
+      return _codeToFailureMap[statusCode]!.call(error, stackTrace);
     }
+    return InvalidStatusCodeFailure('Invalid status code', stackTrace);
   }
 
-  String get _defaultErrorMessage => 'Error, please try again later';
+  static String get _defaultErrorMessage => 'Error, please try again later';
 }
