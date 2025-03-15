@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PaginationResponseModel<T> {
 
- List<T> get data;
+ List<T> get products;
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $PaginationResponseModelCopyWith<T, PaginationResponseModel<T>> get copyWith => 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationResponseModel<T>&&const DeepCollectionEquality().equals(other.data, data));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationResponseModel<T>&&const DeepCollectionEquality().equals(other.products, products));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(data));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(products));
 
 @override
 String toString() {
-  return 'PaginationResponseModel<$T>(data: $data)';
+  return 'PaginationResponseModel<$T>(products: $products)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $PaginationResponseModelCopyWith<T,$Res>  {
   factory $PaginationResponseModelCopyWith(PaginationResponseModel<T> value, $Res Function(PaginationResponseModel<T>) _then) = _$PaginationResponseModelCopyWithImpl;
 @useResult
 $Res call({
- List<T> data
+ List<T> products
 });
 
 
@@ -66,9 +66,9 @@ class _$PaginationResponseModelCopyWithImpl<T,$Res>
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? data = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? products = null,}) {
   return _then(_self.copyWith(
-data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+products: null == products ? _self.products : products // ignore: cast_nullable_to_non_nullable
 as List<T>,
   ));
 }
@@ -80,14 +80,14 @@ as List<T>,
 @JsonSerializable(genericArgumentFactories: true)
 
 class _PaginationResponseModel<T> implements PaginationResponseModel<T> {
-  const _PaginationResponseModel({final  List<T> data = const []}): _data = data;
+  const _PaginationResponseModel({final  List<T> products = const []}): _products = products;
   factory _PaginationResponseModel.fromJson(Map<String, dynamic> json,T Function(Object?) fromJsonT) => _$PaginationResponseModelFromJson(json,fromJsonT);
 
- final  List<T> _data;
-@override@JsonKey() List<T> get data {
-  if (_data is EqualUnmodifiableListView) return _data;
+ final  List<T> _products;
+@override@JsonKey() List<T> get products {
+  if (_products is EqualUnmodifiableListView) return _products;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_data);
+  return EqualUnmodifiableListView(_products);
 }
 
 
@@ -104,16 +104,16 @@ Map<String, dynamic> toJson(Object? Function(T) toJsonT) {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PaginationResponseModel<T>&&const DeepCollectionEquality().equals(other._data, _data));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PaginationResponseModel<T>&&const DeepCollectionEquality().equals(other._products, _products));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_data));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_products));
 
 @override
 String toString() {
-  return 'PaginationResponseModel<$T>(data: $data)';
+  return 'PaginationResponseModel<$T>(products: $products)';
 }
 
 
@@ -124,7 +124,7 @@ abstract mixin class _$PaginationResponseModelCopyWith<T,$Res> implements $Pagin
   factory _$PaginationResponseModelCopyWith(_PaginationResponseModel<T> value, $Res Function(_PaginationResponseModel<T>) _then) = __$PaginationResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- List<T> data
+ List<T> products
 });
 
 
@@ -141,9 +141,9 @@ class __$PaginationResponseModelCopyWithImpl<T,$Res>
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? data = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? products = null,}) {
   return _then(_PaginationResponseModel<T>(
-data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
+products: null == products ? _self._products : products // ignore: cast_nullable_to_non_nullable
 as List<T>,
   ));
 }
