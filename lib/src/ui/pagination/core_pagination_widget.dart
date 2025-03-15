@@ -223,12 +223,10 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
 
     return Column(
       children: [
-        Expanded(
-          child:
-              items.isNotEmpty
-                  ? scrollableBuilder(context, items)
-                  : Center(child: Text(failure.message)),
-        ),
+        if (items.isNotEmpty)
+          scrollableBuilder(context, items)
+        else
+          Center(child: Text(failure.message)),
         _buildRetryButton(retry),
       ],
     );

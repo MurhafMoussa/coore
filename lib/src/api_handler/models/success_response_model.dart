@@ -6,7 +6,7 @@ part 'success_response_model.g.dart';
 
 @Freezed(genericArgumentFactories: true)
 abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
-  const factory SuccessResponseModel({required T data}) =
+  const factory SuccessResponseModel({required T products}) =
       _SuccessResponseModel<T>;
 
   factory SuccessResponseModel.fromJson(
@@ -27,7 +27,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
           (json) =>
               PaginationResponseModel<T>.fromJson(json, (js) => fromJsonT(js)),
         );
-    return successResponse.data.products;
+    return successResponse.products.data;
   }
 
   static T extractValueFromSuccessResponse<T>(
@@ -38,6 +38,6 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
       response,
       (js) => fromJsonT(js),
     );
-    return successResponse.data;
+    return successResponse.products;
   }
 }
