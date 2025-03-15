@@ -1,6 +1,4 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/ui/pagination/core_pagination_cubit.dart';
-import 'package:coore/src/ui/pagination/pagination_strategy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -175,7 +173,7 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
     CorePaginationState<T> state,
     BuildContext context,
   ) {
-    final paginationCubit = context.read<CorePaginationCubit>();
+    final paginationCubit = context.read<CorePaginationCubit<T>>();
     return SmartRefresher(
       controller: paginationCubit.refreshController,
       scrollDirection: scrollDirection,
@@ -245,7 +243,7 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
         context,
         List.generate(
           skeletonItemCount ??
-              context.read<CorePaginationCubit>().paginationStrategy.limit,
+              context.read<CorePaginationCubit<T>>().paginationStrategy.limit,
           (index) => emptyEntity!,
         ),
       ),

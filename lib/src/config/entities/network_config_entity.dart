@@ -9,8 +9,8 @@ class NetworkConfigEntity extends Equatable {
     this.sendTimeout = const Duration(seconds: 10),
     this.receiveTimeout = const Duration(seconds: 10),
     this.enableLogging = false,
-    this.staticHeaders = const {},
-    this.defaultQueryParams = const {
+    this.defaultQueryParams = const {},
+    this.staticHeaders = const {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     },
@@ -72,6 +72,7 @@ class NetworkConfigEntity extends Equatable {
   final int maxRedirects;
   final List<Interceptor> interceptors;
   final AuthInterceptorType authInterceptorType;
+
   @override
   List<Object?> get props => [
     baseUrl,
