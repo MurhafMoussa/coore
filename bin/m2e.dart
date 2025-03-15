@@ -47,7 +47,7 @@ Future<void> main() async {
     stdout.write('File content length: ${content.length} characters');
 
     final fieldRegex = RegExp(
-      r'^\s*((?:final|late final)\s+)([\w<>]+)\?(\s+\w+\s*),?$',
+      r'^\s*((?:final\s+|late final\s+)?)([\w<>]+)\?(\s+\w+\s*),?$',
       multiLine: true,
     );
     final matches = fieldRegex.allMatches(content).toList();
@@ -59,8 +59,8 @@ Future<void> main() async {
         ..write(
           '⚠ No nullable fields found - ensure your model class contains lines like:',
         )
-        ..write('  final String? name;')
-        ..write('  final List<int>? numbers;');
+        ..write('  String? name;')
+        ..write('  List<int>? numbers;');
 
       return;
     }
