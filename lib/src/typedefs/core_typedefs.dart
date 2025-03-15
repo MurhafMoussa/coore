@@ -15,4 +15,4 @@ typedef RepositoryStreamResponse<T> = Stream<Either<Failure, T>>;
 typedef ProgressTrackerCallback = void Function(double progress);
 
 /// The core id that will be used in all entities
-typedef Id = int;
+typedef Id = String;

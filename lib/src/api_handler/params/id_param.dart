@@ -1,11 +1,9 @@
-import 'package:coore/src/api_handler/cancel_request_adapter.dart';
-
-import 'package:coore/src/api_handler/params/base_params.dart';
+import 'package:coore/lib.dart';
 
 class IdParam extends BaseParams {
   const IdParam({required this.id, super.cancelTokenAdapter});
 
-  final int id;
+  final Id id;
 
   @override
   List<Object> get props => [id];
