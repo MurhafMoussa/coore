@@ -10,29 +10,34 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
       _SuccessResponseModel<T>;
 
   factory SuccessResponseModel.fromJson(
-    Map<String, dynamic> json,
-    T Function(dynamic) fromJson,
-  ) => _$SuccessResponseModelFromJson(json, fromJson);
+    Map<String, dynamic> response,
+    T Function(Map<String, dynamic>) fromJson,
+  ) => _$SuccessResponseModelFromJson(
+    response,
+    (json) => fromJson(json! as Map<String, dynamic>),
+  );
+
   static List<T> extractListFromPaginatedSuccessResponse<T>(
-    Map<String, dynamic> json,
-    T Function(dynamic) fromJsonT,
+    Map<String, dynamic> response,
+    T Function(Map<String, dynamic>) fromJsonT,
   ) {
     final successResponse =
         SuccessResponseModel<PaginationResponseModel<T>>.fromJson(
-          json,
-          (json) => PaginationResponseModel<T>.fromJson(
-            json as Map<String, dynamic>,
-            fromJsonT,
-          ),
+          response,
+          (json) =>
+              PaginationResponseModel<T>.fromJson(json, (js) => fromJsonT(js)),
         );
     return successResponse.data.data;
   }
 
   static T extractValueFromSuccessResponse<T>(
-    Map<String, dynamic> json,
-    T Function(dynamic) fromJsonT,
+    Map<String, dynamic> response,
+    T Function(Map<String, dynamic>) fromJsonT,
   ) {
-    final successResponse = SuccessResponseModel<T>.fromJson(json, fromJsonT);
+    final successResponse = SuccessResponseModel<T>.fromJson(
+      response,
+      (js) => fromJsonT(js),
+    );
     return successResponse.data;
   }
 }
