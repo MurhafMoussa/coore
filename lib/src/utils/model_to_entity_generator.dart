@@ -1,44 +1,44 @@
 import 'dart:developer';
 import 'dart:io';
 
-/// Runs the extension method generator for a DTO class.
+/// Runs the extension method generator for a Model class.
 ///
-/// This script prompts the user to input the DTO class name, the entity class name,
-/// and the file path where the DTO is defined. It reads the file to find all nullable
-/// fields (using a regular expression), then creates mapping lines that convert each DTO
+/// This script prompts the user to input the Model class name, the entity class name,
+/// and the file path where the Model is defined. It reads the file to find all nullable
+/// fields (using a regular expression), then creates mapping lines that convert each Model
 /// field to a non‑nullable field for the entity, using default values provided by the
-/// `Defaults` class if the DTO field is null.
+/// `Defaults` class if the Model field is null.
 ///
-/// Finally, the script generates an extension method that adds a `toEntity` getter to the DTO,
-/// printing the generated code and appending it to the specified DTO file.
+/// Finally, the script generates an extension method that adds a `toEntity` getter to the Model,
+/// printing the generated code and appending it to the specified Model file.
 Future<void> main() async {
-  // Prompt for the DTO class name.
-  stdout.write('Enter DTO class name: ');
-  final dtoClassName = stdin.readLineSync();
+  // Prompt for the Model class name.
+  stdout.write('Enter Model class name: ');
+  final modelClassName = stdin.readLineSync();
 
   // Prompt for the entity class name.
-  stdout.write('Enter entity class name: ');
+  stdout.write('Enter Entity class name: ');
   final entityClassName = stdin.readLineSync();
 
-  // Prompt for the file path of the DTO.
-  stdout.write('Enter DTO file path: ');
-  final dtoFilePath = stdin.readLineSync();
+  // Prompt for the file path of the Model.
+  stdout.write('Enter Model file path: ');
+  final modelFilePath = stdin.readLineSync();
 
   // Validate the inputs; if any input is null or empty, exit the script.
-  if (dtoClassName == null ||
+  if (modelClassName == null ||
       entityClassName == null ||
-      dtoFilePath == null ||
-      dtoClassName.isEmpty ||
+      modelFilePath == null ||
+      modelClassName.isEmpty ||
       entityClassName.isEmpty ||
-      dtoFilePath.isEmpty) {
+      modelFilePath.isEmpty) {
     log('One or more inputs were invalid.');
     return;
   }
 
-  // Create a File instance for the given DTO file path.
-  final file = File(dtoFilePath);
+  // Create a File instance for the given Model file path.
+  final file = File(modelFilePath);
   if (!file.existsSync()) {
-    log('File not found at $dtoFilePath');
+    log('File not found at $modelFilePath');
     return;
   }
 
@@ -112,7 +112,7 @@ Future<void> main() async {
 
   // Generate the complete extension method code using the mapping lines.
   final extensionCode = '''
-extension ${dtoClassName}X on $dtoClassName {
+extension ${modelClassName}X on $modelClassName {
   $entityClassName get toEntity => $entityClassName(
 ${lines.join('\n')}
   );
@@ -123,7 +123,7 @@ ${lines.join('\n')}
   log('\nGenerated extension method:\n');
   log(extensionCode);
 
-  // Append the generated extension method code to the DTO file.
+  // Append the generated extension method code to the Model file.
   await file.writeAsString('\n$extensionCode', mode: FileMode.append);
-  log('Extension method appended to $dtoFilePath');
+  log('Extension method appended to $modelFilePath');
 }
