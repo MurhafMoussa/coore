@@ -1,7 +1,7 @@
 import 'package:coore/src/typedefs/core_typedefs.dart';
 
 abstract class Defaults {
-  static const Id invalidId = -1;
+  static const Id invalidId = '';
   static const String defaultString = '';
   static const bool defaultBool = false;
   static const int defaultInt = 0;
