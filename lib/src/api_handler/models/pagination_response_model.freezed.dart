@@ -79,8 +79,8 @@ as List<T>,
 /// @nodoc
 @JsonSerializable(genericArgumentFactories: true)
 
-class _PaginationResponseModel<T> extends PaginationResponseModel<T> {
-  const _PaginationResponseModel({required final  List<T> data = const []}): _data = data,super._();
+class _PaginationResponseModel<T> implements PaginationResponseModel<T> {
+  const _PaginationResponseModel({final  List<T> data = const []}): _data = data;
   factory _PaginationResponseModel.fromJson(Map<String, dynamic> json,T Function(Object?) fromJsonT) => _$PaginationResponseModelFromJson(json,fromJsonT);
 
  final  List<T> _data;
