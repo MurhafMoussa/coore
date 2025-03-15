@@ -14,7 +14,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     T Function(Map<String, dynamic>) fromJson,
   ) => _$SuccessResponseModelFromJson(
     response,
-    (json) => fromJson(json! as Map<String, dynamic>),
+    (json) => fromJson(json != null ? json as Map<String, dynamic> : {}),
   );
 
   static List<T> extractListFromPaginatedSuccessResponse<T>(

@@ -13,6 +13,6 @@ abstract class PaginationResponseModel<T> with _$PaginationResponseModel<T> {
     T Function(Map<String, dynamic>) fromJson,
   ) => _$PaginationResponseModelFromJson(
     response,
-    (json) => fromJson(json! as Map<String, dynamic>),
+    (json) => fromJson(json != null ? json as Map<String, dynamic> : {}),
   );
 }
