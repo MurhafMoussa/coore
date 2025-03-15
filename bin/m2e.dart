@@ -37,7 +37,7 @@ Future<void> main() async {
 
   // Create a File instance for the given Model file path.
   final file = File(modelFilePath);
-  if (!file.existsSync()) {
+  if (!await file.exists()) {
     log('File not found at $modelFilePath');
     return;
   }
