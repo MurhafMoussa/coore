@@ -5,4 +5,7 @@ abstract class BaseEntity extends Equatable {
   const BaseEntity({required this.id});
 
   final Id id;
+
+  @override
+  List<Object?> get props => [id];
 }
