@@ -50,7 +50,7 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
     required this.paginationFunction,
     required this.paginationStrategy,
     this.reverse = false,
-    required this.emptyEntity,
+    this.emptyEntity,
   }) : assert(
          emptyEntity != null || loadingBuilder != null,
          'You must provide either empty entity or a loading builder',
@@ -161,8 +161,8 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return BlocBuilder<CorePaginationCubit<T>, CorePaginationState<T>>(
-            builder: (context, state) {
-              return _buildSmartRefresher(state, context);
+            builder: (ctx, state) {
+              return _buildSmartRefresher(state, ctx);
             },
           );
         },
