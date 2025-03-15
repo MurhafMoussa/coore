@@ -27,7 +27,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
           (json) =>
               PaginationResponseModel<T>.fromJson(json, (js) => fromJsonT(js)),
         );
-    return successResponse.data.data;
+    return successResponse.data.products;
   }
 
   static T extractValueFromSuccessResponse<T>(
