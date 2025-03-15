@@ -51,7 +51,7 @@ dev_dependencies:
   json_serializable: ^6.9.4
 
 executables:
-  m2e: lib/src/utils/model_extension_generator.dart
+  m2e: bin/model_extension_generator.dart
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
