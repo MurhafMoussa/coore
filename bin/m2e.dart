@@ -1,129 +1,174 @@
-import 'dart:developer';
 import 'dart:io';
 
-/// Runs the extension method generator for a Model class.
-///
-/// This script prompts the user to input the Model class name, the entity class name,
-/// and the file path where the Model is defined. It reads the file to find all nullable
-/// fields (using a regular expression), then creates mapping lines that convert each Model
-/// field to a non‑nullable field for the entity, using default values provided by the
-/// `Defaults` class if the Model field is null.
-///
-/// Finally, the script generates an extension method that adds a `toEntity` getter to the Model,
-/// printing the generated code and appending it to the specified Model file.
 Future<void> main() async {
-  // Prompt for the Model class name.
-  stdout.write('Enter Model class name: ');
-  final modelClassName = stdin.readLineSync();
+  try {
+    stdin.lineMode = true;
+    stdin.echoMode = true;
 
-  // Prompt for the entity class name.
-  stdout.write('Enter Entity class name: ');
-  final entityClassName = stdin.readLineSync();
+    stdout.write('Enter Model class name: ');
 
-  // Prompt for the file path of the Model.
-  stdout.write('Enter Model file path: ');
-  final modelFilePath = stdin.readLineSync();
+    final modelClassName = stdin.readLineSync()?.trim();
 
-  // Validate the inputs; if any input is null or empty, exit the script.
-  if (modelClassName == null ||
-      entityClassName == null ||
-      modelFilePath == null ||
-      modelClassName.isEmpty ||
-      entityClassName.isEmpty ||
-      modelFilePath.isEmpty) {
-    log('One or more inputs were invalid.');
-    return;
-  }
+    stdout.write('Enter Entity class name: ');
 
-  // Create a File instance for the given Model file path.
-  final file = File(modelFilePath);
-  if (!await file.exists()) {
-    log('File not found at $modelFilePath');
-    return;
-  }
+    final entityClassName = stdin.readLineSync()?.trim();
 
-  // Read the content of the file as a string.
-  final content = await file.readAsString();
+    stdout.write('Enter Model file path: ');
 
-  // Use a regular expression to match nullable field declarations.
-  // Example match: "final int? id;" where group(1) is "int" and group(2) is "id".
-  final fieldRegex = RegExp(r'final\s+(\S+)\?\s+(\S+);');
-  final matches = fieldRegex.allMatches(content).toList();
+    final rawModelPath = stdin.readLineSync()?.trim() ?? '';
+    final modelFilePath = File(rawModelPath).absolute.path;
 
-  // If no nullable fields are found, log(message) a message and exit.
-  if (matches.isEmpty) {
-    log('No nullable fields were found in the file.');
-    return;
-  }
+    stdout
+      ..write('\n--- Input Summary ---')
+      ..write('Model Class: $modelClassName')
+      ..write('Entity Class: $entityClassName')
+      ..write('File Path: $modelFilePath');
 
-  // Generate mapping lines for each field. These lines will be used in the extension method.
-  final lines = <String>[];
-  for (final match in matches) {
-    // Extract the type (without the '?') and field name.
-    final type = match.group(1);
-    final fieldName = match.group(2);
-
-    // Skip iteration if type or fieldName is not captured.
-    if (type == null || fieldName == null) continue;
-
-    String mappingLine;
-
-    // Use the Defaults class to provide a fallback value if the field is null.
-    if (type == 'int') {
-      mappingLine = '$fieldName: $fieldName ?? Defaults.defaultInt,';
-    } else if (type == 'String') {
-      mappingLine = '$fieldName: $fieldName ?? Defaults.defaultString,';
-    } else if (type == 'double') {
-      mappingLine = '$fieldName: $fieldName ?? Defaults.defaultDouble,';
-    } else if (type == 'bool') {
-      mappingLine = '$fieldName: $fieldName ?? Defaults.defaultBool,';
-    } else if (type == 'num') {
-      mappingLine = '$fieldName: $fieldName ?? Defaults.defaultNum,';
-    } else if (type.startsWith('List<')) {
-      // Handle List types by extracting the inner type.
-      final innerMatch = RegExp(r'List<\s*(\S+)\s*>').firstMatch(type);
-      if (innerMatch != null) {
-        final innerType = innerMatch.group(1);
-        // If the inner type is primitive, use the default empty list.
-        if (innerType != null &&
-            ['int', 'String', 'double', 'bool', 'num'].contains(innerType)) {
-          mappingLine = '$fieldName: $fieldName ?? Defaults.defaultList,';
-        } else {
-          // For non-primitive inner types, assume a toEntity() conversion is needed.
-          mappingLine =
-              '$fieldName: $fieldName?.map((e) => e.toEntity()).toList() ?? Defaults.defaultList,';
-        }
-      } else {
-        mappingLine = '$fieldName: $fieldName ?? Defaults.defaultList,';
-      }
-    } else if (type == 'Map') {
-      mappingLine = '$fieldName: $fieldName ?? Defaults.defaultMap,';
-    } else if (type == 'DateTime') {
-      // For DateTime fields, use a default provided by Defaults (e.g., current local time).
-      mappingLine = '$fieldName: $fieldName ?? Defaults.defaultDateTime,';
-    } else {
-      // For any other type, assume a toEntity() conversion exists.
-      mappingLine =
-          '$fieldName: $fieldName?.toEntity() ?? const $type().toEntity(),';
+    if (modelClassName == null ||
+        modelClassName.isEmpty ||
+        entityClassName == null ||
+        entityClassName.isEmpty ||
+        rawModelPath.isEmpty) {
+      throw Exception('Missing inputs');
     }
-    // Add the mapping line with proper indentation.
-    lines.add('    $mappingLine');
-  }
 
-  // Generate the complete extension method code using the mapping lines.
-  final extensionCode = '''
-extension ${modelClassName}X on $modelClassName {
+    final file = File(modelFilePath);
+
+    stdout.write('\nChecking file existence...');
+
+    if (!file.existsSync()) {
+      throw Exception('File not found');
+    }
+
+    stdout.write('Reading file content...');
+
+    final content = await file.readAsString();
+
+    stdout.write('File content length: ${content.length} characters');
+
+    final fieldRegex = RegExp(
+      r'^\s*((?:final|late final)\s+)([\w<>]+)\?(\s+\w+\s*),?$',
+      multiLine: true,
+    );
+    final matches = fieldRegex.allMatches(content).toList();
+
+    stdout.write('\nFound ${matches.length} potential nullable fields');
+
+    if (matches.isEmpty) {
+      stdout
+        ..write(
+          '⚠ No nullable fields found - ensure your model class contains lines like:',
+        )
+        ..write('  final String? name;')
+        ..write('  final List<int>? numbers;');
+
+      return;
+    }
+
+    final lines = <String>[];
+    for (final match in matches) {
+      try {
+        final fullMatch = match.group(0);
+        final type = match.group(2);
+        final fieldName = match.group(3)?.trim();
+
+        stdout
+          ..write('\nProcessing field: $fullMatch')
+          ..write('Type: $type | Field: $fieldName');
+
+        if (type == null || fieldName == null) {
+          stdout.write('⚠ Skipping invalid match: ${match.group(0)}');
+
+          continue;
+        }
+
+        String mappingLine;
+
+        // Use the Defaults class to provide a fallback value if the field is null.
+        if (type == 'int') {
+          mappingLine = '$fieldName: $fieldName ?? Defaults.defaultInt,';
+        } else if (type == 'String') {
+          mappingLine = '$fieldName: $fieldName ?? Defaults.defaultString,';
+        } else if (type == 'double') {
+          mappingLine = '$fieldName: $fieldName ?? Defaults.defaultDouble,';
+        } else if (type == 'bool') {
+          mappingLine = '$fieldName: $fieldName ?? Defaults.defaultBool,';
+        } else if (type == 'num') {
+          mappingLine = '$fieldName: $fieldName ?? Defaults.defaultNum,';
+        } else if (type.startsWith('List<')) {
+          // Handle List types by extracting the inner type.
+          final innerMatch = RegExp(r'List<\s*(\S+)\s*>').firstMatch(type);
+          if (innerMatch != null) {
+            final innerType = innerMatch.group(1);
+            // If the inner type is primitive, use the default empty list.
+            if (innerType != null &&
+                [
+                  'int',
+                  'String',
+                  'double',
+                  'bool',
+                  'num',
+                ].contains(innerType)) {
+              mappingLine = '$fieldName: $fieldName ?? Defaults.defaultList,';
+            } else {
+              // For non-primitive inner types, assume a toEntity() conversion is needed.
+              mappingLine =
+                  '$fieldName: $fieldName?.map((e) => e.toEntity()).toList() ?? Defaults.defaultList,';
+            }
+          } else {
+            mappingLine = '$fieldName: $fieldName ?? Defaults.defaultList,';
+          }
+        } else if (type == 'Map') {
+          mappingLine = '$fieldName: $fieldName ?? Defaults.defaultMap,';
+        } else if (type == 'DateTime') {
+          // For DateTime fields, use a default provided by Defaults (e.g., current local time).
+          mappingLine = '$fieldName: $fieldName ?? Defaults.defaultDateTime,';
+        } else {
+          // For any other type, assume a toEntity() conversion exists.
+          mappingLine =
+              '$fieldName: $fieldName?.toEntity() ?? const $type().toEntity(),';
+        }
+        lines.add('    $mappingLine');
+
+        stdout.write(' Generated mapping: $mappingLine');
+      } catch (e) {
+        stdout.write('⚠ Error processing match: $e');
+      }
+    }
+
+    if (lines.isEmpty) {
+      stdout.write(
+        '\n No valid fields processed - check your model field formatting',
+      );
+
+      return;
+    }
+
+    final extensionCode = '''
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+extension ${modelClassName}ToEntity on $modelClassName {
   $entityClassName get toEntity => $entityClassName(
 ${lines.join('\n')}
   );
 }
 ''';
 
-  // Print the generated extension method code.
-  log('\nGenerated extension method:\n');
-  log(extensionCode);
+    stdout
+      ..write('\nGenerated Extension Code:\n${'═' * 40}')
+      ..write(extensionCode)
+      ..write('═' * 40)
+      ..write('\nWriting to file...');
 
-  // Append the generated extension method code to the Model file.
-  await file.writeAsString('\n$extensionCode', mode: FileMode.append);
-  log('Extension method appended to $modelFilePath');
+    await file.writeAsString('\n\n$extensionCode', mode: FileMode.append);
+
+    stdout.write(' Successfully updated $modelFilePath');
+  } catch (e) {
+    stdout
+      ..write('\n❌ Error: $e')
+      ..write('Stack trace: ${StackTrace.current}');
+  } finally {
+    stdin.lineMode = false;
+    stdin.echoMode = false;
+  }
 }
