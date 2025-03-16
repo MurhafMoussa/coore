@@ -9,9 +9,9 @@ part of 'success_response_model.dart';
 _SuccessResponseModel<T> _$SuccessResponseModelFromJson<T>(
   Map<String, dynamic> json,
   T Function(Object? json) fromJsonT,
-) => _SuccessResponseModel<T>(data: fromJsonT(json['products']));
+) => _SuccessResponseModel<T>(data: fromJsonT(json['data']));
 
 Map<String, dynamic> _$SuccessResponseModelToJson<T>(
   _SuccessResponseModel<T> instance,
   Object? Function(T value) toJsonT,
-) => <String, dynamic>{'products': toJsonT(instance.data)};
+) => <String, dynamic>{'data': toJsonT(instance.data)};
