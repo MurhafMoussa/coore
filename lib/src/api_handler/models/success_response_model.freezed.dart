@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SuccessResponseModel<T> {
 
-@JsonKey(name: kDataKey) T get data;
+@JsonKey(name: 'products') T get data;
 /// Create a copy of SuccessResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +49,7 @@ abstract mixin class $SuccessResponseModelCopyWith<T,$Res>  {
   factory $SuccessResponseModelCopyWith(SuccessResponseModel<T> value, $Res Function(SuccessResponseModel<T>) _then) = _$SuccessResponseModelCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: kDataKey) T data
+@JsonKey(name: 'products') T data
 });
 
 
@@ -80,10 +80,10 @@ as T,
 @JsonSerializable(genericArgumentFactories: true)
 
 class _SuccessResponseModel<T> implements SuccessResponseModel<T> {
-  const _SuccessResponseModel({@JsonKey(name: kDataKey) required this.data});
+  const _SuccessResponseModel({@JsonKey(name: 'products') required this.data});
   factory _SuccessResponseModel.fromJson(Map<String, dynamic> json,T Function(Object?) fromJsonT) => _$SuccessResponseModelFromJson(json,fromJsonT);
 
-@override@JsonKey(name: kDataKey) final  T data;
+@override@JsonKey(name: 'products') final  T data;
 
 /// Create a copy of SuccessResponseModel
 /// with the given fields replaced by the non-null parameter values.
@@ -118,7 +118,7 @@ abstract mixin class _$SuccessResponseModelCopyWith<T,$Res> implements $SuccessR
   factory _$SuccessResponseModelCopyWith(_SuccessResponseModel<T> value, $Res Function(_SuccessResponseModel<T>) _then) = __$SuccessResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: kDataKey) T data
+@JsonKey(name: 'products') T data
 });
 
 

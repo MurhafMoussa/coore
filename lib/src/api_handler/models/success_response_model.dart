@@ -20,10 +20,9 @@ part 'success_response_model.g.dart';
 @Freezed(genericArgumentFactories: true)
 abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   /// Creates an instance of [SuccessResponseModel] from JSON.
-  ///
-  /// The [data] field is extracted using the constant [kDataKey].
+
   const factory SuccessResponseModel({
-    @JsonKey(name: kDataKey) required T data,
+    @JsonKey(name: 'products') required T data,
   }) = _SuccessResponseModel<T>;
 
   /// Generates a [SuccessResponseModel] instance from a JSON [Map].
@@ -34,10 +33,6 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     Map<String, dynamic> json,
     T Function(dynamic) fromJsonT,
   ) => _$SuccessResponseModelFromJson(json, fromJsonT);
-
-  /// The JSON key used to extract the data.
-  /// Currently set to `'products'` (can be updated to `'data'` later).
-  static const String kDataKey = 'products';
 
   /// Extracts the data of type [T] from a JSON map.
   ///
