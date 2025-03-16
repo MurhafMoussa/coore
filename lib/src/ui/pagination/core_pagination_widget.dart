@@ -382,7 +382,7 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
                 reverse: config.reverse,
               )..fetchInitialData();
             },
-            child: const _PaginationContent(),
+            child:  _PaginationContent<T>(),
           );
         },
       ),
@@ -475,11 +475,11 @@ class _ContentBuilder<T extends BaseEntity> extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<CorePaginationCubit<T>>().state;
     return switch (state) {
-      PaginationSucceeded(:final items) => _SuccessStateWidget<T>(
+      PaginationSucceeded<T>(:final items) => _SuccessStateWidget<T>(
           items: items,
           controller: controller,
         ),
-      PaginationFailed(:final failure, :final items, :final retryFunction) =>
+      PaginationFailed<T>(:final failure, :final items, :final retryFunction) =>
         _ErrorStateWidget<T>(
           failure: failure,
           items: items,
@@ -608,7 +608,7 @@ class _LoadingStateWidget<T extends BaseEntity> extends StatelessWidget {
     return Skeletonizer(
       child: config.scrollableBuilder(
         context,
-        List.generate(
+        List<T>.generate(
           config.skeletonItemCount ?? cubit.paginationStrategy.limit,
           (index) => config.emptyEntity!,
         ),
