@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SuccessResponseModel<T> {
 
- T get data;
+ T get products;
 /// Create a copy of SuccessResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $SuccessResponseModelCopyWith<T, SuccessResponseModel<T>> get copyWith => _$Succ
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SuccessResponseModel<T>&&const DeepCollectionEquality().equals(other.data, data));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SuccessResponseModel<T>&&const DeepCollectionEquality().equals(other.products, products));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(data));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(products));
 
 @override
 String toString() {
-  return 'SuccessResponseModel<$T>(data: $data)';
+  return 'SuccessResponseModel<$T>(products: $products)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $SuccessResponseModelCopyWith<T,$Res>  {
   factory $SuccessResponseModelCopyWith(SuccessResponseModel<T> value, $Res Function(SuccessResponseModel<T>) _then) = _$SuccessResponseModelCopyWithImpl;
 @useResult
 $Res call({
- T data
+ T products
 });
 
 
@@ -66,9 +66,9 @@ class _$SuccessResponseModelCopyWithImpl<T,$Res>
 
 /// Create a copy of SuccessResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? data = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? products = freezed,}) {
   return _then(_self.copyWith(
-data: freezed == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+products: freezed == products ? _self.products : products // ignore: cast_nullable_to_non_nullable
 as T,
   ));
 }
@@ -80,10 +80,10 @@ as T,
 @JsonSerializable(genericArgumentFactories: true)
 
 class _SuccessResponseModel<T> implements SuccessResponseModel<T> {
-  const _SuccessResponseModel({required this.data});
+  const _SuccessResponseModel({required this.products});
   factory _SuccessResponseModel.fromJson(Map<String, dynamic> json,T Function(Object?) fromJsonT) => _$SuccessResponseModelFromJson(json,fromJsonT);
 
-@override final  T data;
+@override final  T products;
 
 /// Create a copy of SuccessResponseModel
 /// with the given fields replaced by the non-null parameter values.
@@ -98,16 +98,16 @@ Map<String, dynamic> toJson(Object? Function(T) toJsonT) {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SuccessResponseModel<T>&&const DeepCollectionEquality().equals(other.data, data));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SuccessResponseModel<T>&&const DeepCollectionEquality().equals(other.products, products));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(data));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(products));
 
 @override
 String toString() {
-  return 'SuccessResponseModel<$T>(data: $data)';
+  return 'SuccessResponseModel<$T>(products: $products)';
 }
 
 
@@ -118,7 +118,7 @@ abstract mixin class _$SuccessResponseModelCopyWith<T,$Res> implements $SuccessR
   factory _$SuccessResponseModelCopyWith(_SuccessResponseModel<T> value, $Res Function(_SuccessResponseModel<T>) _then) = __$SuccessResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- T data
+ T products
 });
 
 
@@ -135,9 +135,9 @@ class __$SuccessResponseModelCopyWithImpl<T,$Res>
 
 /// Create a copy of SuccessResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? data = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? products = freezed,}) {
   return _then(_SuccessResponseModel<T>(
-data: freezed == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+products: freezed == products ? _self.products : products // ignore: cast_nullable_to_non_nullable
 as T,
   ));
 }

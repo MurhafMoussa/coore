@@ -2,6 +2,7 @@ import 'package:coore/src/api_handler/models/pagination_response_model.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'success_response_model.freezed.dart';
+
 part 'success_response_model.g.dart';
 
 @Freezed(genericArgumentFactories: true)
@@ -37,6 +38,20 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     final successResponse = SuccessResponseModel<T>.fromJson(
       response,
       (js) => fromJsonT(js),
+    );
+    return successResponse.products;
+  }
+
+  static List<T> extractListFromSuccessResponse<T>(
+    Map<String, dynamic> response,
+    T Function(Map<String, dynamic>) fromJsonT,
+  ) {
+    final successResponse = SuccessResponseModel<List<T>>.fromJson(
+      response,
+      (js) =>
+          js is List
+              ? (js as List<Map<String, dynamic>>).map<T>(fromJsonT).toList()
+              : <T>[],
     );
     return successResponse.products;
   }
