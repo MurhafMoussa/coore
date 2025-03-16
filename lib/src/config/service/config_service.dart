@@ -1,5 +1,4 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/dependency_injection/di_container.dart';
 import 'package:coore/src/local_storage/local_database/local_database_interface.dart';
 import 'package:flutter/material.dart';
 

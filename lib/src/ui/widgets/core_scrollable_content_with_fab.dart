@@ -1,5 +1,4 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/ui/constants/animation_params_manager.dart';
 import 'package:flutter/material.dart';
 
 /// A reusable widget that wraps scrollable content with a scroll-to-top FAB.

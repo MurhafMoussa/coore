@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:coore/lib.dart';
-import 'package:coore/src/ui/pagination/pagination_strategy.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';

@@ -1,10 +1,4 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/api_handler/api_handler_interface.dart';
-import 'package:coore/src/api_handler/cancel_request_adapter.dart';
-import 'package:coore/src/api_handler/form_data_adapter.dart';
-import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
-import 'package:coore/src/error_handling/failures/network_failure.dart';
-import 'package:coore/src/typedefs/core_typedefs.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 

@@ -32,7 +32,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   /// value into the expected type [T].
   factory SuccessResponseModel.fromJson(
     Map<String, dynamic> json,
-    T Function(Object?) fromJsonT,
+    T Function(dynamic) fromJsonT,
   ) => _$SuccessResponseModelFromJson(json, fromJsonT);
 
   /// The JSON key used to extract the data.
@@ -53,8 +53,12 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   /// ```
   static T getData<T>(
     Map<String, dynamic> json,
-    T Function(Object?) fromJsonT,
-  ) => SuccessResponseModel<T>.fromJson(json, fromJsonT).data;
+    T Function(Map<String, dynamic>) fromJsonT,
+  ) =>
+      SuccessResponseModel<T>.fromJson(
+        json,
+        (innerJson) => fromJsonT(innerJson),
+      ).data;
 
   /// Extracts a list of type [T] from the JSON response.
   ///

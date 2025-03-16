@@ -126,8 +126,9 @@ class CoreFormCubit extends Cubit<CoreFormState> {
       // If the field hasn't been touched yet, the form is not valid.
       if (_touchedFields[field] != true) return false;
       // If the field fails its validation, the form is not valid.
-      if (_validators[field]?.validate(newValues[field], context) != null)
+      if (_validators[field]?.validate(newValues[field], context) != null) {
         return false;
+      }
     }
     return true;
   }
