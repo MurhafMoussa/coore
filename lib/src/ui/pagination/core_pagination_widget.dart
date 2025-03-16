@@ -23,7 +23,7 @@ class PaginationConfig<T extends BaseEntity> extends InheritedWidget {
     this.emptyBuilder,
     this.scrollDirection = Axis.vertical,
     this.physics,
-    this.padding,
+  
     this.showRefreshIndicator = true,
     this.headerBuilder,
     this.footerBuilder,
@@ -109,10 +109,6 @@ class PaginationConfig<T extends BaseEntity> extends InheritedWidget {
   /// {@endtemplate}
   final ScrollPhysics? physics;
 
-  /// {@template content_padding}
-  /// Padding around the scrollable content
-  /// {@endtemplate}
-  final EdgeInsetsGeometry? padding;
 
   /// {@template show_refresh_indicator}
   /// Whether to enable pull-to-refresh functionality
@@ -173,7 +169,7 @@ class PaginationConfig<T extends BaseEntity> extends InheritedWidget {
         emptyBuilder != oldWidget.emptyBuilder ||
         scrollDirection != oldWidget.scrollDirection ||
         physics != oldWidget.physics ||
-        padding != oldWidget.padding ||
+        
         showRefreshIndicator != oldWidget.showRefreshIndicator ||
         headerBuilder != oldWidget.headerBuilder ||
         footerBuilder != oldWidget.footerBuilder ||
@@ -218,7 +214,7 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
     this.emptyBuilder,
     this.scrollDirection = Axis.vertical,
     this.physics,
-    this.padding,
+
     this.showRefreshIndicator = true,
     this.headerBuilder,
     this.footerBuilder,
@@ -307,10 +303,7 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
   /// {@endtemplate}
   final ScrollPhysics? physics;
 
-  /// {@template content_padding}
-  /// Padding around the scrollable content
-  /// {@endtemplate}
-  final EdgeInsetsGeometry? padding;
+
 
   /// {@template show_refresh_indicator}
   /// Whether to enable pull-to-refresh functionality
@@ -364,7 +357,7 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
       emptyBuilder: emptyBuilder,
       scrollDirection: scrollDirection,
       physics: physics,
-      padding: padding,
+  
       showRefreshIndicator: showRefreshIndicator,
       headerBuilder: headerBuilder,
       footerBuilder: footerBuilder,
@@ -450,33 +443,11 @@ class _SmartRefresherWidget<T extends BaseEntity> extends StatelessWidget {
           const ClassicHeader(),
       footer: config.footerBuilder?.call(context, cubit.refreshController) ??
           const ClassicFooter(),
-      child: config.padding != null
-          ? Padding(
-              padding: config.padding!,
-              child: _ContentBuilder<T>(controller: controller),
-            )
-          : _ContentBuilder<T>(controller: controller),
+      child: _contentBuilder(context),
     );
   }
-}
-
-/// {@nodoc}
-/// {@template content_builder}
-/// State-aware content builder that switches between:
-/// - Success state (loaded items)
-/// - Error state (failure message)
-/// - Loading state (skeleton/loading indicator)
-/// {@endtemplate}
-class _ContentBuilder<T extends BaseEntity> extends StatelessWidget {
-  /// {@macro content_builder}
-  const _ContentBuilder({this.controller});
-
-  /// Optional scroll controller
-  final ScrollController? controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<CorePaginationCubit<T>>().state;
+  Widget  _contentBuilder(BuildContext context){
+ final state = context.watch<CorePaginationCubit<T>>().state;
     return switch (state) {
       PaginationSucceeded<T>(:final items) => _SuccessStateWidget<T>(
           items: items,
@@ -491,8 +462,11 @@ class _ContentBuilder<T extends BaseEntity> extends StatelessWidget {
         ),
       _ => _LoadingStateWidget<T>(scrollController: controller),
     };
+
   }
 }
+
+
 
 /// {@nodoc}
 /// {@template success_state}
