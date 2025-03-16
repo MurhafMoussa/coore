@@ -16,38 +16,66 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     T Function(Object?) fromJsonT,
   ) => _$SuccessResponseModelFromJson(json, fromJsonT);
 
-  static SuccessResponseModel<T> genericFromJson<T>(
-    Map<String, dynamic> json,
-    T Function(Object?) fromJsonT,
-  ) => SuccessResponseModel<T>.fromJson(json, fromJsonT);
+  // Helper to safely convert JSON while preserving type information
+  static T _safeFromJson<T>(
+    Object? json,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
+    if (json is! Map<String, dynamic>) {
+      throw FormatException(
+        'Expected Map<String, dynamic> but got ${json.runtimeType}',
+      );
+    }
+    return fromJson(json);
+  }
 
+  // Base data extractor
   static T getData<T>(
     Map<String, dynamic> json,
     T Function(Object?) fromJsonT,
-  ) => genericFromJson(json, fromJsonT).data;
+  ) => SuccessResponseModel.fromJson(json, fromJsonT).data;
 
+  // List data extractor with nested type safety
   static List<T> getList<T>(
     Map<String, dynamic> json,
-    T Function(Object?) fromJsonT,
+    T Function(Map<String, dynamic>) fromJson,
   ) {
-    final data = getData<List<dynamic>>(json, (list) {
-      if (list is! List<dynamic>) return [];
-      return list.map(fromJsonT).toList();
-    });
+    final data = getData<List<dynamic>>(
+      json,
+      (list) =>
+          (list as List<dynamic>?)?.map((item) {
+            return _safeFromJson(item, fromJson);
+          }).toList() ??
+          [],
+    );
     return data.cast<T>();
   }
 
+  // Paginated list extractor with full type safety
   static List<T> getPaginatedList<T>(
     Map<String, dynamic> json,
-    T Function(Object?) fromJsonT,
+    T Function(Map<String, dynamic>) fromJson,
   ) {
-    final pagination = getData<PaginationResponseModel<T>>(
+    final paginationData = getData<PaginationResponseModel<T>>(
       json,
       (paginationJson) => PaginationResponseModel<T>.fromJson(
-        paginationJson! as Map<String, dynamic>,
-        fromJsonT,
+        _safeFromJson(paginationJson, (json) => json),
+        (item) => _safeFromJson(item, fromJson),
       ),
     );
-    return pagination.data;
+    return paginationData.data;
+  }
+
+  // Primitive value extractor (for booleans, numbers, strings)
+  static T getPrimitive<T>(
+    Map<String, dynamic> json,
+    T Function(Object?) converter,
+  ) {
+    return getData<T>(json, (value) {
+      if (value is! T) {
+        throw FormatException('Expected type $T but got ${value.runtimeType}');
+      }
+      return converter(value);
+    });
   }
 }
