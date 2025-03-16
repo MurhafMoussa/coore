@@ -375,7 +375,10 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
         builder: (context) {
           return BlocProvider<CorePaginationCubit<T>>(
             create: (context) {
-              final config = PaginationConfig.of<T>(context);
+              final element = context.getElementForInheritedWidgetOfExactType<PaginationConfig<T>>();
+              assert(element != null, 'No PaginationConfig found in context');
+              final config = element!.widget as PaginationConfig<T>;
+              
               return CorePaginationCubit<T>(
                 paginationFunction: config.paginationFunction,
                 paginationStrategy: config.paginationStrategy,
