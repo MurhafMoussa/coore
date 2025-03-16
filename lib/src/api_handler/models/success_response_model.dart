@@ -34,6 +34,15 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     T Function(dynamic) fromJsonT,
   ) => _$SuccessResponseModelFromJson(json, fromJsonT);
 
+  static T _dataFieldExtractor<T>(
+    Map<String, dynamic> json,
+    T Function(dynamic) fromJsonT,
+  ) =>
+      SuccessResponseModel<T>.fromJson(
+        json,
+        (innerJson) => fromJsonT(innerJson),
+      ).data;
+
   /// Extracts the data of type [T] from a JSON map.
   ///
   /// Example:
@@ -49,11 +58,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   static T getData<T>(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJsonT,
-  ) =>
-      SuccessResponseModel<T>.fromJson(
-        json,
-        (innerJson) => fromJsonT(innerJson),
-      ).data;
+  ) => _dataFieldExtractor(json, (innerJson) => fromJsonT(innerJson));
 
   /// Extracts a list of type [T] from the JSON response.
   ///
@@ -77,7 +82,10 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     T Function(Map<String, dynamic>) itemConverter,
   ) {
     try {
-      return getData<List<T>>(json, (data) => _parseList(data, itemConverter));
+      return _dataFieldExtractor<List<T>>(
+        json,
+        (data) => _parseList(data, itemConverter),
+      );
     } catch (e) {
       throw FormatException('Failed to parse list: $e');
     }
@@ -111,7 +119,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     T Function(Map<String, dynamic>) itemConverter,
   ) {
     try {
-      final pagination = getData<PaginationResponseModel<T>>(
+      final pagination = _dataFieldExtractor<PaginationResponseModel<T>>(
         json,
         (data) => _parsePagination(data, itemConverter),
       );
@@ -138,7 +146,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   static T getPrimitive<T>(
     Map<String, dynamic> json,
     T Function(Object?) converter,
-  ) => getData<T>(json, converter);
+  ) => _dataFieldExtractor<T>(json, converter);
 
   /// Private helper that parses a JSON array into a [List] of [T].
   ///
