@@ -69,12 +69,12 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
   /// - [BuildContext]
   /// - [Failure] encountered
   /// - Retry callback (may be null if items exist)
-  /// - Already fetched items.
+  /// - Already fetched items widget.
   final Widget Function(
     BuildContext context,
     Failure failure,
     VoidCallback? retry,
-    List<T> alreadyFeatchedItems,
+    Widget alreadyFetchedItemsWidget,
   )?
   errorBuilder;
 
@@ -205,7 +205,12 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
   ) {
     // If a custom error builder is provided, use it.
     if (errorBuilder != null) {
-      return errorBuilder!(context, failure, retry, items);
+      return errorBuilder!(
+        context,
+        failure,
+        retry,
+        scrollableBuilder(context, items),
+      );
     }
     // If there are already fetched items, display them.
     if (items.isNotEmpty) {
@@ -213,13 +218,16 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
     }
     // Otherwise, display a default error message with a retry button.
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(failure.message),
-          const SizedBox(height: 16),
-          FilledButton(onPressed: retry, child: const Text('Retry')),
-        ],
+      child: Padding(
+        padding: PaddingManager.paddingHorizontal20,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(failure.message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: retry, child: const Text('Retry')),
+          ],
+        ),
       ),
     );
   }
@@ -247,13 +255,17 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.inbox_outlined, size: 64),
-          SizedBox(height: 16),
-          Text('No items found'),
-        ],
+      child: Padding(
+        padding: PaddingManager.paddingHorizontal20,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.inbox_outlined, size: 64),
+            SizedBox(height: 16),
+            Text('No items found'),
+          ],
+        ),
       ),
     );
   }
