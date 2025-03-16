@@ -32,23 +32,27 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   // Base data extractor
   static T getData<T>(
     Map<String, dynamic> json,
-    T Function(Object?) fromJsonT,
-  ) => SuccessResponseModel.fromJson(json, fromJsonT).data;
+    T Function(Map<String, dynamic>) fromJsonT,
+  ) =>
+      SuccessResponseModel.fromJson(
+        json,
+        (innerJson) => _safeFromJson(innerJson, fromJsonT),
+      ).data;
 
   // List data extractor with nested type safety
   static List<T> getList<T>(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJson,
   ) {
-    final data = getData<List<dynamic>>(
+    final data = getData<List<T>>(
       json,
       (list) =>
-          (list as List<dynamic>?)?.map((item) {
+          (list as List<dynamic>?)?.map<T>((item) {
             return _safeFromJson(item, fromJson);
           }).toList() ??
-          [],
+          <T>[],
     );
-    return data.cast<T>();
+    return data;
   }
 
   // Paginated list extractor with full type safety
@@ -59,7 +63,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     final paginationData = getData<PaginationResponseModel<T>>(
       json,
       (paginationJson) => PaginationResponseModel<T>.fromJson(
-        _safeFromJson(paginationJson, (json) => json),
+        paginationJson,
         (item) => _safeFromJson(item, fromJson),
       ),
     );
