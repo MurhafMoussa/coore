@@ -16,13 +16,13 @@ import 'package:skeletonizer/skeletonizer.dart';
 ///
 /// ## Usage
 /// ```dart
-/// CorePaginationWidget&lt;Post&gt;(
-///   paginationFunction: (batch, limit) =&gt; repo.getPosts(batch, limit),
+/// CorePaginationWidget<Post>(
+///   paginationFunction: (batch, limit) => repo.getPosts(batch, limit),
 ///   paginationStrategy: PageBasedStrategy(),
 ///   emptyEntity: Post.empty(),
-///   scrollableBuilder: (context, items) =&gt; ListView.builder(
+///   scrollableBuilder: (context, items) => ListView.builder(
 ///     itemCount: items.length,
-///     itemBuilder: (context, index) =&gt; PostItem(post: items[index]),
+///     itemBuilder: (context, index) => PostItem(post: items[index]),
 ///   ),
 /// )
 /// ```
@@ -31,7 +31,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 /// - [CorePaginationCubit] for state management logic
 /// - [PaginationStrategy] for custom pagination implementations
 class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
-  /// Creates a pagination widget with configurable behavior and UI
+  /// Creates a pagination widget with configurable behavior and UI.
   const CorePaginationWidget({
     super.key,
     required this.scrollableBuilder,
@@ -54,104 +54,83 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
          'You must provide either empty entity or a loading builder',
        );
 
-  /// {@template pagination_builder}
-  /// Builder function for the main scrollable content area
-  ///
+  /// Builder for the main scrollable content area.
   /// Receives:
-  /// - Current build context
-  /// - List of loaded items
-  /// {@endtemplate}
+  /// - [BuildContext]
+  /// - List of loaded items.
   final Widget Function(BuildContext context, List<T> items) scrollableBuilder;
 
-  /// {@template pagination_loader}
-  /// Custom loading state widget builder
-  ///
-  /// If null, uses [Skeletonizer] with [emptyEntity]
-  /// {@endtemplate}
+  /// Custom loading state widget builder.
+  /// If null, uses [Skeletonizer] with [emptyEntity].
   final Widget Function(BuildContext context)? loadingBuilder;
 
-  /// {@template pagination_error}
-  /// Error state widget builder
-  ///
+  /// Error state widget builder.
   /// Receives:
-  /// - Build context
-  /// - Encountered failure
+  /// - [BuildContext]
+  /// - [Failure] encountered
   /// - Retry callback (may be null if items exist)
-  /// {@endtemplate}
+  /// - Already fetched items.
   final Widget Function(
     BuildContext context,
     Failure failure,
     VoidCallback? retry,
+    List<T> alreadyFeatchedItems,
   )?
   errorBuilder;
 
-  /// Data fetching function with pagination parameters
-  ///
-  /// Parameters:
-  /// - [batch]: Current pagination index (page number or skip value)
-  /// - [limit]: Number of items per page/batch
-  ///
-  /// Must return [RepositoryFutureResponse] with item list
+  /// Data fetching function with pagination parameters.
+  /// Must return a [RepositoryFutureResponse] with an item list.
   final RepositoryFutureResponse<List<T>> Function(int batch, int limit)
   paginationFunction;
 
-  /// Pagination strategy implementation
-  ///
-  /// Handles:
-  /// - Pagination math (page numbers, skip/limit)
-  /// - Batch calculations
-  /// - Max item tracking
+  /// Pagination strategy implementation.
+  /// Handles pagination math (page numbers, skip/limit), batch calculations, and max item tracking.
   final PaginationStrategy paginationStrategy;
 
-  /// Reverse loading order (new items prepend instead of append)
+  /// Reverse loading order (new items prepend instead of append).
   final bool reverse;
 
-  /// Widget to display when no items are loaded
-  ///
-  /// Defaults to centered icon and text
+  /// Widget to display when no items are loaded.
+  /// Defaults to a centered icon and text.
   final Widget Function(BuildContext context)? emptyBuilder;
 
-  /// Scroll axis direction (defaults to vertical)
+  /// Scroll axis direction (defaults to vertical).
   final Axis scrollDirection;
 
-  /// Scroll physics behavior
+  /// Scroll physics behavior.
   final ScrollPhysics? physics;
 
-  /// Padding around scrollable content
+  /// Padding around scrollable content.
   final EdgeInsetsGeometry? padding;
 
-  /// Toggles pull-to-refresh functionality
+  /// Toggles pull-to-refresh functionality.
   final bool showRefreshIndicator;
 
-  /// Custom refresh header widget builder
-  ///
-  /// Receives refresh controller for completion control
-  /// Defaults to [ClassicHeader]
+  /// Custom refresh header widget builder.
+  /// Receives a refresh controller for completion control.
+  /// Defaults to [ClassicHeader].
   final Widget Function(BuildContext context, RefreshController controller)?
   headerBuilder;
 
-  /// Custom loading footer widget builder
-  ///
-  /// Receives refresh controller for completion control
-  /// Defaults to [ClassicFooter]
+  /// Custom loading footer widget builder.
+  /// Receives a refresh controller for completion control.
+  /// Defaults to [ClassicFooter].
   final Widget Function(BuildContext context, RefreshController controller)?
   footerBuilder;
 
-  /// Number of skeleton items to display during loading
-  ///
-  /// Uses [PaginationStrategy.limit] if null
+  /// Number of skeleton items to display during loading.
+  /// Uses [PaginationStrategy.limit] if null.
   final int? skeletonItemCount;
 
-  /// Entity instance for skeleton loading placeholders
-  ///
-  /// Required when [loadingBuilder] is null
+  /// Entity instance for skeleton loading placeholders.
+  /// Required when [loadingBuilder] is null.
   final T? emptyEntity;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<CorePaginationCubit<T>>(
       create:
-          (context) => CorePaginationCubit(
+          (context) => CorePaginationCubit<T>(
             paginationFunction: paginationFunction,
             paginationStrategy: paginationStrategy,
             reverse: reverse,
@@ -159,16 +138,14 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return BlocBuilder<CorePaginationCubit<T>, CorePaginationState<T>>(
-            builder: (ctx, state) {
-              return _buildSmartRefresher(state, ctx);
-            },
+            builder: (context, state) => _buildSmartRefresher(state, context),
           );
         },
       ),
     );
   }
 
-  /// Builds the SmartRefresher widget with configured header/footer
+  /// Builds the SmartRefresher widget with configured header/footer.
   Widget _buildSmartRefresher(
     CorePaginationState<T> state,
     BuildContext context,
@@ -188,11 +165,15 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
       footer:
           footerBuilder?.call(context, paginationCubit.refreshController) ??
           const ClassicFooter(),
-      child: _buildContent(state, context),
+      // Wrap content in a Padding widget if [padding] is provided.
+      child:
+          padding != null
+              ? Padding(padding: padding!, child: _buildContent(state, context))
+              : _buildContent(state, context),
     );
   }
 
-  /// Selects appropriate content based on current state
+  /// Selects the appropriate content based on the current state.
   Widget _buildContent(CorePaginationState<T> state, BuildContext context) {
     return switch (state) {
       PaginationSucceeded(:final items) => _buildSuccessState(items, context),
@@ -202,62 +183,64 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
     };
   }
 
-  /// Builds success state with items or empty view
+  /// Builds success state with items or displays an empty view.
   Widget _buildSuccessState(List<T> items, BuildContext context) {
     if (items.isEmpty) {
       return emptyBuilder?.call(context) ?? const _EmptyState();
     }
-    return scrollableBuilder(context, items);
+    final scrollableWidget = scrollableBuilder(context, items);
+    assert(
+      scrollableWidget is ScrollView,
+      'Scrollable builder must return GridView, ListView, or Slivers',
+    );
+    return scrollableWidget;
   }
 
-  /// Builds error state with optional retry and existing items
+  /// Builds error state with optional retry and existing items.
   Widget _buildErrorState(
     Failure failure,
     List<T> items,
     VoidCallback? retry,
     BuildContext context,
   ) {
+    // If a custom error builder is provided, use it.
     if (errorBuilder != null) {
-      return errorBuilder!(context, failure, retry);
+      return errorBuilder!(context, failure, retry, items);
     }
-
-    return Column(
-      children: [
-        if (items.isNotEmpty)
-          scrollableBuilder(context, items)
-        else
-          Center(child: Text(failure.message)),
-        _buildRetryButton(retry),
-      ],
+    // If there are already fetched items, display them.
+    if (items.isNotEmpty) {
+      return scrollableBuilder(context, items);
+    }
+    // Otherwise, display a default error message with a retry button.
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(failure.message),
+          const SizedBox(height: 16),
+          FilledButton(onPressed: retry, child: const Text('Retry')),
+        ],
+      ),
     );
   }
 
-  /// Builds loading state with skeleton or custom UI
+  /// Builds loading state with a skeleton placeholder or custom loading UI.
   Widget _buildLoadingState(BuildContext context) {
     if (loadingBuilder != null) return loadingBuilder!(context);
-
+    final cubit = context.read<CorePaginationCubit<T>>();
     return Skeletonizer(
       child: scrollableBuilder(
         context,
         List.generate(
-          skeletonItemCount ??
-              context.read<CorePaginationCubit<T>>().paginationStrategy.limit,
+          skeletonItemCount ?? cubit.paginationStrategy.limit,
           (index) => emptyEntity!,
         ),
       ),
     );
   }
-
-  /// Generic retry button for error states
-  Widget _buildRetryButton(VoidCallback? retry) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: FilledButton(onPressed: retry, child: const Text('Retry')),
-    );
-  }
 }
 
-/// Default empty state view
+/// Default empty state view.
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
