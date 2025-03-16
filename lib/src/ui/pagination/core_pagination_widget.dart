@@ -449,43 +449,23 @@ class _SmartRefresherWidget<T extends BaseEntity> extends StatelessWidget {
   Widget  _contentBuilder(BuildContext context){
  final state = context.watch<CorePaginationCubit<T>>().state;
     return switch (state) {
-      PaginationSucceeded<T>(:final items) => _SuccessStateWidget<T>(
-          items: items,
-          controller: controller,
+      PaginationSucceeded<T>(:final items) =>successStateWidget(
+          context,items,
         ),
       PaginationFailed<T>(:final failure, :final items, :final retryFunction) =>
-        _ErrorStateWidget<T>(
-          failure: failure,
-          items: items,
-          retryFunction: retryFunction,
-          controller: controller,
+        errorStateWidget(
+        context,items,failure,retryFunction
         ),
       _ => _LoadingStateWidget<T>(scrollController: controller),
     };
 
-  }
-}
-
-
-
-/// {@nodoc}
-/// {@template success_state}
-/// Displays the successfully loaded items using the configured scrollable builder.
+  }/// {@nodoc}
+/// {@template error_state}
+/// Handles error display while potentially showing already loaded items.
 /// 
-/// Shows empty state if no items are available.
+/// Prioritizes custom error builder if provided, falls back to default error UI.
 /// {@endtemplate}
-class _SuccessStateWidget<T extends BaseEntity> extends StatelessWidget {
-  /// {@macro success_state}
-  const _SuccessStateWidget({required this.items, this.controller});
-
-  /// Loaded items list
-  final List<T> items;
-
-  /// Scroll controller for the content
-  final ScrollController? controller;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget successStateWidget(BuildContext context,List<T> items){
     final config = PaginationConfig.of<T>(context);
 
     if (items.isEmpty) {
@@ -502,39 +482,15 @@ class _SuccessStateWidget<T extends BaseEntity> extends StatelessWidget {
       'Scrollable builder must return GridView, ListView, or Slivers',
     );
     return scrollableWidget;
-  }
-}
-
+  }  
 /// {@nodoc}
 /// {@template error_state}
 /// Handles error display while potentially showing already loaded items.
 /// 
 /// Prioritizes custom error builder if provided, falls back to default error UI.
 /// {@endtemplate}
-class _ErrorStateWidget<T extends BaseEntity> extends StatelessWidget {
-  /// {@macro error_state}
-  const _ErrorStateWidget({
-    required this.failure,
-    required this.items,
-    required this.retryFunction,
-    this.controller,
-  });
-
-  /// Error details
-  final Failure failure;
-
-  /// Previously loaded items (if any)
-  final List<T> items;
-
-  /// Retry callback function
-  final VoidCallback? retryFunction;
-
-  /// Scroll controller
-  final ScrollController? controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final config = PaginationConfig.of<T>(context);
+  Widget errorStateWidget(BuildContext context,List<T> items,Failure failure,VoidCallback? retryFunction){
+     final config = PaginationConfig.of<T>(context);
 
     if (config.errorBuilder != null) {
       return config.errorBuilder!(
@@ -564,6 +520,12 @@ class _ErrorStateWidget<T extends BaseEntity> extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
 
 /// {@nodoc}
 /// {@template loading_state}
