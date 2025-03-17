@@ -65,5 +65,5 @@ class CoreLoggerImpl implements CoreLogger {
   }
 
   @override
-  bool get shouldLog => kDebugMode;
+  bool get shouldLog => kDebugMode||kProfileMode;
 }
