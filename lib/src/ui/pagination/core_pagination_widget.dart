@@ -439,10 +439,9 @@ class _SmartRefresherWidget<T extends BaseEntity> extends StatelessWidget {
       enablePullDown: config.showRefreshIndicator,
       onRefresh: cubit.fetchInitialData,
       onLoading: cubit.fetchMoreData,
-      header: config.headerBuilder?.call(context, cubit.refreshController) ??
-          const ClassicHeader(),
-      footer: config.footerBuilder?.call(context, cubit.refreshController) ??
-          const ClassicFooter(),
+      header: config.headerBuilder?.call(context, cubit.refreshController) ,
+      footer: config.footerBuilder?.call(context, cubit.refreshController) 
+         , 
       child: _contentBuilder(context),
     );
   }
@@ -454,7 +453,7 @@ class _SmartRefresherWidget<T extends BaseEntity> extends StatelessWidget {
         ),
       PaginationFailed<T>(:final failure, :final items, :final retryFunction) =>
         errorStateWidget(
-        context,items,failure,retryFunction
+        context,items,failure,retryFunction,
         ),
       _ => _LoadingStateWidget<T>(scrollController: controller),
     };
