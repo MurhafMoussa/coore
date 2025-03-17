@@ -2,5 +2,8 @@
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "editor.defaultFormatter": "Dart-Code.dart-code",
-    "editor.formatOnType": true
+    "editor.formatOnType": true,
+    "cSpell.words": [
+        "coore"
+    ]
 }

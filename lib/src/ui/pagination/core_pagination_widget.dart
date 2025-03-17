@@ -1,4 +1,5 @@
 import 'package:coore/lib.dart';
+import 'package:coore/src/ui/widgets/core_default_error_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -504,19 +505,7 @@ class _SmartRefresherWidget<T extends BaseEntity> extends StatelessWidget {
       return config.scrollableBuilder(context, items, controller);
     }
 
-    return Center(
-      child: Padding(
-        padding: PaddingManager.paddingHorizontal20,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(failure.message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton(onPressed: retryFunction, child: const Text('Retry')),
-          ],
-        ),
-      ),
-    );
+    return  CoreDefaultErrorWidget(message: failure.message,onRetry: retryFunction,);
   }
 }
 
