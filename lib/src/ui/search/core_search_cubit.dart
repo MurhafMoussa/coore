@@ -1,26 +1,39 @@
 import 'dart:async';
 
 import 'package:coore/lib.dart';
+import 'package:coore/src/api_handler/params/search_params.dart';
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'core_search_cubit.freezed.dart';
 part 'core_search_state.dart';
 
 class CoreSearchCubit<T> extends CoreCubit<CoreSearchState<T>, List<T>> {
-  CoreSearchCubit(this.searchFunction) : super(CoreSearchState.initial());
+  CoreSearchCubit(
+    this.searchFunction,
+    this.searchParams, {
+    this.debounceDuration = const Duration(seconds: 1),
+  }) : super(CoreSearchState.initial()) {
+    // Add a listener to handle text changes in the search field.
+    searchController.addListener(() {
+      _onQueryChanged(searchParams.copyWith(query: searchController.text));
+    });
+  }
   final RepositoryFutureResponse<List<T>> Function(SearchParams) searchFunction;
   Timer? _debounceTimer;
-
+  final searchController = SearchController();
+  final Duration debounceDuration;
+  final SearchParams searchParams;
   void _cancelTimer() {
     if (_debounceTimer != null && _debounceTimer!.isActive) {
       _debounceTimer!.cancel();
     }
   }
 
-  Future<void> onQueryChanged(SearchParams params) async {
+  Future<void> _onQueryChanged(SearchParams params) async {
     _cancelTimer();
 
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+    _debounceTimer = Timer(debounceDuration, () async {
       handleApiCall(apiCall: searchFunction.call, params: params);
     });
   }
@@ -33,6 +46,7 @@ class CoreSearchCubit<T> extends CoreCubit<CoreSearchState<T>, List<T>> {
   @override
   Future<void> close() {
     _cancelTimer();
+    searchController.dispose();
     return super.close();
   }
 
@@ -44,21 +58,4 @@ class CoreSearchCubit<T> extends CoreCubit<CoreSearchState<T>, List<T>> {
     CoreSearchState<T> state,
     ApiState<List<T>> apiState,
   ) => state.copyWith(apiState: apiState);
-}
-
-class SearchParams extends BaseParams {
-  const SearchParams({super.cancelTokenAdapter, required this.query});
-
-  final String query;
-  @override
-  BaseParams attachCancelToken({CancelRequestAdapter? cancelTokenAdapter}) =>
-      SearchParams(
-        query: query,
-        cancelTokenAdapter: cancelTokenAdapter ?? this.cancelTokenAdapter,
-      );
-  @override
-  List<Object?> get props => [query];
-
-  @override
-  Map<String, dynamic> toJson() => {'query': query};
 }

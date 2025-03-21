@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:coore/lib.dart';
+import 'package:coore/src/api_handler/params/search_params.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart' as fp;
@@ -27,7 +28,7 @@ typedef CustomSuggestionBuilder =
 /// [CoreSearchWidget] integrates a search interface with suggestions,
 /// error handling, and state management using the BLoC pattern.
 /// The generic type [T] represents the type of each search result.
-class CoreSearchWidget<T> extends StatefulWidget {
+class CoreSearchWidget<T> extends StatelessWidget {
   /// Creates a [CoreSearchWidget].
   ///
   /// The [resultBuilder] and [searchFunction] are required parameters.
@@ -63,6 +64,7 @@ class CoreSearchWidget<T> extends StatefulWidget {
     this.textInputAction,
     this.keyboardType,
     this.enabled = true,
+    required this.searchParams,
   });
 
   /// Placeholder text shown in the search bar when no input is provided.
@@ -77,6 +79,9 @@ class CoreSearchWidget<T> extends StatefulWidget {
   /// It takes [SearchParams] and returns a [Future] that resolves to either a [Failure]
   /// or a [List] of search results of type [T].
   final RepositoryFutureResponse<List<T>> Function(SearchParams) searchFunction;
+
+  /// The initial search params that might includes query params for pagination
+  final SearchParams searchParams;
 
   /// Optional custom suggestion builder to build the suggestion list.
   final CustomSuggestionBuilder? suggestionBuilder;
@@ -103,7 +108,7 @@ class CoreSearchWidget<T> extends StatefulWidget {
   /// If null, the default color defined in the theme is used.
   final Color? viewBackgroundColor;
 
-  /// The elevation of the search view's [Material] widget.
+  /// The elevation of the search view's [Material]
   /// If null, defaults to 6.0.
   final double? viewElevation;
 
@@ -171,78 +176,42 @@ class CoreSearchWidget<T> extends StatefulWidget {
   final bool enabled;
 
   @override
-  State<CoreSearchWidget<T>> createState() => _CoreSearchWidgetState<T>();
-}
-
-/// The state class for [CoreSearchWidget] which manages search logic and UI updates.
-class _CoreSearchWidgetState<T> extends State<CoreSearchWidget<T>> {
-  /// Controller for managing the search input.
-  final _searchController = SearchController();
-
-  /// BLoC instance to manage the search state.
-  late final CoreSearchCubit<T> _CoreSearchCubit;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize the CoreSearchCubit with the provided search function.
-    _CoreSearchCubit = CoreSearchCubit<T>(widget.searchFunction);
-    // Add a listener to handle text changes in the search field.
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  /// Listener function that triggers a search when the query changes.
-  void _onSearchChanged() {
-    _CoreSearchCubit.onQueryChanged(
-      SearchParams(query: _searchController.text),
-    );
-  }
-
-  @override
-  void dispose() {
-    // Dispose the controller and close the BLoC to free resources.
-    _searchController.dispose();
-    _CoreSearchCubit.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     // Provide the CoreSearchCubit to the widget tree so that child widgets can access it.
     return BlocProvider(
-      create: (context) => _CoreSearchCubit,
+      create: (context) => CoreSearchCubit<T>(searchFunction, searchParams),
       child: Builder(
         builder: (context) {
-          // Return the SearchAnchor which manages the search view overlay.
+          final cubit = context.read<CoreSearchCubit<T>>();
           return SearchAnchor(
-            searchController: _searchController,
-            isFullScreen: widget.isFullScreen,
-            viewBuilder: widget.viewBuilder,
-            viewLeading: widget.viewLeading,
-            viewTrailing: widget.viewTrailing,
-            viewHintText: widget.viewHintText,
-            viewBackgroundColor: widget.viewBackgroundColor,
-            viewElevation: widget.viewElevation,
-            viewSurfaceTintColor: widget.viewSurfaceTintColor,
-            viewSide: widget.viewSide,
-            viewShape: widget.viewShape,
-            viewBarPadding: widget.viewBarPadding,
-            headerHeight: widget.headerHeight,
-            headerTextStyle: widget.headerTextStyle,
-            headerHintStyle: widget.headerHintStyle,
-            dividerColor: widget.dividerColor,
-            viewConstraints: widget.viewConstraints,
-            viewPadding: widget.viewPadding,
-            shrinkWrap: widget.shrinkWrap,
-            textCapitalization: widget.textCapitalization,
-            textInputAction: widget.textInputAction,
-            keyboardType: widget.keyboardType,
-            enabled: widget.enabled,
+            searchController: cubit.searchController,
+            isFullScreen: isFullScreen,
+            viewBuilder: viewBuilder,
+            viewLeading: viewLeading,
+            viewTrailing: viewTrailing,
+            viewHintText: viewHintText,
+            viewBackgroundColor: viewBackgroundColor,
+            viewElevation: viewElevation,
+            viewSurfaceTintColor: viewSurfaceTintColor,
+            viewSide: viewSide,
+            viewShape: viewShape,
+            viewBarPadding: viewBarPadding,
+            headerHeight: headerHeight,
+            headerTextStyle: headerTextStyle,
+            headerHintStyle: headerHintStyle,
+            dividerColor: dividerColor,
+            viewConstraints: viewConstraints,
+            viewPadding: viewPadding,
+            shrinkWrap: shrinkWrap,
+            textCapitalization: textCapitalization,
+            textInputAction: textInputAction,
+            keyboardType: keyboardType,
+            enabled: enabled,
             // Build the main search bar that users interact with.
             builder: (context, controller) {
               return SearchBar(
                 controller: controller,
-                hintText: widget.hintText,
+                hintText: hintText,
                 leading: const Icon(Icons.search),
                 trailing: [
                   // Use BlocBuilder to update the trailing icon based on the search state.
@@ -264,12 +233,8 @@ class _CoreSearchWidgetState<T> extends State<CoreSearchWidget<T>> {
               final cubit = context.watch<CoreSearchCubit<T>>();
               final apiState = cubit.getApiState(cubit.state);
               // Use a custom suggestion builder if provided.
-              if (widget.suggestionBuilder != null) {
-                return widget.suggestionBuilder!(
-                  context,
-                  controller,
-                  cubit.state,
-                );
+              if (suggestionBuilder != null) {
+                return suggestionBuilder!(context, controller, cubit.state);
               }
               // Display appropriate messages or results based on the API state.
               if (apiState.isInitial) {
@@ -287,24 +252,18 @@ class _CoreSearchWidgetState<T> extends State<CoreSearchWidget<T>> {
                   ),
                 ];
               }
-              if (apiState.isSuccess) {
-                return apiState.data.fold(
-                  () => [const Center(child: Text('No results found'))],
-                  (t) =>
-                      t.isEmpty
-                          ? [const Center(child: Text('No results found'))]
-                          : t
-                              .map(
-                                (item) => widget.resultBuilder(
-                                  item,
-                                  _searchController,
-                                ),
-                              )
-                              .toList(),
-                );
-              }
-              // Fallback in case no conditions are met.
-              return [const SizedBox.shrink()];
+              return apiState.data.fold(
+                () => [const Center(child: Text('No results found'))],
+                (t) =>
+                    t.isEmpty
+                        ? [const Center(child: Text('No results found'))]
+                        : t
+                            .map(
+                              (item) =>
+                                  resultBuilder(item, cubit.searchController),
+                            )
+                            .toList(),
+              );
             },
           );
         },
