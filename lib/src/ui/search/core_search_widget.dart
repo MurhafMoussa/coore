@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:coore/lib.dart';
-import 'package:coore/src/ui/search/core_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart' as fp;
@@ -247,7 +246,7 @@ class _CoreSearchWidgetState<T> extends State<CoreSearchWidget<T>> {
                 leading: const Icon(Icons.search),
                 trailing: [
                   // Use BlocBuilder to update the trailing icon based on the search state.
-                  BlocBuilder<CoreSearchCubit<T>, CoreSearchState>(
+                  BlocBuilder<CoreSearchCubit<T>, CoreSearchState<T>>(
                     builder: (context, state) {
                       return state.apiState.isLoading
                           ? const Padding(
@@ -262,11 +261,15 @@ class _CoreSearchWidgetState<T> extends State<CoreSearchWidget<T>> {
             },
             // Build the suggestions or search results list based on the current state.
             suggestionsBuilder: (context, controller) {
-              final state = context.watch<CoreSearchCubit<T>>().state;
-              final apiState = state.apiState;
+              final cubit = context.watch<CoreSearchCubit<T>>();
+              final apiState = cubit.getApiState(cubit.state);
               // Use a custom suggestion builder if provided.
               if (widget.suggestionBuilder != null) {
-                return widget.suggestionBuilder!(context, controller, state);
+                return widget.suggestionBuilder!(
+                  context,
+                  controller,
+                  cubit.state,
+                );
               }
               // Display appropriate messages or results based on the API state.
               if (apiState.isInitial) {
