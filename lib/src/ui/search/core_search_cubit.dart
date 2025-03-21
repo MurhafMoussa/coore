@@ -7,7 +7,7 @@ part 'core_search_cubit.freezed.dart';
 part 'core_search_state.dart';
 
 class CoreSearchCubit<T> extends CoreCubit<CoreSearchState<T>, List<T>> {
-  CoreSearchCubit(this.searchFunction) : super(CoreSearchState.initial());
+  CoreSearchCubit(this.searchFunction) : super(CoreSearchState<T>.initial());
   final RepositoryFutureResponse<List<T>> Function(SearchParams) searchFunction;
   Timer? _debounceTimer;
 
