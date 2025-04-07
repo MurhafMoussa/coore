@@ -1,5 +1,4 @@
-import 'package:coore/src/config/entities/core_config_entity.dart';
-import 'package:coore/src/dependency_injection/di_container.dart';
+import 'package:coore/lib.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger.dart';
 
@@ -9,11 +8,25 @@ class CoreConfig {
   ) async {
     await setupCoreDependencies(configEntity);
 
-    Bloc.observer = TalkerBlocObserver(
-      settings: const TalkerBlocLoggerSettings(
-        printChanges: true,
-        printClosings: true,
-        printCreations: true,
+    if (configEntity.currentEnvironment == CoreEnvironment.development) {
+      Bloc.observer = TalkerBlocObserver(
+        settings: const TalkerBlocLoggerSettings(
+          printChanges: true,
+          printClosings: true,
+          printCreations: true,
+        ),
+      );
+    }
+  }
+
+  static Future<void> initializeCoreDependenciesAfterProjectSetup(
+    CoreConfigAfterProjectSetupEntity coreEntity,
+  ) async {
+    getIt.registerLazySingleton(
+      () => CoreNavigator(
+        logger: getIt(),
+        shouldLog: coreEntity.shouldLog,
+        navigationConfigEntity: coreEntity.navigationConfigEntity,
       ),
     );
   }

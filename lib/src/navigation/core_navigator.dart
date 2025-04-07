@@ -9,6 +9,7 @@ class CoreNavigator {
   CoreNavigator({
     required CoreLogger logger,
     required NavigationConfigEntity navigationConfigEntity,
+    required this.shouldLog,
   }) : _logger = logger,
        refreshListenable = navigationConfigEntity.refreshListenable,
        _configEntity = navigationConfigEntity {
@@ -19,6 +20,7 @@ class CoreNavigator {
   final NavigationConfigEntity _configEntity;
   final Listenable? refreshListenable; // For auth state changes
   late final GoRouter _goRouter;
+  final bool shouldLog;
   static final GlobalKey<NavigatorState> _routeNavigationKey = GlobalKey(
     debugLabel: 'root',
   );
@@ -168,11 +170,11 @@ class CoreNavigator {
       navigatorKey: _routeNavigationKey,
       routes: _configEntity.routes,
       errorBuilder: _configEntity.errorBuilder ?? _defaultErrorWidget,
-      debugLogDiagnostics: _configEntity.enableLogging,
+      debugLogDiagnostics: shouldLog,
       redirect: _configEntity.redirect,
       refreshListenable: refreshListenable,
       observers: [
-        if (_configEntity.enableLogging) CoreNavigationObserver(_logger),
+        if (shouldLog) CoreNavigationObserver(_logger),
         ..._configEntity.navigationObservers,
       ],
     );

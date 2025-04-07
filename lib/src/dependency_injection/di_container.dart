@@ -8,7 +8,6 @@ import 'package:coore/src/api_handler/base_cache_store/mem_cache_store.dart';
 import 'package:coore/src/api_handler/interceptors/auth_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/caching_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/logging_interceptor.dart';
-import 'package:coore/src/config/entities/core_config_after_run_app_entity.dart';
 import 'package:coore/src/config/entities/core_config_entity.dart';
 import 'package:coore/src/config/entities/network_config_entity.dart';
 import 'package:coore/src/config/service/config_service.dart';
@@ -20,7 +19,6 @@ import 'package:coore/src/local_storage/local_database/nosql_database_imp.dart';
 import 'package:coore/src/local_storage/secure_database/secure_database_imp.dart';
 import 'package:coore/src/local_storage/secure_database/secure_database_interface.dart';
 import 'package:coore/src/localization/cubit/localization_cubit.dart';
-import 'package:coore/src/navigation/core_navigator.dart';
 import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
 import 'package:coore/src/network_status/service/network_status_imp.dart';
 import 'package:coore/src/network_status/service/network_status_interface.dart';
@@ -52,6 +50,9 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       ),
     )
     ..registerLazySingleton(_createFlutterSecureStorage)
+    ..registerLazySingleton<CoreLogger>(
+      () => CoreLoggerImpl(getIt(), shouldLog: coreEntity.shouldLog),
+    )
     ..registerLazySingleton(
       () => AuthTokenManager(
         getIt(),
@@ -60,9 +61,12 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
             AuthInterceptorType.tokenBased,
       ),
     )
-    ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
     ..registerLazySingleton(
-      () => _createDio(coreEntity.networkConfigEntity, directory),
+      () => _createDio(
+        coreEntity.networkConfigEntity,
+        directory,
+        shouldLog: coreEntity.shouldLog,
+      ),
     )
     ..registerLazySingleton<SecureDatabaseInterface>(
       () => SecureDatabaseImp(getIt()),
@@ -109,7 +113,11 @@ FlutterSecureStorage _createFlutterSecureStorage() {
   );
 }
 
-Dio _createDio(NetworkConfigEntity entity, Directory directory) {
+Dio _createDio(
+  NetworkConfigEntity entity,
+  Directory directory, {
+  bool shouldLog = false,
+}) {
   final interceptors = <Interceptor>[];
   late final AuthInterceptor authInterceptor;
 
@@ -154,18 +162,6 @@ Dio _createDio(NetworkConfigEntity entity, Directory directory) {
         ),
       ...interceptors,
       ...entity.interceptors,
-      if (entity.enableLogging)
-        LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
+      if (shouldLog) LoggingInterceptor(logger: getIt(), maxBodyLength: 10000),
     ]);
-}
-
-Future<void> configureDependenciesAfterRunApp(
-  CoreConfigAfterRunAppEntity coreEntity,
-) async {
-  getIt.registerLazySingleton(
-    () => CoreNavigator(
-      logger: getIt(),
-      navigationConfigEntity: coreEntity.navigationConfigEntity,
-    ),
-  );
 }

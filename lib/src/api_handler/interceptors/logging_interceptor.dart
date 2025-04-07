@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:coore/src/dev_tools/core_logger.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 
 class LoggingInterceptor extends Interceptor {
   LoggingInterceptor({
@@ -74,7 +73,7 @@ class LoggingInterceptor extends Interceptor {
       if (options.data is FormData) {
         _formatFormData(options.data as FormData, buffer);
       } else {
-        final body = _convertData(options.data, maxBodyLength);
+        final body = _convertData(options.data);
         buffer.writeln(body);
       }
     }
@@ -101,7 +100,7 @@ class LoggingInterceptor extends Interceptor {
     if (response.data != null) {
       buffer
         ..writeln('Body:')
-        ..writeln(_convertData(response.data, maxBodyLength));
+        ..writeln(_convertData(response.data));
     }
 
     buffer.writeln('*** End Response ***');
@@ -152,7 +151,7 @@ class LoggingInterceptor extends Interceptor {
     }
   }
 
-  String _convertData(dynamic data, [int? maxLength]) {
+  String _convertData(dynamic data) {
     if (data == null) return 'null';
 
     String dataStr;
@@ -166,21 +165,9 @@ class LoggingInterceptor extends Interceptor {
       dataStr = data.toString();
     }
 
-    if (maxLength != null && dataStr.length > maxLength) {
-      dataStr = '${dataStr.substring(0, maxLength)}... [trimmed]';
+    if (dataStr.length > maxBodyLength) {
+      dataStr = '${dataStr.substring(0, maxBodyLength)}... [trimmed]';
     }
     return dataStr;
-  }
-}
-
-class Logger {
-  const Logger();
-
-  void info(String message) {
-    debugPrint(message);
-  }
-
-  void error(String message) {
-    debugPrint(message);
   }
 }
