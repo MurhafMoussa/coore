@@ -37,24 +37,24 @@ class SkipPagingStrategyParams extends PaginationParams {
   }
 }
 
-class OffsetPaginationParams extends PaginationParams {
-  const OffsetPaginationParams({
+class PagePaginationParams extends PaginationParams {
+  const PagePaginationParams({
     required super.limit,
-    required this.skip,
+    required super.batch,
     super.cancelTokenAdapter,
-  }) : super(batch: skip);
+  }) ;
 
-  final int skip;
+
 
   @override
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{'offset': skip, 'limit': limit};
+    return <String, dynamic>{'page': batch, 'limit': limit};
   }
 
   @override
   BaseParams attachCancelToken({CancelRequestAdapter? cancelTokenAdapter}) {
-    return OffsetPaginationParams(
-      skip: skip,
+    return PagePaginationParams(
+      batch: batch,
       limit: limit,
       cancelTokenAdapter: cancelTokenAdapter ?? this.cancelTokenAdapter,
     );
