@@ -1,7 +1,8 @@
 import 'package:coore/src/typedefs/core_typedefs.dart';
+import 'package:uuid/uuid.dart';
 
 abstract class Defaults {
-  static const Id invalidId = '';
+  static final Id invalidId = const Uuid().v4();
   static const String defaultString = '';
   static const bool defaultBool = false;
   static const int defaultInt = 0;
