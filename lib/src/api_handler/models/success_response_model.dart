@@ -21,9 +21,8 @@ part 'success_response_model.g.dart';
 abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   /// Creates an instance of [SuccessResponseModel] from JSON.
 
-  const factory SuccessResponseModel({
-    required T data,
-  }) = _SuccessResponseModel<T>;
+  const factory SuccessResponseModel({required T data}) =
+      _SuccessResponseModel<T>;
 
   /// Generates a [SuccessResponseModel] instance from a JSON [Map].
   ///
@@ -34,7 +33,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     T Function(dynamic) fromJsonT,
   ) => _$SuccessResponseModelFromJson(json, fromJsonT);
 
-   /// Private helper that extracts the relevant portion of the JSON response.
+  /// Private helper that extracts the relevant portion of the JSON response.
   ///
   /// It uses [wrapperKey] (default is `'data'`) to extract the main payload.
   /// If [dataKey] is provided, it will further extract the nested data from
@@ -45,7 +44,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     String wrapperKey = 'data',
     String? dataKey,
   }) {
-    final dynamic dataContent;
+    late final dynamic dataContent;
     if (dataKey != null) {
       if (json[wrapperKey] is Map<String, dynamic>) {
         dataContent = (json[wrapperKey] as Map<String, dynamic>)[dataKey];
@@ -58,7 +57,7 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
       dataContent = json[wrapperKey];
     }
     return SuccessResponseModel<T>.fromJson({
-      'data': dataContent,
+      wrapperKey: dataContent,
     }, (innerJson) => fromJsonT(innerJson)).data;
   }
 
@@ -110,8 +109,6 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     }
   }
 
-
-
   /// Extracts a paginated list of type [T] from the JSON response.
   ///
   /// If [dataKey] is provided, it further extracts nested data using that key.
@@ -121,12 +118,13 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   ///       {'id': 1, 'name': 'Paginated Product 1'},
   ///       {'id': 2, 'name': 'Paginated Product 2'},
   ///     ],
-  ///     
+  ///
   ///   }
   /// };
   /// final paginatedList = SuccessResponseModel.getPaginatedList&lt;Product&gt;(
   ///   jsonResponse,
-  ///   (item) => item, 
+  ///   (item) => item,
+  ///   dataKey:"products"
   /// );
   /// ``
   static List<T> getPaginatedList<T>(
