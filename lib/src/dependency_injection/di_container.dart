@@ -37,11 +37,9 @@ import 'package:path_provider/path_provider.dart';
 final getIt = GetIt.instance;
 
 Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
-  // Initialize local storage (Hive)
   final directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
 
-  // Register Logger
   getIt
     ..registerLazySingleton(
       () => logger.Logger(
@@ -53,9 +51,7 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
         level: logger.Level.all,
       ),
     )
-    // Register Secure Storage
     ..registerLazySingleton(_createFlutterSecureStorage)
-    // Register AuthTokenManager
     ..registerLazySingleton(
       () => AuthTokenManager(
         getIt(),
@@ -64,47 +60,36 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
             AuthInterceptorType.tokenBased,
       ),
     )
-    // Register CoreLogger
     ..registerLazySingleton<CoreLogger>(() => CoreLoggerImpl(getIt()))
-    // Register Dio (API Client)
     ..registerLazySingleton(
       () => _createDio(coreEntity.networkConfigEntity, directory),
     )
-    // Register Secure Database
     ..registerLazySingleton<SecureDatabaseInterface>(
       () => SecureDatabaseImp(getIt()),
     )
-    // Register Exception Mappers
     ..registerLazySingleton<NetworkExceptionMapper>(
       () => DioNetworkExceptionMapper(),
     )
-    // Register API Handler
     ..registerLazySingleton<ApiHandlerInterface>(
       () => DioApiHandler(getIt(), getIt()),
     )
-    // Register Internet Connection Checker
     ..registerLazySingleton(() => InternetConnection())
-    // Register Network Status Service & Cubit
     ..registerLazySingleton<NetworkStatusInterface>(
       () => NetworkStatusImp(getIt(), getIt()),
     )
     ..registerLazySingleton(() => NetworkStatusCubit(networkStatus: getIt()))
-    // Register Local Database using Hive (with a parameterized factory)
     ..registerFactoryParam<LocalDatabaseInterface, String, void>(
       (boxName, _) => HiveLocalDatabase(boxName),
     )
-    // Register Config Service
     ..registerLazySingleton(
       () => ConfigService(getIt<LocalDatabaseInterface>(param1: 'coreConfig')),
     )
-    // Register Localization Cubit
     ..registerLazySingleton(
       () => LocalizationCubit(
         service: getIt(),
         config: coreEntity.localizationConfigEntity,
       ),
     )
-    // Register Theme Cubit
     ..registerLazySingleton(
       () => ThemeCubit(
         repository: getIt(),
@@ -130,52 +115,48 @@ Dio _createDio(NetworkConfigEntity entity, Directory directory) {
 
   switch (entity.authInterceptorType) {
     case AuthInterceptorType.tokenBased:
-      authInterceptor = TokenAuthInterceptor(getIt());
-      break;
+      {
+        authInterceptor = TokenAuthInterceptor(getIt());
+      }
     case AuthInterceptorType.cookieBased:
-      final String appDocPath = directory.path;
-      final jar = PersistCookieJar(
-        ignoreExpires: true,
-        storage: FileStorage('$appDocPath/.cookies/'),
-      );
-      authInterceptor = CookieAuthInterceptor(getIt());
-      interceptors.add(CookieManager(jar));
-      break;
+      {
+        final String appDocPath = directory.path;
+        final jar = PersistCookieJar(
+          ignoreExpires: true,
+          storage: FileStorage('$appDocPath/.cookies/'),
+        );
+        authInterceptor = CookieAuthInterceptor(getIt());
+        interceptors.add(CookieManager(jar));
+      }
   }
-
   interceptors.add(authInterceptor);
-
-  final dio = Dio(
-    BaseOptions(
-      baseUrl: entity.baseUrl,
-      connectTimeout: entity.connectTimeout,
-      contentType: entity.defaultContentType,
-      followRedirects:
-          interceptors.first is TokenAuthInterceptor
-              ? entity.followRedirects
-              : false,
-      maxRedirects: entity.maxRedirects,
-      queryParameters: entity.defaultQueryParams,
-      sendTimeout: entity.sendTimeout,
-      receiveTimeout: entity.receiveTimeout,
-      headers: entity.staticHeaders,
-    ),
-  );
-
-  // Add caching, logging and other interceptors
-  dio.interceptors.addAll([
-    if (entity.enableCache)
-      CachingInterceptor(
-        cacheStore: MemoryCacheStore(),
-        defaultCacheDuration: entity.cacheDuration,
+  return Dio(
+      BaseOptions(
+        baseUrl: entity.baseUrl,
+        connectTimeout: entity.connectTimeout,
+        contentType: entity.defaultContentType,
+        followRedirects:
+            interceptors.first is TokenAuthInterceptor
+                ? entity.followRedirects
+                : false,
+        maxRedirects: entity.maxRedirects,
+        queryParameters: entity.defaultQueryParams,
+        sendTimeout: entity.sendTimeout,
+        receiveTimeout: entity.receiveTimeout,
+        headers: entity.staticHeaders,
       ),
-    ...interceptors,
-    ...entity.interceptors,
-    if (entity.enableLogging)
-      LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
-  ]);
-
-  return dio;
+    )
+    ..interceptors.addAll([
+      if (entity.enableCache)
+        CachingInterceptor(
+          cacheStore: MemoryCacheStore(),
+          defaultCacheDuration: entity.cacheDuration,
+        ),
+      ...interceptors,
+      ...entity.interceptors,
+      if (entity.enableLogging)
+        LoggingInterceptor(logger: getIt(), maxBodyLength: 2048),
+    ]);
 }
 
 Future<void> configureDependenciesAfterRunApp(

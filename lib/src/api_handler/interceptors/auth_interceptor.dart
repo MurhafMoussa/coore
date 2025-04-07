@@ -33,9 +33,9 @@ abstract class AuthInterceptor extends Interceptor {
   ) async {
     if (err.response?.statusCode == 401) {
       try {
-        final success = await handleRefresh(err); // Implemented in subclasses
+        final success = await handleRefresh(err);
         if (success) {
-          await retryRequest(err, handler); // Shared retry logic
+          await retryRequest(err, handler); 
         } else {
           handler.reject(err);
         }
@@ -114,7 +114,7 @@ class CookieAuthInterceptor extends AuthInterceptor {
     return response.fold((l) => false, (r) {
       _tokenManager.setTokens(
         accessToken: r['data']['access_token'],
-        refreshToken: r['data']['refresh_token'],
+      
       );
       return true;
     });
