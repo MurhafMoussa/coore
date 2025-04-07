@@ -7,10 +7,7 @@ part 'pagination_response_model.g.dart';
 abstract class PaginationResponseModel<T> with _$PaginationResponseModel<T> {
   const factory PaginationResponseModel({
     @Default([]) List<T> data,
-    // Add other pagination fields if needed
-    // int? totalPages,
-    // int? currentPage,
-    // int? totalItems,
+  
   }) = _PaginationResponseModel<T>;
 
   factory PaginationResponseModel.fromJson(

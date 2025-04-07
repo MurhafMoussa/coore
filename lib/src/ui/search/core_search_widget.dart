@@ -16,11 +16,11 @@ import 'package:fpdart/fpdart.dart' as fp;
 /// It takes the [BuildContext], [SearchController] controlling the input,
 /// and the current [CoreSearchState], and returns an [Iterable] of [Widget]s,
 /// either synchronously or asynchronously.
-typedef CustomSuggestionBuilder =
+typedef CustomSuggestionBuilder<T> =
     FutureOr<Iterable<Widget>> Function(
       BuildContext context,
       SearchController searchController,
-      CoreSearchState state,
+      CoreSearchState<T> state,
     );
 
 /// A generic, customizable search widget for enterprise applications.
@@ -38,7 +38,9 @@ class CoreSearchWidget<T> extends StatelessWidget {
     super.key,
     this.hintText = '',
     required this.resultBuilder,
-    required this.searchFunction,
+    required this.searchFunction,  
+    required this.searchParams,
+
     this.suggestionBuilder,
     this.isFullScreen,
     this.viewBuilder,
@@ -64,7 +66,6 @@ class CoreSearchWidget<T> extends StatelessWidget {
     this.textInputAction,
     this.keyboardType,
     this.enabled = true,
-    required this.searchParams,
   });
 
   /// Placeholder text shown in the search bar when no input is provided.

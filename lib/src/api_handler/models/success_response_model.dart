@@ -15,14 +15,14 @@ part 'success_response_model.g.dart';
 /// - **T as a [PaginationResponseModel]:** Handling paginated data responses.
 ///
 /// **Note:** The key for extracting data from JSON is defined by [kDataKey].
-/// It is currently set to `'products'` but can be changed to `'data'` if required.
+/// It is currently set to `'data'` but can be changed to `'data'` if required.
 /// {@endtemplate}
 @Freezed(genericArgumentFactories: true)
 abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   /// Creates an instance of [SuccessResponseModel] from JSON.
 
   const factory SuccessResponseModel({
-    @JsonKey(name: 'products') required T data,
+    required T data,
   }) = _SuccessResponseModel<T>;
 
   /// Generates a [SuccessResponseModel] instance from a JSON [Map].
@@ -34,25 +34,44 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     T Function(dynamic) fromJsonT,
   ) => _$SuccessResponseModelFromJson(json, fromJsonT);
 
+   /// Private helper that extracts the relevant portion of the JSON response.
+  ///
+  /// It uses [wrapperKey] (default is `'data'`) to extract the main payload.
+  /// If [dataKey] is provided, it will further extract the nested data from
+  /// `json[wrapperKey][dataKey]`.
   static T _dataFieldExtractor<T>(
     Map<String, dynamic> json,
-    T Function(dynamic) fromJsonT,
-  ) =>
-      SuccessResponseModel<T>.fromJson(
-        json,
-        (innerJson) => fromJsonT(innerJson),
-      ).data;
+    T Function(dynamic) fromJsonT, {
+    String wrapperKey = 'data',
+    String? dataKey,
+  }) {
+    final dynamic dataContent;
+    if (dataKey != null) {
+      if (json[wrapperKey] is Map<String, dynamic>) {
+        dataContent = (json[wrapperKey] as Map<String, dynamic>)[dataKey];
+      } else {
+        throw FormatException(
+          "Expected '$wrapperKey' to be a Map<String, dynamic> but got ${json[wrapperKey].runtimeType}",
+        );
+      }
+    } else {
+      dataContent = json[wrapperKey];
+    }
+    return SuccessResponseModel<T>.fromJson({
+      'data': dataContent,
+    }, (innerJson) => fromJsonT(innerJson)).data;
+  }
 
   /// Extracts the data of type [T] from a JSON map.
   ///
   /// Example:
   /// ```dart
   /// final jsonResponse = {
-  ///   'products': {'id': 1, 'name': 'Example Product'}
+  ///   'data': {'id': 1, 'name': 'Example Product'}
   /// };
-  /// final product = SuccessResponseModel.getData<Map<String, dynamic>>(
+  /// final product = SuccessResponseModel.getData&lt;Product&gt;(
   ///   jsonResponse,
-  ///   (data) => data as Map<String, dynamic>,
+  ///   (data) => data ,
   /// );
   /// ```
   static T getData<T>(
@@ -67,12 +86,12 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   /// Example:
   /// ```dart
   /// final jsonResponse = {
-  ///   'products': [
+  ///   'data': [
   ///     {'id': 1, 'name': 'Product 1'},
   ///     {'id': 2, 'name': 'Product 2'},
   ///   ]
   /// };
-  /// final productList = SuccessResponseModel.getList<Map<String, dynamic>>(
+  /// final productList = SuccessResponseModel.getList&lt;Product&gt;(
   ///   jsonResponse,
   ///   (item) => item, // In a real example, convert map to your model
   /// );
@@ -91,37 +110,37 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     }
   }
 
+
+
   /// Extracts a paginated list of type [T] from the JSON response.
   ///
-  /// This method expects the JSON to represent a paginated response and uses the
-  /// private helper [_parsePagination] to convert the nested pagination object.
-  ///
-  /// Example:
-  /// ```dart
-  /// // Assume jsonResponse contains paginated data in the 'products' key.
+  /// If [dataKey] is provided, it further extracts nested data using that key.
   /// final jsonResponse = {
-  ///   'products': {
-  ///     'data': [
+  ///   'data': {
+  ///     'products': [
   ///       {'id': 1, 'name': 'Paginated Product 1'},
   ///       {'id': 2, 'name': 'Paginated Product 2'},
   ///     ],
-  ///     'currentPage': 1,
-  ///     'totalPages': 5,
+  ///     
   ///   }
   /// };
-  /// final paginatedList = SuccessResponseModel.getPaginatedList<Map<String, dynamic>>(
+  /// final paginatedList = SuccessResponseModel.getPaginatedList&lt;Product&gt;(
   ///   jsonResponse,
-  ///   (item) => item, // Replace with a proper conversion to your model
+  ///   (item) => item, 
   /// );
-  /// ```
+  /// ``
   static List<T> getPaginatedList<T>(
     Map<String, dynamic> json,
-    T Function(Map<String, dynamic>) itemConverter,
-  ) {
+    T Function(Map<String, dynamic>) itemConverter, {
+    String wrapperKey = 'data',
+    String? dataKey,
+  }) {
     try {
       final pagination = _dataFieldExtractor<PaginationResponseModel<T>>(
         json,
         (data) => _parsePagination(data, itemConverter),
+        wrapperKey: wrapperKey,
+        dataKey: dataKey,
       );
       return pagination.data;
     } catch (e) {
@@ -136,11 +155,11 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   /// Example:
   /// ```dart
   /// final jsonResponse = {
-  ///   'products': 42
+  ///   'data': 42
   /// };
   /// final number = SuccessResponseModel.getPrimitive<int>(
   ///   jsonResponse,
-  ///   (data) => data as int,
+  ///   (data) => data,
   /// );
   /// ```
   static T getPrimitive<T>(
