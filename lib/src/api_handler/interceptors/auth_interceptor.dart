@@ -13,15 +13,15 @@ abstract class AuthInterceptor extends Interceptor {
     try {
       final isAuthorized = options.extra['isAuthorized'] as bool;
       if (isAuthorized) {
-        await handleAuthorization(options); // Implemented in subclasses
+        await handleAuthorization(options); 
       }
       handler.next(options);
     } on DioException catch (e) {
-      handler.reject(e, true);
+      handler.reject(e,);
     } catch (e) {
       handler.reject(
         DioException(requestOptions: options, error: 'Auth setup failed: $e'),
-        true,
+       
       );
     }
   }
@@ -48,11 +48,11 @@ abstract class AuthInterceptor extends Interceptor {
         );
       }
     } else {
-      handler.next(err);
+      handler.reject(err);
     }
   }
 
-  // Shared retry logic
+
   Future<void> retryRequest(
     DioException err,
     ErrorInterceptorHandler handler,
@@ -62,7 +62,7 @@ abstract class AuthInterceptor extends Interceptor {
     handler.resolve(clonedRequest);
   }
 
-  // Abstract methods for subclasses to implement
+ 
   Future<void> handleAuthorization(RequestOptions options) async {
     final accessToken = await _tokenManager.accessToken;
     if (accessToken.isNotEmpty) {
