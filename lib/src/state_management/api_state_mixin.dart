@@ -1,5 +1,6 @@
 // api_state_mixin.dart
 
+import 'package:coore/lib.dart';
 import 'package:coore/src/api_handler/cancel_request_adapter.dart';
 import 'package:coore/src/api_handler/params/base_params.dart';
 import 'package:coore/src/error_handling/failures/failure.dart';
@@ -7,71 +8,95 @@ import 'package:coore/src/state_management/api_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 
-/// A generic mixin for BLoCs/Cubits that manage composite states containing API state.
+/// A generic mixin for BLoCs/Cubits that manage composite state objects containing an API state.
 ///
-/// This mixin provides a structure to handle API calls and manage their state within
-/// a BLoC/Cubit, ensuring consistent loading, success, and failure state handling.
+/// This mixin provides a reusable pattern for handling API calls, including request cancellation,
+/// state updates for loading, success, and failure conditions, and optional retry functionality.
 ///
-/// Type Parameters:
-/// - `CompositeState`: The composite state type managed by the BLoC.
-/// - `SuccessData`: The success data type returned by the API call.
+/// ### Type Parameters:
+/// - `CompositeState`: The type of the composite state managed by the BLoC/Cubit. This state
+///   includes both API call status and other related form or view data.
+/// - `SuccessData`: The expected type of data returned upon a successful API call.
+///
+/// ### Usage:
+/// When mixing this in to a BLoC/Cubit, you must provide implementations for:
+/// - [getApiState] to extract the current API-related state from your composite state.
+/// - [setApiState] to update your composite state with a new API state.
+///
+/// The [handleApiCall] method is used to encapsulate the API call lifecycle:
+/// - It checks if an API call is already in progress.
+/// - Emits a loading state.
+/// - Performs the API call while supporting request cancellation via [cancelRequestAdapter].
+/// - Emits either a failure or success state based on the response.
+/// - Optionally provides a retry function for failed requests.
 mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
-  /// Adapter to manage cancellation of API requests.
+  /// Adapter instance used to cancel an ongoing API request.
   CancelRequestAdapter? cancelRequestAdapter;
 
-  /// Cancels an ongoing API request if applicable.
+  /// Cancels an ongoing API request, if one exists.
   void cancelRequest() {
     cancelRequestAdapter?.cancelRequest();
   }
 
   /// Retrieves the current API state from the composite state.
   ///
-  /// Must be implemented by the consuming BLoC/Cubit.
+  /// This method must be implemented by the consuming BLoC/Cubit to extract
+  /// the API-specific state (such as loading, success, or failure) from a larger state object.
   ApiState<SuccessData> getApiState(CompositeState state);
 
   /// Updates the composite state with a new API state.
   ///
-  /// Must be implemented by the consuming BLoC/Cubit.
+  /// This method must be implemented by the consuming BLoC/Cubit to merge the new
+  /// API state into its current composite state.
   CompositeState setApiState(
     CompositeState state,
     ApiState<SuccessData> apiState,
   );
 
-  /// Handles an API call lifecycle and updates the state accordingly.
+  /// Executes an API call and manages its state lifecycle including loading, success, and failure.
   ///
-  /// This function ensures that the state is updated for loading, success,
-  /// and failure scenarios while also managing request cancellation.
+  /// This method encapsulates the following workflow:
+  /// 1. Prevents duplicate API calls if one is already in progress.
+  /// 2. Emits a loading state.
+  /// 3. Sets up a request cancellation adapter.
+  /// 4. Executes the provided API call with the given parameters.
+  /// 5. Depending on the outcome, either emits a failure state (with a built-in retry function)
+  ///    or emits a success state.
   ///
-  /// Parameters:
-  /// - `apiCall`: A function that performs the API call, returning a `TaskEither` of `Failure` or `T`.
-  /// - `params`: The parameters required for the API call.
-  /// - `onSuccess`: (Optional) A callback executed when the API call is successful.
-  /// - `onFailure`: (Optional) A callback executed when the API call fails.
+  /// ### Parameters:
+  /// - `apiCall`: A function that takes parameters of type [T] and returns a `TaskEither` containing
+  ///    either a [Failure] or the [SuccessData]. This function executes the actual API call.
+  /// - `params`: The parameters to pass to [apiCall]. It must extend [BaseParams].
+  /// - `onSuccess`: An optional callback invoked when the API call succeeds.
+  /// - `onFailure`: An optional callback invoked when the API call fails.
+  ///
+  /// The method uses a cancellation adapter to ensure that the API call can be cancelled
+  /// if needed. If the call fails, the state is updated with a failure and a retry function is provided.
   Future<void> handleApiCall<T extends BaseParams>({
-    required Future<Either<Failure, SuccessData>> Function(T params) apiCall,
+    required RepositoryFutureResponse<SuccessData> Function(T params) apiCall,
     required T params,
     void Function(SuccessData data)? onSuccess,
     void Function(Failure failure)? onFailure,
   }) async {
-    // Prevents duplicate API calls while a request is already in progress
+    // Avoid duplicate API calls if one is already in progress.
     if (getApiState(state).isLoading) return;
 
-    // Emit loading state
+    // Emit loading state.
     emit(setApiState(state, const ApiState.loading()));
 
-    // Initialize request cancellation adapter
+    // Initialize the cancel request adapter.
     cancelRequestAdapter = DioCancelRequestAdapter();
 
-    // Execute the API call
+    // Execute the API call, attaching the cancel token.
     final result = await apiCall(
       params.attachCancelToken(cancelTokenAdapter: cancelRequestAdapter) as T,
     );
 
-    // Handle API response
+    // Ensure that the Bloc/Cubit is still active before updating state.
     if (!isClosed) {
       result.fold(
         (failure) {
-          // Emit failure state with a retry function
+          // On failure: Emit failure state with a retry function.
           emit(
             setApiState(
               state,
@@ -87,13 +112,13 @@ mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
               ),
             ),
           );
-          // Invoke failure callback if provided
+          // Call failure callback if provided.
           onFailure?.call(failure);
         },
         (success) {
-          // Emit success state
+          // On success: Emit the succeeded state.
           emit(setApiState(state, ApiState.succeeded(success)));
-          // Invoke success callback if provided
+          // Call success callback if provided.
           onSuccess?.call(success);
         },
       );
