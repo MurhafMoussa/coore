@@ -1,13 +1,65 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:coore/lib.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 
+/// A versatile image widget that handles network, asset, and file images with
+/// advanced features like caching, placeholder states, and error handling.
+///
+/// This widget provides a unified interface for different image types and
+/// includes features like:
+/// - Cached network image loading
+/// - SVG support
+/// - Shimmer loading effects
+/// - Progress indicators
+/// - Error fallbacks
+/// - Customizable fade animations
+///
+/// Example:
+/// ```dart
+/// CoreImage.network(
+///   'https://example.com/image.jpg',
+///   width: 200,
+///   height: 200,
+///   placeholderAssetImage: 'assets/placeholder.png',
+/// )
+/// ```
 class CoreImage extends StatelessWidget {
+  /// Creates a CoreImage from a local file
+  ///
+  /// Parameters:
+  /// - `filePath`: Path to the image file
+  /// - `scale`: Image scale factor (default: 1.0)
+  /// - `color`: Tint color for the image
+  /// - `colorBlendMode`: Blend mode for color tinting
+  CoreImage.file(
+    String filePath, {
+    Key? key,
+
+    double? scale,
+    double? width,
+    double? height,
+    Color? color,
+    BlendMode? colorBlendMode,
+    BoxFit fit = BoxFit.cover,
+    Alignment alignment = Alignment.center,
+  }) : this._(
+         key: key,
+         imageFile: File(filePath),
+         scale: scale,
+         width: width,
+         height: height,
+         color: color,
+         colorBlendMode: colorBlendMode,
+         fit: fit,
+         alignment: alignment,
+       );
+
+  /// Private main constructor
   const CoreImage._({
+    super.key,
     this.imageUrl,
     this.imagePath,
     this.imageFile,
@@ -16,7 +68,7 @@ class CoreImage extends StatelessWidget {
     this.height,
     this.color,
     this.colorBlendMode,
-    this.fit = BoxFit.fill,
+    this.fit = BoxFit.cover,
     this.alignment = Alignment.center,
     this.placeholderAssetImage,
     this.placeholderBuilder,
@@ -44,11 +96,24 @@ class CoreImage extends StatelessWidget {
     this.progressBarColor,
     this.filterQuality = FilterQuality.low,
     this.placeholderFadeInDuration,
+    this.borderRadius,
   });
 
-  /// Factory constructor for network image
-  factory CoreImage.network(
+  /// Creates a CoreImage from a network resource with caching capabilities
+  ///
+  /// Parameters:
+  /// - `imageUrl`: The URL of the image to load
+  /// - `placeholderAssetImage`: Local asset to use while loading (optional)
+  /// - `memCacheWidth`: Width to cache the image in memory (pixels)
+  /// - `memCacheHeight`: Height to cache the image in memory (pixels)
+  /// - `shimmerBaseColor`: Base color for shimmer effect (defaults to theme)
+  /// - `httpHeaders`: Custom headers for the image request
+  /// - `fadeInDuration`: Duration for image fade-in animation (default: 500ms)
+  /// - `filterQuality`: Rendering quality filter (default: low)
+  const CoreImage.network(
     String imageUrl, {
+    Key? key,
+
     String? placeholderAssetImage,
     Widget Function(BuildContext context, String)? placeholderBuilder,
     Widget Function(BuildContext, String, DownloadProgress)?
@@ -58,7 +123,7 @@ class CoreImage extends StatelessWidget {
     bool showProgressIndicator = false,
     double? height,
     double? width,
-    BoxFit fit = BoxFit.fill,
+    BoxFit fit = BoxFit.cover,
     Alignment alignment = Alignment.center,
     int? memCacheWidth,
     int? memCacheHeight,
@@ -71,7 +136,7 @@ class CoreImage extends StatelessWidget {
     Map<String, String>? httpHeaders,
     Widget Function(BuildContext context, ImageProvider<Object> imageProvider)?
     imageBuilder,
-    Duration? fadeOutDuration = const Duration(milliseconds: 1000),
+    Duration fadeOutDuration = const Duration(milliseconds: 1000),
     Curve fadeOutCurve = Curves.easeOut,
     Duration fadeInDuration = const Duration(milliseconds: 500),
     Curve fadeInCurve = Curves.easeIn,
@@ -83,100 +148,83 @@ class CoreImage extends StatelessWidget {
     FilterQuality filterQuality = FilterQuality.low,
     BlendMode? colorBlendMode,
     Duration? placeholderFadeInDuration,
-  }) {
-    return CoreImage._(
-      imageUrl: imageUrl,
-      placeholderAssetImage: placeholderAssetImage,
-      placeholderBuilder: placeholderBuilder,
-      progressIndicatorBuilder: progressIndicatorBuilder,
-      errorBuilder: errorBuilder,
-      showError: showError,
-      showProgressIndicator: showProgressIndicator,
-      height: height,
-      width: width,
-      fit: fit,
-      alignment: alignment,
-      memCacheWidth: memCacheWidth,
-      memCacheHeight: memCacheHeight,
-      cacheKey: cacheKey,
-      maxWidthDiskCache: maxWidthDiskCache,
-      maxHeightDiskCache: maxHeightDiskCache,
-      shimmerBaseColor: shimmerBaseColor,
-      shimmerHighlightColor: shimmerHighlightColor,
-      placeholderForegroundColor: placeholderForegroundColor,
-      httpHeaders: httpHeaders,
-      imageBuilder: imageBuilder,
-      fadeOutDuration: fadeOutDuration,
-      fadeOutCurve: fadeOutCurve,
-      fadeInDuration: fadeInDuration,
-      fadeInCurve: fadeInCurve,
-      repeat: repeat,
-      matchTextDirection: matchTextDirection,
-      useOldImageOnUrlChange: useOldImageOnUrlChange,
-      color: color,
-      progressBarColor: progressBarColor,
-      filterQuality: filterQuality,
-      colorBlendMode: colorBlendMode,
-      placeholderFadeInDuration: placeholderFadeInDuration,
-    );
-  }
+    BorderRadius? borderRadius,
+  }) : this._(
+         key: key,
+         imageUrl: imageUrl,
+         placeholderAssetImage: placeholderAssetImage,
+         placeholderBuilder: placeholderBuilder,
+         progressIndicatorBuilder: progressIndicatorBuilder,
+         errorBuilder: errorBuilder,
+         showError: showError,
+         showProgressIndicator: showProgressIndicator,
+         height: height,
+         width: width,
+         fit: fit,
+         borderRadius: borderRadius,
+         alignment: alignment,
+         memCacheWidth: memCacheWidth,
+         memCacheHeight: memCacheHeight,
+         cacheKey: cacheKey,
+         maxWidthDiskCache: maxWidthDiskCache,
+         maxHeightDiskCache: maxHeightDiskCache,
+         shimmerBaseColor: shimmerBaseColor,
+         shimmerHighlightColor: shimmerHighlightColor,
+         placeholderForegroundColor: placeholderForegroundColor,
+         httpHeaders: httpHeaders,
+         imageBuilder: imageBuilder,
+         fadeOutDuration: fadeOutDuration,
+         fadeOutCurve: fadeOutCurve,
+         fadeInDuration: fadeInDuration,
+         fadeInCurve: fadeInCurve,
+         repeat: repeat,
+         matchTextDirection: matchTextDirection,
+         useOldImageOnUrlChange: useOldImageOnUrlChange,
+         color: color,
+         progressBarColor: progressBarColor,
+         filterQuality: filterQuality,
+         colorBlendMode: colorBlendMode,
+         placeholderFadeInDuration: placeholderFadeInDuration,
+       );
 
-  /// Factory constructor for asset image
-  factory CoreImage.asset(
+  /// Creates a CoreImage from a local asset
+  ///
+  /// Parameters:
+  /// - `imagePath`: Path to the asset image
+  /// - `scale`: Image scale factor (default: 1.0)
+  /// - `color`: Tint color for the image
+  /// - `colorBlendMode`: Blend mode for color tinting
+  const CoreImage.asset(
     String imagePath, {
+    Key? key,
+
     double? scale,
     double? width,
     double? height,
     Color? color,
     BlendMode? colorBlendMode,
-    BoxFit? fit = BoxFit.fill,
+    BoxFit fit = BoxFit.cover,
     Alignment alignment = Alignment.center,
-  }) {
-    return CoreImage._(
-      imagePath: imagePath,
-      scale: scale,
-      width: width,
-      height: height,
-      color: color,
-      colorBlendMode: colorBlendMode,
-      fit: fit,
-      alignment: alignment,
-    );
-  }
-
-  /// Factory constructor for file image
-  factory CoreImage.file(
-    String imagePath, {
-    double? scale,
-    double? width,
-    double? height,
-    Color? color,
-    BlendMode? colorBlendMode,
-    BoxFit? fit = BoxFit.fill,
-    Alignment alignment = Alignment.center,
-  }) {
-    return CoreImage._(
-      imageFile: File(imagePath),
-      scale: scale,
-      width: width,
-      height: height,
-      color: color,
-      colorBlendMode: colorBlendMode,
-      fit: fit,
-      alignment: alignment,
-    );
-  }
-
+  }) : this._(
+         key: key,
+         imagePath: imagePath,
+         scale: scale,
+         width: width,
+         height: height,
+         color: color,
+         colorBlendMode: colorBlendMode,
+         fit: fit,
+         alignment: alignment,
+       );
   final String? imageUrl;
   final String? imagePath;
-
   final File? imageFile;
   final double? scale;
   final double? width;
   final double? height;
   final Color? color;
   final BlendMode? colorBlendMode;
-  final BoxFit? fit;
+  final BoxFit fit;
   final Alignment alignment;
   final String? placeholderAssetImage;
   final Widget Function(BuildContext, String)? placeholderBuilder;
@@ -193,14 +241,9 @@ class CoreImage extends StatelessWidget {
   final Color? shimmerBaseColor;
   final Color? shimmerHighlightColor;
   final Color? placeholderForegroundColor;
-
   final Map<String, String>? httpHeaders;
-  final Widget Function(
-    BuildContext context,
-    ImageProvider<Object> imageProvider,
-  )?
-  imageBuilder;
-  final Duration? fadeOutDuration;
+  final Widget Function(BuildContext, ImageProvider<Object>)? imageBuilder;
+  final Duration fadeOutDuration;
   final Curve fadeOutCurve;
   final Duration fadeInDuration;
   final Curve fadeInCurve;
@@ -210,89 +253,72 @@ class CoreImage extends StatelessWidget {
   final Color? progressBarColor;
   final FilterQuality filterQuality;
   final Duration? placeholderFadeInDuration;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
     if (imageUrl != null) {
-      return CachedNetworkImage(
-        color: color,
-        colorBlendMode: colorBlendMode,
-        fadeInCurve: fadeInCurve,
-        fadeInDuration: fadeInDuration,
-        fadeOutCurve: fadeOutCurve,
-        fadeOutDuration: fadeOutDuration,
-        filterQuality: filterQuality,
-        httpHeaders: httpHeaders,
-        imageBuilder: imageBuilder,
-        key: key,
-        matchTextDirection: matchTextDirection,
-        placeholderFadeInDuration: placeholderFadeInDuration,
-        repeat: repeat,
-        useOldImageOnUrlChange: useOldImageOnUrlChange,
-        memCacheHeight: memCacheHeight,
-        memCacheWidth: memCacheWidth,
-        maxHeightDiskCache: maxHeightDiskCache,
-        maxWidthDiskCache: maxWidthDiskCache,
-        cacheKey: cacheKey,
-        height: height,
-        width: width,
-        fit: fit,
-        alignment: alignment,
-        imageUrl: imageUrl!,
-        placeholder:
-            (placeholderBuilder != null)
-                ? placeholderBuilder
-                : ((progressIndicatorBuilder == null && !showProgressIndicator)
-                    ? _defaultPlaceholderBuilder()
-                    : null),
-        errorWidget: errorBuilder ?? _defaultErrorBuilder(context),
-        progressIndicatorBuilder:
-            progressIndicatorBuilder ??
-            ((placeholderBuilder == null && showProgressIndicator)
-                ? _defaultProgressIndicatorBuilder(context)
-                : null),
-      );
+      return _buildNetworkImage(context);
     } else if (imageFile != null) {
-      return Image.file(
-        imageFile!,
-        key: key,
-        scale: scale ?? 1,
-        width: width,
-        height: height,
-        color: color,
-        fit: fit,
-        alignment: alignment,
-        colorBlendMode: colorBlendMode,
-      );
+      return _buildFileImage();
     } else if (imagePath != null) {
-      final bool isSvg = imagePath!.endsWith('svg');
-      return isSvg
-          ? SvgPicture.asset(
-            imagePath!,
-            key: key,
-            width: width,
-            height: height,
-            colorFilter:
-                color != null
-                    ? ColorFilter.mode(
-                      color!,
-                      colorBlendMode ?? BlendMode.srcIn,
-                    )
-                    : null,
-            fit: fit ?? BoxFit.contain,
-            alignment: alignment,
-          )
-          : _buildAssetImage();
-    } else {
-      return const SizedBox.shrink();
+      return _buildAssetImage(context);
     }
+    return const SizedBox.shrink();
   }
 
-  Widget _buildAssetImage() {
-    return Image.asset(
-      imagePath!,
+  Widget _buildNetworkImage(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl!,
+      width: width,
+      height: height,
+      fit: fit,
+      color: color,
+      colorBlendMode: colorBlendMode,
+      alignment: alignment,
+      memCacheWidth: memCacheWidth,
+      memCacheHeight: memCacheHeight,
+      cacheKey: cacheKey,
+      maxWidthDiskCache: maxWidthDiskCache,
+      maxHeightDiskCache: maxHeightDiskCache,
+      httpHeaders: httpHeaders,
+      imageBuilder:
+          imageBuilder ??
+          (borderRadius != null
+              ? (context, imageProvider) => DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius,
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: fit,
+                    colorFilter: ColorFilter.mode(
+                      color ?? Colors.transparent,
+                      colorBlendMode ?? BlendMode.color,
+                    ),
+                  ),
+                ),
+              )
+              : null),
+      fadeOutDuration: fadeOutDuration,
+      fadeOutCurve: fadeOutCurve,
+      fadeInDuration: fadeInDuration,
+      fadeInCurve: fadeInCurve,
+      repeat: repeat,
+      matchTextDirection: matchTextDirection,
+      filterQuality: filterQuality,
+      placeholder: _getPlaceholderBuilder(context),
+      errorWidget: _getErrorBuilder(context),
+      progressIndicatorBuilder: _getProgressBuilder(context),
+      placeholderFadeInDuration: placeholderFadeInDuration,
+      useOldImageOnUrlChange: useOldImageOnUrlChange,
+    );
+  }
+
+  Widget _buildFileImage() {
+    return Image.file(
+      imageFile!,
       key: key,
-      scale: scale,
+      scale: scale ?? 1.0,
       width: width,
       height: height,
       color: color,
@@ -302,74 +328,128 @@ class CoreImage extends StatelessWidget {
     );
   }
 
-  Widget Function(BuildContext context, String url)
-  _defaultPlaceholderBuilder() {
-    return (BuildContext context, String url) {
-      return SizedBox(
-        width: width,
-        height: height,
-        child: Shimmer.fromColors(
-          baseColor: shimmerBaseColor ?? Colors.grey.shade300,
-          highlightColor:
-              shimmerHighlightColor ?? context.colorScheme.onInverseSurface,
-          child: _buildSvgPlaceHolder(),
-        ),
-      );
-    };
-  }
-
-  Widget _buildSvgPlaceHolder() {
-    return placeholderAssetImage != null
-        ? (placeholderAssetImage!.endsWith('svg')
-            ? SvgPicture.asset(
-              placeholderAssetImage!,
-              width: width,
-              height: height,
-              fit: fit ?? BoxFit.fill,
-              alignment: alignment,
-              colorFilter: ColorFilter.mode(
-                placeholderForegroundColor ?? Colors.grey.shade300,
-                BlendMode.srcIn,
-              ),
-            )
-            : _buildAssetImage())
-        : Icon(
-          Icons.image,
-          size: width,
-          color: placeholderForegroundColor ?? Colors.grey.shade300,
-          blendMode: BlendMode.srcIn,
+  Widget _buildAssetImage(BuildContext context) {
+    final isSvg = imagePath!.toLowerCase().endsWith('.svg');
+    return isSvg
+        ? _buildSvgImage()
+        : Image.asset(
+          imagePath!,
+          key: key,
+          scale: scale,
+          width: width,
+          height: height,
+          color: color,
+          fit: fit,
+          alignment: alignment,
+          colorBlendMode: colorBlendMode,
         );
   }
 
-  Widget Function(BuildContext context, String url, Object error)
-  _defaultErrorBuilder(BuildContext context) {
-    return (BuildContext context, String url, Object error) {
-      return placeholderAssetImage == null
-          ? _buildSvgPlaceHolder()
-          : CoreImage.asset(
-            placeholderAssetImage!,
-            width: width,
-            height: height,
-            fit: fit,
-            alignment: alignment,
-            color: Colors.grey.shade300,
-          );
-    };
+  Widget _buildSvgImage() {
+    return SvgPicture.asset(
+      imagePath!,
+      width: width,
+      height: height,
+      colorFilter:
+          color != null
+              ? ColorFilter.mode(color!, colorBlendMode ?? BlendMode.srcOver)
+              : null,
+      fit: fit,
+      alignment: alignment,
+    );
   }
 
-  Widget Function(BuildContext context, String url, DownloadProgress progress)
-  _defaultProgressIndicatorBuilder(BuildContext context) {
+  Widget Function(BuildContext, String)? _getPlaceholderBuilder(
+    BuildContext context,
+  ) {
+    return placeholderBuilder ??
+        (progressIndicatorBuilder == null && !showProgressIndicator
+            ? _defaultPlaceholderBuilder
+            : null);
+  }
+
+  Widget Function(BuildContext, String, dynamic) _getErrorBuilder(
+    BuildContext context,
+  ) {
+    return errorBuilder ?? _defaultErrorBuilder;
+  }
+
+  Widget Function(BuildContext, String, DownloadProgress)? _getProgressBuilder(
+    BuildContext context,
+  ) {
+    return progressIndicatorBuilder ??
+        (placeholderBuilder == null && showProgressIndicator
+            ? _defaultProgressIndicatorBuilder
+            : null);
+  }
+
+  Widget _defaultPlaceholderBuilder(BuildContext context, String url) {
+    return Shimmer.fromColors(
+      baseColor:
+          shimmerBaseColor ??
+          Theme.of(context).colorScheme.surfaceContainerHighest,
+      highlightColor:
+          shimmerHighlightColor ?? Theme.of(context).colorScheme.surface,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: borderRadius,
+        ),
+        child: _buildPlaceholderIcon(context),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderIcon(BuildContext context) {
+    return LayoutBuilder(
+      builder:
+          (context, constraints) => Center(
+            child: Icon(
+              Icons.photo,
+              size: constraints.maxWidth * 0.4,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+    );
+  }
+
+  Widget _defaultErrorBuilder(BuildContext context, String url, dynamic error) {
+    return placeholderAssetImage != null
+        ? Image.asset(
+          placeholderAssetImage!,
+          width: width,
+          height: height,
+          fit: fit,
+          color: Colors.grey.shade300,
+        )
+        : LayoutBuilder(
+          builder: (context, constraints) {
+            return Icon(
+              Icons.broken_image,
+              size: constraints.maxWidth * 0.4,
+              color: Theme.of(context).colorScheme.error,
+            );
+          },
+        );
+  }
+
+  /// The default progress indicator widget builder.
+  Widget Function(BuildContext, String, DownloadProgress)
+  get _defaultProgressIndicatorBuilder {
     return (BuildContext context, String url, DownloadProgress progress) {
-      if (progress.totalSize == null) {
-        return _buildSvgPlaceHolder();
-      }
-      return CircularProgressIndicator.adaptive(
-        value: progress.downloaded / progress.totalSize!,
-        strokeWidth: 5,
-        strokeAlign: -3,
-        backgroundColor: Colors.grey.shade300,
-        valueColor: AlwaysStoppedAnimation<Color>(
-          progressBarColor ?? context.colorScheme.primary,
+      return FractionallySizedBox(
+        heightFactor: 0.3,
+        widthFactor: 0.3,
+        child: CircularProgressIndicator.adaptive(
+          value: progress.downloaded / (progress.totalSize ?? 1),
+          strokeWidth: 5,
+          strokeAlign: -3,
+          backgroundColor: Colors.grey.shade300,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            progressBarColor ?? Theme.of(context).colorScheme.primary,
+          ),
         ),
       );
     };
