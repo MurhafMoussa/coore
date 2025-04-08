@@ -31,7 +31,7 @@ class ApiStateBuilder<CompositeState, SuccessData> extends StatelessWidget {
     VoidCallback? retry,
   )?
   errorBuilder;
-  final Widget Function(BuildContext context, SuccessData data) successBuilder;
+  final Widget Function(BuildContext context, CompositeState data) successBuilder;
   final SuccessData emptyEntity;
   @override
   Widget build(BuildContext context) {
@@ -40,11 +40,9 @@ class ApiStateBuilder<CompositeState, SuccessData> extends StatelessWidget {
       builder: (context, state) {
         final apiState = cubit.getApiState(state);
         return switch (apiState) {
-          Succeeded(:final data) => successBuilder(
+          Succeeded() => successBuilder(
             context,
-            data.getOrElse(() {
-              throw Exception('Something went wrong');
-            }),
+            state,
           ),
           Failed(:final failureObject, :final retryFunction) =>
             errorBuilder?.call(
@@ -64,7 +62,7 @@ class ApiStateBuilder<CompositeState, SuccessData> extends StatelessWidget {
             loadingBuilder?.call(context) ??
                 DefaultLoadingWidget<SuccessData>(
                   emptyEntity: emptyEntity,
-                  successBuilder: successBuilder,
+                  successBuilder: (context, data) =>successBuilder(context,state) ,
                 ),
         };
       },
