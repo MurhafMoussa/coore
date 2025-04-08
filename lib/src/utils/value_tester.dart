@@ -7,7 +7,7 @@ abstract final class ValueTester {
   static bool isNullOrBlank(dynamic value) {
     if (value == null) return true;
     if (value is String) return value.trim().isEmpty;
-    if (value is Iterable || value is Map) return value.isEmpty;
+    if (value is Iterable || value is Map) return value.isEmpty as bool;
     return false;
   }
 
@@ -15,7 +15,7 @@ abstract final class ValueTester {
   static bool isBlank(dynamic value) {
     if (value == null) return true;
     if (value is String) return value.trim().isEmpty;
-    if (value is Iterable || value is Map) return value.isEmpty;
+    if (value is Iterable || value is Map) return value.isEmpty as bool;
     return false;
   }
 
@@ -24,7 +24,7 @@ abstract final class ValueTester {
   static int? dynamicLength(dynamic value) {
     if (value == null) return null;
     if (value is String || value is Iterable || value is Map) {
-      return value.length;
+      return value.length as int?;
     }
     if (value is int) return value.toString().length;
     if (value is double) return value.toString().replaceAll('.', '').length;

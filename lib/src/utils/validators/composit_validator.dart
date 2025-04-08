@@ -6,7 +6,7 @@ class CompositeValidator implements Validator {
   final List<Validator> validators;
 
   @override
-  String? validate(String? value, BuildContext context) {
+  String? validate(dynamic value, BuildContext context) {
     for (final validator in validators) {
       final result = validator.validate(value, context);
       if (result != null) {

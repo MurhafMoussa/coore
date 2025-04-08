@@ -92,7 +92,7 @@ class CachingInterceptor extends Interceptor {
 
       if (cacheKey != null) {
         await cacheStore.save(
-          cacheKey,
+          cacheKey.toString(),
           CacheEntry.fromResponse(response, defaultCacheDuration),
         );
       }

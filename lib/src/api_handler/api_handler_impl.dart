@@ -49,7 +49,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ) async {
     try {
       final response = await dioMethod();
-      return right(response.data);
+      return right(response.data as Map<String, dynamic>);
     } catch (error, stackTrace) {
       if (error is DioException) {
         return left(_exceptionMapper.mapException(error, stackTrace));
@@ -265,7 +265,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// If the provided [cancelRequestAdapter] is not a [DioCancelRequestAdapter],
   /// this method returns `null`.
-  dynamic _cancelToken(CancelRequestAdapter? cancelRequestAdapter) {
+  CancelToken? _cancelToken(CancelRequestAdapter? cancelRequestAdapter) {
     if (cancelRequestAdapter == null ||
         cancelRequestAdapter is! DioCancelRequestAdapter) {
       return null;

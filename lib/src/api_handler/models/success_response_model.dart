@@ -76,7 +76,10 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
   static T getData<T>(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJsonT,
-  ) => _dataFieldExtractor(json, (innerJson) => fromJsonT(innerJson));
+  ) => _dataFieldExtractor(
+    json,
+    (innerJson) => fromJsonT(innerJson as Map<String, dynamic>),
+  );
 
   /// Extracts a list of type [T] from the JSON response.
   ///

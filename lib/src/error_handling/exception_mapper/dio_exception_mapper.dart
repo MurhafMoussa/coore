@@ -111,7 +111,10 @@ class DioNetworkExceptionMapper implements NetworkExceptionMapper {
   }
 
   NetworkFailure _mapBadResponse(Response? response, StackTrace? stackTrace) {
-    final error = ErrorResponseModel.fromJson(response?.data).error;
+    final error =
+        ErrorResponseModel.fromJson(
+          response?.data as Map<String, dynamic>,
+        ).error;
     final statusCode = error.status;
     if (_codeToFailureMap[statusCode] != null) {
       return _codeToFailureMap[statusCode]!.call(error, stackTrace);

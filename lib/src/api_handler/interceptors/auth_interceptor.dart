@@ -219,8 +219,8 @@ class TokenAuthInterceptor extends AuthInterceptor {
       return response.fold((l) => false, (r) async {
         // On success, update the tokens in the token manager.
         await _tokenManager.setTokens(
-          accessToken: r['data']['access_token'],
-          refreshToken: r['data']['refresh_token'],
+          accessToken: r['data']['access_token'] as String?,
+          refreshToken: r['data']['refresh_token'] as String?,
         );
         return true;
       });
@@ -272,7 +272,9 @@ class CookieAuthInterceptor extends AuthInterceptor {
       return response.fold((l) => false, (r) async {
         // Update access token if necessary. Typically, for cookies, the server will
         // set new cookies via headers. In some cases, you might also update a token.
-        await _tokenManager.setTokens(accessToken: r['data']['access_token']);
+        await _tokenManager.setTokens(
+          accessToken: r['data']['access_token'] as String?,
+        );
         return true;
       });
     } catch (e) {

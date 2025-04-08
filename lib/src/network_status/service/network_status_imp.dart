@@ -39,7 +39,7 @@ class NetworkStatusImp implements NetworkStatusInterface {
           _controller.add(ConnectionStatus.disconnected);
           break;
       }
-    })..onError((e, s) {
+    })..onError((Object? e, StackTrace s) {
       _logger.error('Some thing went wrong in NetworkStatus', e, s);
     });
   }
