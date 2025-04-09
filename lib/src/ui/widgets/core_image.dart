@@ -253,7 +253,7 @@ class CoreImage extends StatelessWidget {
   final Color? progressBarColor;
   final FilterQuality filterQuality;
   final Duration? placeholderFadeInDuration;
-  final BorderRadius? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
 
   @override
   Widget build(BuildContext context) {
