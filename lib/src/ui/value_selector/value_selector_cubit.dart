@@ -45,4 +45,26 @@ abstract class ValueSelectorCubit<T extends BaseEntity>
 
   /// Returns `true` if no values are selected, `false` otherwise.
   bool get selectedValuesIsEmpty => state.selectedValues.isEmpty;
+
+/// Updates the available values for selection.
+  ///
+  /// [newValues] is the new list of values that can be selected.
+  /// This method replaces the current available values with [newValues] and
+  /// the [defaultSelectedValues] provided will be used as the new selection.
+  ///
+  /// If [defaultSelectedValues] is not passed and the current selection is empty,
+  /// then no values will be selected.
+  void updateAvailableValues(
+    List<T> newValues, {
+    List<T> defaultSelectedValues = const [],
+  }) {
+    values
+      ..clear()
+      ..addAll(newValues);
+
+  
+
+    emit(ValueSelectorState(defaultSelectedValues));
+    valueSetter(defaultSelectedValues);
+  }
 }
