@@ -148,7 +148,7 @@ class CoreImage extends StatelessWidget {
     FilterQuality filterQuality = FilterQuality.low,
     BlendMode? colorBlendMode,
     Duration? placeholderFadeInDuration,
-    BorderRadius? borderRadius,
+    BorderRadiusGeometry? borderRadius,
   }) : this._(
          key: key,
          imageUrl: imageUrl,
