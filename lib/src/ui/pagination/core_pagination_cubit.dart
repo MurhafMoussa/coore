@@ -16,7 +16,7 @@ part 'core_pagination_state.dart';
 /// - Pagination strategy (page/skip/cursor)
 /// - Error handling with retry capabilities
 ///
-class CorePaginationCubit<T extends BaseEntity>
+class CorePaginationCubit<T extends Identifiable>
     extends Cubit<CorePaginationState<T>> {
   /// {@macro core_pagination_cubit}
   CorePaginationCubit({

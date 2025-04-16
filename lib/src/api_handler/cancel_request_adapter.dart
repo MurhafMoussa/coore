@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 /// Implementations of this interface provide mechanisms to
 /// signal and check the cancellation status of operations,
 /// such as HTTP requests or long-running tasks.
-abstract class CancelRequestAdapter {
+abstract interface class CancelRequestAdapter {
   /// Cancels the ongoing operation.
   ///
   /// Optionally, a [reason] can be provided to specify why

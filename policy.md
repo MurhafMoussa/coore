@@ -12,7 +12,7 @@
 
     // ✅ Compliant: Logic in entity
 
-    class ShoppingCartEntity extends BaseEntity {
+    class ShoppingCartEntity extends Identifiable {
 
       bool get isEligibleForDiscount => totalPrice > 100;
 

@@ -4,13 +4,13 @@
 export 'api_handler/api_handler.dart';
 export 'config/config.dart';
 export 'constants/constants.dart';
-export 'dependency_injection/di_container.dart';
+export 'dependency_injection/dependency_injection.dart';
 export 'dev_tools/dev_tools.dart';
 export 'environment/environment.dart';
 export 'error_handling/error_handling.dart';
 export 'extensions/extensions.dart';
-export 'local_storage/local_database.dart';
 export 'localization/localization.dart';
+export 'local_storage/local_storage.dart';
 export 'navigation/navigation.dart';
 export 'network_status/network_status.dart';
 export 'state_management/state_management.dart';

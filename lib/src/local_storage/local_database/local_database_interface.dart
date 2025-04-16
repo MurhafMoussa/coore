@@ -1,7 +1,7 @@
 import 'package:coore/src/typedefs/core_typedefs.dart';
 import 'package:fpdart/fpdart.dart';
 
-abstract class LocalDatabaseInterface {
+abstract interface class LocalDatabaseInterface {
   CacheResponse<Unit> initialize();
 
   CacheResponse<Unit> close();

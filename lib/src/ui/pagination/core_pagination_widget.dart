@@ -1,5 +1,4 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/ui/widgets/core_default_error_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -11,7 +10,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 /// 
 /// Contains all customizable parameters for pagination behavior and UI components.
 /// {@endtemplate}
-class PaginationConfig<T extends BaseEntity> extends InheritedWidget {
+class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   /// {@macro pagination_config}
   const PaginationConfig({
     super.key,
@@ -152,7 +151,7 @@ class PaginationConfig<T extends BaseEntity> extends InheritedWidget {
   final bool enableScrollToTop;
 
   /// {@macro pagination_config.of}
-  static PaginationConfig<T> of<T extends BaseEntity>(BuildContext context) {
+  static PaginationConfig<T> of<T extends Identifiable>(BuildContext context) {
     final config =
         context.dependOnInheritedWidgetOfExactType<PaginationConfig<T>>();
     assert(config != null, 'No PaginationConfig found in context');
@@ -202,7 +201,7 @@ class PaginationConfig<T extends BaseEntity> extends InheritedWidget {
 /// ```
 /// {@end-tool}
 /// {@endtemplate}
-class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
+class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
   /// {@macro core_pagination_widget}
   const CorePaginationWidget({
     super.key,
@@ -393,7 +392,7 @@ class CorePaginationWidget<T extends BaseEntity> extends StatelessWidget {
 /// 
 /// Decides whether to show scroll-to-top FAB based on configuration.
 /// {@endtemplate}
-class _PaginationContent<T extends BaseEntity> extends StatelessWidget {
+class _PaginationContent<T extends Identifiable> extends StatelessWidget {
   /// {@macro pagination_content}
   const _PaginationContent();
 
@@ -420,7 +419,7 @@ class _PaginationContent<T extends BaseEntity> extends StatelessWidget {
 /// 
 /// Uses the SmartRefresher package to handle refresh gestures and pagination.
 /// {@endtemplate}
-class _SmartRefresherWidget<T extends BaseEntity> extends StatelessWidget {
+class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
   /// {@macro smart_refresher_widget}
   const _SmartRefresherWidget({this.controller});
 
@@ -519,7 +518,7 @@ class _SmartRefresherWidget<T extends BaseEntity> extends StatelessWidget {
 /// {@template loading_state}
 /// Shows loading state using either custom loading builder or skeletonized items.
 /// {@endtemplate}
-class _LoadingStateWidget<T extends BaseEntity> extends StatelessWidget {
+class _LoadingStateWidget<T extends Identifiable> extends StatelessWidget {
   /// {@macro loading_state}
   const _LoadingStateWidget({super.key, this.scrollController});
 

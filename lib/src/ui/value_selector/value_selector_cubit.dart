@@ -1,4 +1,4 @@
-import 'package:coore/src/api_handler/entities/base_entity.dart';
+import 'package:coore/src/api_handler/entities/identifiable.dart';
 import 'package:coore/src/ui/value_selector/value_selector_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// This class provides common functionality for both single and multi-selection
 /// scenarios. It manages the selection state and provides methods to query and
 /// modify the selection.
-abstract class ValueSelectorCubit<T extends BaseEntity>
+abstract class ValueSelectorCubit<T extends Identifiable>
     extends Cubit<ValueSelectorState<T>> {
   /// Creates a [ValueSelectorCubit] instance.
   ///
@@ -46,7 +46,7 @@ abstract class ValueSelectorCubit<T extends BaseEntity>
   /// Returns `true` if no values are selected, `false` otherwise.
   bool get selectedValuesIsEmpty => state.selectedValues.isEmpty;
 
-/// Updates the available values for selection.
+  /// Updates the available values for selection.
   ///
   /// [newValues] is the new list of values that can be selected.
   /// This method replaces the current available values with [newValues] and
@@ -61,8 +61,6 @@ abstract class ValueSelectorCubit<T extends BaseEntity>
     values
       ..clear()
       ..addAll(newValues);
-
-  
 
     emit(ValueSelectorState(defaultSelectedValues));
     valueSetter(defaultSelectedValues);

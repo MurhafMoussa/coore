@@ -3,4 +3,5 @@
 
 
 export 'error_response_model.dart';
+export 'pagination_response_model.dart';
 export 'success_response_model.dart';
