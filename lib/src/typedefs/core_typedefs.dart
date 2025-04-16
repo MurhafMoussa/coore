@@ -7,8 +7,8 @@ typedef ApiHandlerResponse =
     Future<Either<NetworkFailure, Map<String, dynamic>>>;
 typedef RemoteResponse<T> = Future<Either<NetworkFailure, T>>;
 typedef CacheResponse<T> = Future<Either<CacheFailure, T>>;
-typedef RepositoryFutureResponse<T> = Future<Either<Failure, T>>;
-typedef RepositoryStreamResponse<T> = Stream<Either<Failure, T>>;
+typedef UseCaseFutureResponse<T> = Future<Either<Failure, T>>;
+typedef UseCaseStreamResponse<T> = Stream<Either<Failure, T>>;
 
 /// A callback used to track the download or upload progress
 

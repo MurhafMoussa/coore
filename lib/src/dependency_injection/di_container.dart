@@ -96,7 +96,7 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
     )
     ..registerLazySingleton(
       () => ThemeCubit(
-        repository: getIt(),
+        usecase: getIt(),
         themeConfigEntity: coreEntity.themeConfigEntity,
       ),
     );

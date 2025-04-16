@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:coore/lib.dart';
-import 'package:coore/src/api_handler/params/search_params.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart' as fp;
@@ -38,7 +37,7 @@ class CoreSearchWidget<T> extends StatelessWidget {
     super.key,
     this.hintText = '',
     required this.resultBuilder,
-    required this.searchFunction,  
+    required this.searchFunction,
     required this.searchParams,
 
     this.suggestionBuilder,
@@ -79,7 +78,7 @@ class CoreSearchWidget<T> extends StatelessWidget {
   ///
   /// It takes [SearchParams] and returns a [Future] that resolves to either a [Failure]
   /// or a [List] of search results of type [T].
-  final RepositoryFutureResponse<List<T>> Function(SearchParams) searchFunction;
+  final UseCaseFutureResponse<List<T>> Function(SearchParams) searchFunction;
 
   /// The initial search params that might includes query params for pagination
   final SearchParams searchParams;

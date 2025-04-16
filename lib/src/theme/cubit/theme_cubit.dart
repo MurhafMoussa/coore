@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 
 class ThemeCubit extends Cubit<ThemeConfigEntity> {
   ThemeCubit({
-    required ConfigService repository,
+    required ConfigService usecase,
     required ThemeConfigEntity themeConfigEntity,
-  }) : _configService = repository,
+  }) : _configService = usecase,
 
        super(themeConfigEntity) {
     _init();

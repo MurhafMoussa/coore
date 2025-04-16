@@ -216,7 +216,7 @@ This document establishes guidelines for managing branches, commit messages, ver
 
 ## 1. Branch Naming and Structure
 
-Our GitLab repository follows a structured branching model with three core branches:
+Our GitLab usecase follows a structured branching model with three core branches:
 
 - **`development`**: Contains the latest ongoing development and new features.
 - **`staging`**: Used for integration testing and pre-production validation.
@@ -310,7 +310,7 @@ Every new release must be tagged in GitLab (`git tag v1.2.0`).
 
 ## 4. Changelog Management
 
-We maintain a `CHANGELOG.md` file in the repository root.
+We maintain a `CHANGELOG.md` file in the usecase root.
 
 ### Changelog Format:
 ```

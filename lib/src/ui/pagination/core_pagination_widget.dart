@@ -58,7 +58,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   /// 
   /// Returns Future containing either the item list or failure
   /// {@endtemplate}
-  final RepositoryFutureResponse<List<T>> Function(int batch, int limit)
+  final UseCaseFutureResponse<List<T>> Function(int batch, int limit)
       paginationFunction;
 
   /// {@template pagination_strategy}
@@ -194,7 +194,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
 ///     itemCount: items.length,
 ///     itemBuilder: (_, index) => ProductItem(item: items[index]),
 ///   ),
-///   paginationFunction: (batch, limit) => repository.getProducts(batch, limit),
+///   paginationFunction: (batch, limit) => usecase.getProducts(batch, limit),
 ///   paginationStrategy: const PageBasedStrategy(limit: 20),
 ///   emptyEntity: Product.empty(),
 /// )
@@ -252,7 +252,7 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
   /// 
   /// Returns Future containing either the item list or failure
   /// {@endtemplate}
-  final RepositoryFutureResponse<List<T>> Function(int batch, int limit)
+  final UseCaseFutureResponse<List<T>> Function(int batch, int limit)
       paginationFunction;
 
   /// {@template pagination_strategy}

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:coore/lib.dart';
-import 'package:coore/src/api_handler/params/search_params.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -19,7 +18,7 @@ class CoreSearchCubit<T> extends CoreCubit<CoreSearchState<T>, List<T>> {
       _onQueryChanged(searchParams.copyWith(query: searchController.text));
     });
   }
-  final RepositoryFutureResponse<List<T>> Function(SearchParams) searchFunction;
+  final UseCaseFutureResponse<List<T>> Function(SearchParams) searchFunction;
   Timer? _debounceTimer;
   final searchController = SearchController();
   final Duration debounceDuration;

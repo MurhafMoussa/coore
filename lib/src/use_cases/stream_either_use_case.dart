@@ -4,5 +4,5 @@ import 'package:coore/src/use_cases/usecase.dart';
 abstract class StreamEitherUseCase<Output, Input> extends UseCase {
   const StreamEitherUseCase();
 
-  RepositoryStreamResponse<Output> call(Input input);
+  UseCaseStreamResponse<Output> call(Input input);
 }

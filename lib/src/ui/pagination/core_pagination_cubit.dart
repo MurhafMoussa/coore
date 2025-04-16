@@ -20,7 +20,7 @@ class CorePaginationCubit<T extends Identifiable>
     extends Cubit<CorePaginationState<T>> {
   /// {@macro core_pagination_cubit}
   CorePaginationCubit({
-    /// Async function that fetches paginated data from repository
+    /// Async function that fetches paginated data from usecase
     required this.paginationFunction,
 
     /// Pagination strategy implementation (Page/Skip)
@@ -35,7 +35,7 @@ class CorePaginationCubit<T extends Identifiable>
   /// The data fetching function signature:
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
-  final RepositoryFutureResponse<List<T>> Function(int batch, int limit)
+  final UseCaseFutureResponse<List<T>> Function(int batch, int limit)
   paginationFunction;
 
   /// Active pagination strategy implementation
