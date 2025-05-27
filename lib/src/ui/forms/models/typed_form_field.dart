@@ -1,8 +1,8 @@
-import 'package:coore/src/utils/validators/composit_validator.dart';
+import 'package:coore/src/utils/validators/composite_validator.dart';
 import 'package:coore/src/utils/validators/validator.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'form_field.freezed.dart';
+part 'typed_form_field.freezed.dart';
 
 @freezed
 abstract class TypedFormField<T> with _$TypedFormField<T> {

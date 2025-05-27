@@ -1,4 +1,4 @@
-import 'package:coore/src/ui/forms/models/form_field.dart';
+import 'package:coore/src/ui/forms/models/typed_form_field.dart';
 import 'package:coore/src/utils/validators/validator.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

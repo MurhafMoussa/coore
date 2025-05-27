@@ -10,11 +10,10 @@ abstract class CoreFormState with _$CoreFormState {
     required Map<String, Type> fieldTypes,
   }) = _CoreFormState;
 
-  factory CoreFormState.initial() => CoreFormState(
+  factory CoreFormState.initial() => const CoreFormState(
         values: {},
         errors: {},
         isValid: false,
-        validationType: ValidationType.fieldsBeingEdited,
         fieldTypes: {},
       );
 
