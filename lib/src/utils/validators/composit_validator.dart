@@ -1,12 +1,17 @@
 import 'package:coore/src/utils/validators/validator.dart';
 import 'package:flutter/material.dart';
 
-class CompositeValidator implements Validator {
+/// A composite validator that combines multiple validators and runs them in sequence.
+/// It stops at the first validation error encountered.
+class CompositeValidator<T> implements Validator<T> {
+  /// Creates a composite validator with the given list of validators.
   CompositeValidator(this.validators);
-  final List<Validator> validators;
+  
+  /// The list of validators to run in sequence.
+  final List<Validator<T>> validators;
 
   @override
-  String? validate(dynamic value, BuildContext context) {
+  String? validate(T? value, BuildContext context) {
     for (final validator in validators) {
       final result = validator.validate(value, context);
       if (result != null) {

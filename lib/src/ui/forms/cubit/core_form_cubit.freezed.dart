@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CoreFormState {
 
- Map<String, dynamic> get values; Map<String, String> get errors; bool get isValid; ValidationType get validationType;
+ Map<String, Object?> get values; Map<String, String> get errors; bool get isValid; ValidationType get validationType; Map<String, Type> get fieldTypes;
 /// Create a copy of CoreFormState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +26,16 @@ $CoreFormStateCopyWith<CoreFormState> get copyWith => _$CoreFormStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoreFormState&&const DeepCollectionEquality().equals(other.values, values)&&const DeepCollectionEquality().equals(other.errors, errors)&&(identical(other.isValid, isValid) || other.isValid == isValid)&&(identical(other.validationType, validationType) || other.validationType == validationType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoreFormState&&const DeepCollectionEquality().equals(other.values, values)&&const DeepCollectionEquality().equals(other.errors, errors)&&(identical(other.isValid, isValid) || other.isValid == isValid)&&(identical(other.validationType, validationType) || other.validationType == validationType)&&const DeepCollectionEquality().equals(other.fieldTypes, fieldTypes));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(values),const DeepCollectionEquality().hash(errors),isValid,validationType);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(values),const DeepCollectionEquality().hash(errors),isValid,validationType,const DeepCollectionEquality().hash(fieldTypes));
 
 @override
 String toString() {
-  return 'CoreFormState(values: $values, errors: $errors, isValid: $isValid, validationType: $validationType)';
+  return 'CoreFormState(values: $values, errors: $errors, isValid: $isValid, validationType: $validationType, fieldTypes: $fieldTypes)';
 }
 
 
@@ -46,7 +46,7 @@ abstract mixin class $CoreFormStateCopyWith<$Res>  {
   factory $CoreFormStateCopyWith(CoreFormState value, $Res Function(CoreFormState) _then) = _$CoreFormStateCopyWithImpl;
 @useResult
 $Res call({
- Map<String, dynamic> values, Map<String, String> errors, bool isValid, ValidationType validationType
+ Map<String, Object?> values, Map<String, String> errors, bool isValid, ValidationType validationType, Map<String, Type> fieldTypes
 });
 
 
@@ -63,13 +63,14 @@ class _$CoreFormStateCopyWithImpl<$Res>
 
 /// Create a copy of CoreFormState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? values = null,Object? errors = null,Object? isValid = null,Object? validationType = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? values = null,Object? errors = null,Object? isValid = null,Object? validationType = null,Object? fieldTypes = null,}) {
   return _then(_self.copyWith(
 values: null == values ? _self.values : values // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>,errors: null == errors ? _self.errors : errors // ignore: cast_nullable_to_non_nullable
+as Map<String, Object?>,errors: null == errors ? _self.errors : errors // ignore: cast_nullable_to_non_nullable
 as Map<String, String>,isValid: null == isValid ? _self.isValid : isValid // ignore: cast_nullable_to_non_nullable
 as bool,validationType: null == validationType ? _self.validationType : validationType // ignore: cast_nullable_to_non_nullable
-as ValidationType,
+as ValidationType,fieldTypes: null == fieldTypes ? _self.fieldTypes : fieldTypes // ignore: cast_nullable_to_non_nullable
+as Map<String, Type>,
   ));
 }
 
@@ -80,11 +81,11 @@ as ValidationType,
 
 
 class _CoreFormState implements CoreFormState {
-  const _CoreFormState({required final  Map<String, dynamic> values, required final  Map<String, String> errors, required this.isValid, this.validationType = ValidationType.fieldsBeingEdited}): _values = values,_errors = errors;
+  const _CoreFormState({required final  Map<String, Object?> values, required final  Map<String, String> errors, required this.isValid, this.validationType = ValidationType.fieldsBeingEdited, required final  Map<String, Type> fieldTypes}): _values = values,_errors = errors,_fieldTypes = fieldTypes;
   
 
- final  Map<String, dynamic> _values;
-@override Map<String, dynamic> get values {
+ final  Map<String, Object?> _values;
+@override Map<String, Object?> get values {
   if (_values is EqualUnmodifiableMapView) return _values;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_values);
@@ -99,6 +100,13 @@ class _CoreFormState implements CoreFormState {
 
 @override final  bool isValid;
 @override@JsonKey() final  ValidationType validationType;
+ final  Map<String, Type> _fieldTypes;
+@override Map<String, Type> get fieldTypes {
+  if (_fieldTypes is EqualUnmodifiableMapView) return _fieldTypes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_fieldTypes);
+}
+
 
 /// Create a copy of CoreFormState
 /// with the given fields replaced by the non-null parameter values.
@@ -110,16 +118,16 @@ _$CoreFormStateCopyWith<_CoreFormState> get copyWith => __$CoreFormStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoreFormState&&const DeepCollectionEquality().equals(other._values, _values)&&const DeepCollectionEquality().equals(other._errors, _errors)&&(identical(other.isValid, isValid) || other.isValid == isValid)&&(identical(other.validationType, validationType) || other.validationType == validationType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoreFormState&&const DeepCollectionEquality().equals(other._values, _values)&&const DeepCollectionEquality().equals(other._errors, _errors)&&(identical(other.isValid, isValid) || other.isValid == isValid)&&(identical(other.validationType, validationType) || other.validationType == validationType)&&const DeepCollectionEquality().equals(other._fieldTypes, _fieldTypes));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_values),const DeepCollectionEquality().hash(_errors),isValid,validationType);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_values),const DeepCollectionEquality().hash(_errors),isValid,validationType,const DeepCollectionEquality().hash(_fieldTypes));
 
 @override
 String toString() {
-  return 'CoreFormState(values: $values, errors: $errors, isValid: $isValid, validationType: $validationType)';
+  return 'CoreFormState(values: $values, errors: $errors, isValid: $isValid, validationType: $validationType, fieldTypes: $fieldTypes)';
 }
 
 
@@ -130,7 +138,7 @@ abstract mixin class _$CoreFormStateCopyWith<$Res> implements $CoreFormStateCopy
   factory _$CoreFormStateCopyWith(_CoreFormState value, $Res Function(_CoreFormState) _then) = __$CoreFormStateCopyWithImpl;
 @override @useResult
 $Res call({
- Map<String, dynamic> values, Map<String, String> errors, bool isValid, ValidationType validationType
+ Map<String, Object?> values, Map<String, String> errors, bool isValid, ValidationType validationType, Map<String, Type> fieldTypes
 });
 
 
@@ -147,13 +155,14 @@ class __$CoreFormStateCopyWithImpl<$Res>
 
 /// Create a copy of CoreFormState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? values = null,Object? errors = null,Object? isValid = null,Object? validationType = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? values = null,Object? errors = null,Object? isValid = null,Object? validationType = null,Object? fieldTypes = null,}) {
   return _then(_CoreFormState(
 values: null == values ? _self._values : values // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>,errors: null == errors ? _self._errors : errors // ignore: cast_nullable_to_non_nullable
+as Map<String, Object?>,errors: null == errors ? _self._errors : errors // ignore: cast_nullable_to_non_nullable
 as Map<String, String>,isValid: null == isValid ? _self.isValid : isValid // ignore: cast_nullable_to_non_nullable
 as bool,validationType: null == validationType ? _self.validationType : validationType // ignore: cast_nullable_to_non_nullable
-as ValidationType,
+as ValidationType,fieldTypes: null == fieldTypes ? _self._fieldTypes : fieldTypes // ignore: cast_nullable_to_non_nullable
+as Map<String, Type>,
   ));
 }
 

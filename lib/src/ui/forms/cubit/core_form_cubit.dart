@@ -1,4 +1,4 @@
-import 'package:coore/src/utils/validators/composit_validator.dart';
+import 'package:coore/src/ui/forms/models/form_field.dart';
 import 'package:coore/src/utils/validators/validator.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,70 +7,79 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'core_form_cubit.freezed.dart';
 part 'core_form_state.dart';
 
-/// A Cubit that manages the state of a form including field values, validation errors,
-/// and overall validity. It supports various validation strategies defined in
-/// [ValidationType] and tracks which fields have been "touched" (edited) by the user.
-///
-/// Validation Strategies:
-/// - [ValidationType.onSubmit]: Validation occurs only when the form is submitted.
-/// - [ValidationType.allFields]: All fields are validated whenever any field is updated.
-/// - [ValidationType.fieldsBeingEdited]: Only the currently edited field is validated.
-/// - [ValidationType.disabled]: No validation is performed.
-///
-/// The overall form is considered valid only when every field has been touched and passes its validation.
+/// Form cubit with type-safe state access
 class CoreFormCubit extends Cubit<CoreFormState> {
-  /// Creates a [CoreFormCubit] with the given [validators] and [validationType].
-  ///
-  /// [validators] is a map where each key represents a field name and the associated
-  /// list of [Validator]s is used to create a [CompositeValidator] for that field.
-  /// All fields are initialized with a `null` value and marked as untouched.
   CoreFormCubit({
-    Map<String, List<Validator>> validators = const {},
+    List<TypedFormField> fields = const [],
     ValidationType validationType = ValidationType.allFields,
-  }) : super(CoreFormState.initial().copyWith(validationType: validationType)) {
+  }) : super(CoreFormState.initial()) {
     _validators = {};
     _touchedFields = {};
-    final values = <String, dynamic>{};
-    // Initialize validators and mark fields as untouched.
-    validators.forEach((key, value) {
-      values.putIfAbsent(key, () => null);
-      _validators[key] = CompositeValidator(value);
-      _touchedFields[key] = false;
-    });
-    emit(state.copyWith(values: values));
+    final values = <String, Object?>{};
+    final fieldTypes = <String, Type>{};
+
+    // Initialize validators, field types, and mark fields as untouched
+    for (final field in fields) {
+      values[field.name] = field.initialValue;
+      _validators[field.name] = field.createValidator();
+      _touchedFields[field.name] = false;
+      fieldTypes[field.name] = field.valueType;
+    }
+
+    // Single emit call with all initial values
+    emit(
+      CoreFormState(
+        values: values,
+        errors: {},
+        isValid: false,
+        validationType: validationType,
+        fieldTypes: fieldTypes,
+      ),
+    );
   }
 
-  late final Map<String, CompositeValidator> _validators;
+  late final Map<String, Validator> _validators;
   late final Map<String, bool> _touchedFields;
 
-  /// Updates the value for a specific field identified by [fieldName] and revalidates
-  /// based on the current [ValidationType]. Also marks the field as touched.
-  void updateField(String fieldName, dynamic value, BuildContext context) {
-    final newValues = Map<String, dynamic>.from(state.values)
+  /// Type-safe getter for field values
+  T? getValue<T>(String fieldName) => state.getValue<T>(fieldName);
+
+  /// Type-safe update method for a single field
+  void updateField<T>(String fieldName, T? value, BuildContext context) {
+    // Type check
+    final expectedType = state.fieldTypes[fieldName];
+    if (expectedType != null && expectedType != T) {
+      throw TypeError();
+    }
+
+    final newValues = Map<String, Object?>.from(state.values)
       ..[fieldName] = value;
 
-    // Mark this field as touched.
+    // Mark this field as touched
     _touchedFields[fieldName] = true;
 
     Map<String, String> newErrors = Map<String, String>.from(state.errors);
 
-    // Update errors based on the active validation strategy.
+    // Update errors based on the active validation strategy
     switch (state.validationType) {
       case ValidationType.onSubmit:
-        // In onSubmit mode, we don't update errors on field change.
+        // In onSubmit mode, we don't update errors on field change
         newErrors = state.errors;
         break;
       case ValidationType.allFields:
-        // Validate all fields when any field is updated.
+        // Validate all fields when any field is updated
         newErrors = _validateFields(newValues, context);
         break;
       case ValidationType.fieldsBeingEdited:
-        // Validate only the field being edited.
-        final error = _validators[fieldName]?.validate(value, context);
-        if (error != null) {
-          newErrors[fieldName] = error;
-        } else {
-          newErrors.remove(fieldName);
+        // Validate only the field being edited
+        final validator = _validators[fieldName];
+        if (validator != null) {
+          final error = _validateField(validator, value, context);
+          if (error != null) {
+            newErrors[fieldName] = error;
+          } else {
+            newErrors.remove(fieldName);
+          }
         }
         break;
       case ValidationType.disabled:
@@ -78,8 +87,7 @@ class CoreFormCubit extends Cubit<CoreFormState> {
         break;
     }
 
-    // Compute overall validity:
-    // The form is valid only if every field has been touched and passes its validation.
+    // Compute overall validity
     final overallValid = _computeOverallValidity(newValues, context);
 
     emit(
@@ -91,22 +99,29 @@ class CoreFormCubit extends Cubit<CoreFormState> {
     );
   }
 
-  /// Returns the value associated with the field [name].
-  dynamic getValueByName(String name) => state.values[name];
+  /// Validates a single field with its validator
+  String? _validateField<T>(
+    Validator validator,
+    T? value,
+    BuildContext context,
+  ) {
+    return validator.validate(value, context);
+  }
 
-  /// Validates all fields based on the provided [values] map and returns a map of errors.
-  /// If validation is disabled, an empty map is returned.
+  /// Validates all fields based on the provided values map and returns a map of errors
   Map<String, String> _validateFields(
-    Map<String, dynamic> values,
+    Map<String, Object?> values,
     BuildContext context,
   ) {
     if (state.validationType == ValidationType.disabled) {
       return {};
     }
+
     final errors = <String, String>{};
 
     _validators.forEach((fieldName, validator) {
-      final error = validator.validate(values[fieldName], context);
+      final value = values[fieldName];
+      final error = validator.validate(value, context);
       if (error != null) {
         errors[fieldName] = error;
       }
@@ -115,33 +130,32 @@ class CoreFormCubit extends Cubit<CoreFormState> {
     return errors;
   }
 
-  /// Computes the overall form validity using [newValues] by ensuring:
-  ///  - Every field has been touched.
-  ///  - Every touched field passes its validation.
+  /// Computes the overall form validity
   bool _computeOverallValidity(
-    Map<String, dynamic> newValues,
+    Map<String, Object?> values,
     BuildContext context,
   ) {
     for (final field in state.values.keys) {
-      // If the field hasn't been touched yet, the form is not valid.
+      // If the field hasn't been touched yet, the form is not valid
       if (_touchedFields[field] != true) return false;
-      // If the field fails its validation, the form is not valid.
-      if (_validators[field]?.validate(newValues[field], context) != null) {
-        return false;
+
+      // If the field fails its validation, the form is not valid
+      final validator = _validators[field];
+      if (validator != null) {
+        final value = values[field];
+        if (validator.validate(value, context) != null) {
+          return false;
+        }
       }
     }
     return true;
   }
 
-  /// Sets a new [validationType] for the form and updates the state.
+  /// Sets a new validation type for the form
   void setValidationType(ValidationType validationType) =>
       emit(state.copyWith(validationType: validationType));
 
-  /// Validates the entire form. In [ValidationType.onSubmit] mode, all fields are validated.
-  ///
-  /// If the form is valid, [onValidationPass] is invoked.
-  /// Otherwise, [onValidationFail] is invoked (if provided) and the validation strategy
-  /// is switched to [ValidationType.fieldsBeingEdited] to provide immediate feedback.
+  /// Validates the entire form
   void validateForm(
     BuildContext context, {
     required VoidCallback onValidationPass,
@@ -159,19 +173,111 @@ class CoreFormCubit extends Cubit<CoreFormState> {
       setValidationType(ValidationType.fieldsBeingEdited);
     }
   }
+
+  /// Updates multiple fields at once with a single state emission
+  void updateFields<T>(Map<String, T?> fieldValues, BuildContext context) {
+    final newValues = Map<String, Object?>.from(state.values);
+    final newErrors = Map<String, String>.from(state.errors);
+
+    // Type check and mark fields as touched
+    for (final entry in fieldValues.entries) {
+      final fieldName = entry.key;
+      final value = entry.value;
+
+      // Type check
+      final expectedType = state.fieldTypes[fieldName];
+      if (expectedType != null && expectedType != T) {
+        throw TypeError();
+      }
+
+      // Update value and mark as touched
+      newValues[fieldName] = value;
+      _touchedFields[fieldName] = true;
+    }
+
+    // Update errors based on validation strategy
+    switch (state.validationType) {
+      case ValidationType.onSubmit:
+        // No validation on field change
+        break;
+      case ValidationType.allFields:
+        // Validate all fields
+        newErrors.clear();
+        newErrors.addAll(_validateFields(newValues, context));
+        break;
+      case ValidationType.fieldsBeingEdited:
+        // Validate only edited fields
+        for (final fieldName in fieldValues.keys) {
+          final validator = _validators[fieldName];
+          if (validator != null) {
+            final value = newValues[fieldName];
+            final error = validator.validate(value, context);
+            if (error != null) {
+              newErrors[fieldName] = error;
+            } else {
+              newErrors.remove(fieldName);
+            }
+          }
+        }
+        break;
+      case ValidationType.disabled:
+        newErrors.clear();
+        break;
+    }
+
+    emit(
+      state.copyWith(
+        values: newValues,
+        errors: newErrors,
+        isValid: _computeOverallValidity(newValues, context),
+      ),
+    );
+  }
+
+  /// Resets the form to its initial state
+  void resetForm() {
+    final initialValues = <String, Object?>{};
+
+    // Reset all fields to their initial values
+    for (final fieldName in _validators.keys) {
+      initialValues[fieldName] = null;
+      _touchedFields[fieldName] = false;
+    }
+
+    emit(state.copyWith(values: initialValues, errors: {}, isValid: false));
+  }
+
+  /// Marks all fields as touched and validates them
+  void touchAllFields(BuildContext context) {
+    // Mark all fields as touched
+    for (final field in _touchedFields.keys) {
+      _touchedFields[field] = true;
+    }
+
+    // Validate all fields
+    final newErrors = _validateFields(state.values, context);
+
+    // Update state
+    emit(
+      state.copyWith(
+        errors: newErrors,
+        isValid: _computeOverallValidity(state.values, context),
+      ),
+    );
+  }
 }
 
-/// Enum representing the available form validation strategies.
+/// Enum representing the available form validation strategies
 enum ValidationType {
-  /// Validation occurs only upon form submission.
+  /// Validation occurs only upon form submission
   onSubmit,
 
-  /// All fields are validated whenever any field is updated.
+  /// All fields are validated whenever any field is updated
   allFields,
 
-  /// Only the field currently being edited is validated.
+  /// Only the field currently being edited is validated
   fieldsBeingEdited,
 
-  /// Validation is disabled.
+  /// Validation is disabled
   disabled,
 }
