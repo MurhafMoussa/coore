@@ -80,8 +80,8 @@ as Map<String, Type>,
 /// @nodoc
 
 
-class _CoreFormState implements CoreFormState {
-  const _CoreFormState({required final  Map<String, Object?> values, required final  Map<String, String> errors, required this.isValid, this.validationType = ValidationType.fieldsBeingEdited, required final  Map<String, Type> fieldTypes}): _values = values,_errors = errors,_fieldTypes = fieldTypes;
+class _CoreFormState extends CoreFormState {
+  const _CoreFormState({required final  Map<String, Object?> values, required final  Map<String, String> errors, required this.isValid, this.validationType = ValidationType.fieldsBeingEdited, required final  Map<String, Type> fieldTypes}): _values = values,_errors = errors,_fieldTypes = fieldTypes,super._();
   
 
  final  Map<String, Object?> _values;

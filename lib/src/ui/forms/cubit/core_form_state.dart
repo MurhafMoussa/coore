@@ -9,13 +9,13 @@ abstract class CoreFormState with _$CoreFormState {
     @Default(ValidationType.fieldsBeingEdited) ValidationType validationType,
     required Map<String, Type> fieldTypes,
   }) = _CoreFormState;
-
+  const CoreFormState._();
   factory CoreFormState.initial() => const CoreFormState(
-        values: {},
-        errors: {},
-        isValid: false,
-        fieldTypes: {},
-      );
+    values: {},
+    errors: {},
+    isValid: false,
+    fieldTypes: {},
+  );
 
   /// Type-safe getter for field values
   @useResult
@@ -35,7 +35,7 @@ abstract class CoreFormState with _$CoreFormState {
     final value = values[fieldName];
     if (value == null) return null;
     if (value is T) return value as T;
-    
+
     throw TypeError();
   }
 
@@ -47,4 +47,3 @@ abstract class CoreFormState with _$CoreFormState {
   @useResult
   bool hasError(String fieldName) => errors.containsKey(fieldName);
 }
-
