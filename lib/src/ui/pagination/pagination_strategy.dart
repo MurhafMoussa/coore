@@ -52,14 +52,14 @@ class SkipPaginationStrategy extends PaginationStrategy {
 class PagePaginationStrategy extends PaginationStrategy {
   PagePaginationStrategy({super.limit = 20});
 
-  int page = 0;
+  int page = 1;
 
   @override
   int get nextBatch => page;
 
   @override
   void reset() {
-    page = 0;
+    page = 1;
   }
 
   @override
@@ -69,7 +69,7 @@ class PagePaginationStrategy extends PaginationStrategy {
 
   @override
   void decrement() {
-    if (page > 0) page -= 1;
+    if (page > 1) page -= 1;
   }
 
   @override
@@ -83,5 +83,5 @@ class PagePaginationStrategy extends PaginationStrategy {
   }
 
   @override
-  bool get isFirst => page == 0;
+  bool get isFirst => page == 1;
 }
