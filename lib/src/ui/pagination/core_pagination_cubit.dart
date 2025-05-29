@@ -55,7 +55,7 @@ class CorePaginationCubit<T extends Identifiable>
 
   @mustCallSuper
   Future<void> fetchInitialData() async {
-    _resetState();
+    if (!isClosed) _resetState();
 
     await _fetchNetworkData(isInitial: true);
   }
@@ -84,10 +84,12 @@ class CorePaginationCubit<T extends Identifiable>
       paginationStrategy.limit,
     );
 
-    result.fold(
-      (failure) => _handleFailure(failure, isInitial),
-      (items) => _handleSuccess(items, isInitial),
-    );
+    if (!isClosed) {
+      result.fold(
+        (failure) => _handleFailure(failure, isInitial),
+        (items) => _handleSuccess(items, isInitial),
+      );
+    }
   }
 
   /// Error handling pipeline:
