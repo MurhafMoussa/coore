@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:coore/lib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -70,7 +73,6 @@ class CoreTextField extends StatefulWidget {
   const CoreTextField({
     super.key,
     required this.name,
-
     this.enabled = true,
     this.obscureText = false,
     this.switchBetweenPrefixAndSuffix = false,
@@ -87,6 +89,7 @@ class CoreTextField extends StatefulWidget {
     this.maxLines = 1,
     this.minLines,
     this.maxLength,
+    this.maxLengthEnforcement,
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
     this.initialText,
     this.textAlignVertical = TextAlignVertical.center,
@@ -102,6 +105,44 @@ class CoreTextField extends StatefulWidget {
     this.suffixIcon,
     this.hintText,
     this.labelText,
+    this.style,
+    this.errorBuilder,
+    this.showRequiredStar = false,
+    this.requiredStarColor,
+    this.requiredStarWidget,
+    this.requiredIndicatorBuilder,
+    this.cursorColor,
+    this.cursorWidth = 2.0,
+    this.cursorHeight,
+    this.cursorRadius,
+    this.prefixWidget,
+    this.suffixWidget,
+    this.scrollPadding = const EdgeInsets.all(20),
+    this.scrollPhysics,
+    this.strutStyle,
+    this.textDirection,
+    this.autocorrect = true,
+    this.smartDashesType,
+    this.smartQuotesType,
+    this.selectionControls,
+    this.onSubmitted,
+    this.onAppPrivateCommand,
+    this.mouseCursor,
+    this.obscuringCharacter = '•',
+    this.contextMenuBuilder,
+    this.magnifierConfiguration,
+    this.undoController,
+    this.restorationId,
+    this.stylusHandwritingEnabled = true,
+    this.enableIMEPersonalizedLearning = true,
+    this.spellCheckConfiguration,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.onValueChanged,
+    this.debounceTime,
+    this.transformValue,
+    this.formatText,
+    this.autofocus = false,
   }) : assert(
          !expands || (maxLines == null && minLines == null),
          'When expands is true, maxLines and minLines must both be null.',
@@ -199,40 +240,293 @@ class CoreTextField extends StatefulWidget {
     required int? maxLength,
   })?
   counterBuilder;
+
+  /// Icon displayed at the end of the text field.
   final Widget? suffixIcon;
 
+  /// Icon displayed at the beginning of the text field.
   final Widget? prefixIcon;
+
+  /// Text that describes the input field.
   final String? labelText;
+
+  /// Text that suggests what sort of input the field accepts.
   final String? hintText;
+
+  // New properties
+
+  /// The style to use for the text being edited.
+  final TextStyle? style;
+
+  /// Custom builder for error messages.
+  /// If provided, this will be used instead of the default error text display.
+  final Widget Function(BuildContext context, String? errorText)? errorBuilder;
+
+  /// Whether to show a required indicator after the label text.
+  final bool showRequiredStar;
+
+  /// The color of the required star.
+  final Color? requiredStarColor;
+
+  /// Custom widget to use as the required indicator.
+  /// If provided, this will be used instead of the default star.
+  final Widget? requiredStarWidget;
+  
+  /// Custom builder for the required indicator.
+  /// Takes precedence over requiredStarWidget if both are provided.
+  /// If null, falls back to requiredStarWidget or the default star.
+  final Widget Function(BuildContext context, String labelText)? requiredIndicatorBuilder;
+
+  /// The color of the cursor.
+  final Color? cursorColor;
+
+  /// How thick the cursor will be.
+  final double cursorWidth;
+
+  /// How tall the cursor will be.
+  final double? cursorHeight;
+
+  /// The radius of the cursor corners.
+  final Radius? cursorRadius;
+
+  /// A widget to display before the text input field.
+  final Widget? prefixWidget;
+
+  /// A widget to display after the text input field.
+  final Widget? suffixWidget;
+
+  /// The padding added around the text field when it scrolls.
+  final EdgeInsets scrollPadding;
+
+  /// The physics of the scrollable text field.
+  final ScrollPhysics? scrollPhysics;
+
+  /// The strut style used for the vertical layout of the text.
+  final StrutStyle? strutStyle;
+
+  /// The text direction of the text field.
+  final TextDirection? textDirection;
+
+  /// Whether to enable autocorrection.
+  final bool autocorrect;
+
+  /// The configuration of smart dashes.
+  final SmartDashesType? smartDashesType;
+
+  /// The configuration of smart quotes.
+  final SmartQuotesType? smartQuotesType;
+
+  /// Optional delegate for building the text selection handles and toolbar.
+  final TextSelectionControls? selectionControls;
+
+  /// Called when the user submits editable content.
+  final ValueChanged<String>? onSubmitted;
+
+  /// Called when the platform receives a private command.
+  final AppPrivateCommandCallback? onAppPrivateCommand;
+
+  /// The cursor for a mouse pointer when it enters or hovers over the widget.
+  final MouseCursor? mouseCursor;
+
+  /// Character used for obscuring text if obscureText is true.
+  final String obscuringCharacter;
+
+  /// Builder for the context menu.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  /// Configuration of the text magnifier.
+  final TextMagnifierConfiguration? magnifierConfiguration;
+
+  /// Controller for undo/redo operations.
+  final UndoHistoryController? undoController;
+
+  /// Restoration ID to save and restore the state of the text field.
+  final String? restorationId;
+
+  /// Whether to enable scribble for Apple Pencil.
+  final bool stylusHandwritingEnabled;
+
+  /// Whether to enable personalized learning for IME.
+  final bool enableIMEPersonalizedLearning;
+
+  /// Configuration for spell check.
+  final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// How tall the selection highlight should be.
+  final ui.BoxHeightStyle selectionHeightStyle;
+
+  /// How wide the selection highlight should be.
+  final ui.BoxWidthStyle selectionWidthStyle;
+
+  /// How to enforce the text length limit.
+  final MaxLengthEnforcement? maxLengthEnforcement;
+
+  /// Whether this text field should focus itself if nothing else is already focused.
+  final bool autofocus;
+
+  /// Callback that is called when the text value changes.
+  /// This is different from onChanged as it can be used to listen to changes
+  /// without updating the form state.
+  final ValueChanged<String>? onValueChanged;
+
+  /// Time to wait before triggering form updates after typing.
+  /// Useful for search fields or other scenarios where you want to
+  /// reduce the number of form updates during rapid typing.
+  final Duration? debounceTime;
+
+  /// Function to transform the value before updating the form state.
+  /// Useful for formatting or normalizing input.
+  final String Function(String value)? transformValue;
+
+  /// Function to format the displayed text without affecting the underlying value.
+  /// Useful for displaying formatted text while maintaining raw value in the form.
+  final String Function(String value)? formatText;
+
   @override
   State<CoreTextField> createState() => _CoreTextFieldState();
 }
 
 class _CoreTextFieldState extends State<CoreTextField> {
   bool obscureText = false;
-
+  Timer? _debounceTimer;
   late final TextEditingController textEditingController;
+  late final FocusNode _focusNode;
+
   @override
   void initState() {
+    super.initState();
+    
     if (!ValueTester.isNull(widget.initialText)) {
       _updateCubit(widget.initialText);
     }
+    
     obscureText = widget.obscureText;
-    textEditingController = TextEditingController(text: widget.initialText);
-
-    super.initState();
+    
+    // Apply format if provided
+    final initialText = widget.formatText != null && widget.initialText != null 
+        ? widget.formatText!(widget.initialText!) 
+        : widget.initialText;
+        
+    textEditingController = TextEditingController(text: initialText);
+    
+    // Use provided focus node or create one
+    _focusNode = widget.focusNode ?? FocusNode();
+    
+    // Listen for changes to update value without affecting form state
+    if (widget.onValueChanged != null) {
+      textEditingController.addListener(_handleValueChanged);
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _debounceTimer?.cancel();
+    
+    // Only dispose the focus node if we created it
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
+    
+    if (widget.onValueChanged != null) {
+      textEditingController.removeListener(_handleValueChanged);
+    }
+    
     textEditingController.dispose();
+    super.dispose();
+  }
+  
+  @override
+  void didUpdateWidget(CoreTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // Update controller if formatText or initialText changed
+    if (oldWidget.formatText != widget.formatText || 
+        oldWidget.initialText != widget.initialText) {
+      final currentValue = textEditingController.text;
+      final formValue = context.read<CoreFormCubit>().state.values[widget.name] as String?;
+      
+      // Only update if the form value differs from current controller value
+      if (formValue != null && formValue != currentValue) {
+        final formattedValue = widget.formatText != null 
+            ? widget.formatText!(formValue) 
+            : formValue;
+            
+        // Update controller without triggering listeners
+        textEditingController.value = TextEditingValue(
+          text: formattedValue,
+          selection: textEditingController.selection,
+        );
+      }
+    }
+    
+    // Update listener if onValueChanged changed
+    if (oldWidget.onValueChanged != widget.onValueChanged) {
+      if (oldWidget.onValueChanged != null) {
+        textEditingController.removeListener(_handleValueChanged);
+      }
+      if (widget.onValueChanged != null) {
+        textEditingController.addListener(_handleValueChanged);
+      }
+    }
+  }
+  
+  void _handleValueChanged() {
+    widget.onValueChanged?.call(textEditingController.text);
+  }
+
+  void _updateCubit(String? text) {
+    if (widget.debounceTime != null) {
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(widget.debounceTime!, () {
+        _updateFormState(text);
+      });
+    } else {
+      _updateFormState(text);
+    }
+  }
+  
+  void _updateFormState(String? text) {
+    // Transform value if needed
+    final transformedText = text != null && widget.transformValue != null
+        ? widget.transformValue!(text)
+        : text;
+        
+    context.read<CoreFormCubit>().updateField(widget.name, transformedText, context);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CoreFormCubit, CoreFormState>(
       builder: (context, state) {
+        final errorText = state.errors[widget.name];
+
+        // Build label text with required indicator if needed
+        Widget? labelWidget;
+        if (widget.labelText != null && widget.showRequiredStar) {
+          // Use the custom builder if provided
+          if (widget.requiredIndicatorBuilder != null) {
+            labelWidget = widget.requiredIndicatorBuilder!(context, widget.labelText!);
+          } else {
+            // Otherwise use the default implementation
+            labelWidget = Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(widget.labelText!),
+                const SizedBox(width: 1),
+                widget.requiredStarWidget ??
+                    Text(
+                      '*',
+                      style: TextStyle(
+                        color:
+                            widget.requiredStarColor ??
+                            Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+              ],
+            );
+          }
+        }
+
         InputDecoration effectiveDecoration =
             (widget.decoration ?? const InputDecoration()).copyWith(
               suffixIcon:
@@ -243,19 +537,25 @@ class _CoreTextFieldState extends State<CoreTextField> {
                   widget.switchBetweenPrefixAndSuffix
                       ? _buildSuffixIcons(state)
                       : _buildPrefixIcons(),
-
-              labelText: widget.labelText,
+              labelText: widget.showRequiredStar ? null : widget.labelText,
+              label: labelWidget,
               hintText: widget.hintText,
+              prefix: widget.prefixWidget,
+              suffix: widget.suffixWidget,
+              errorText: widget.errorBuilder == null ? errorText : null,
             );
-        return TextFormField(
+
+        final textField = TextFormField(
           controller: textEditingController,
           obscureText: obscureText,
-          decoration: effectiveDecoration.copyWith(
-            errorText: state.errors[widget.name],
-          ),
+          obscuringCharacter: widget.obscuringCharacter,
+          decoration: effectiveDecoration,
           inputFormatters: widget.inputFormatters,
           onChanged: _updateCubit,
-          onFieldSubmitted: _updateCubit,
+          onFieldSubmitted: (value) {
+            _updateCubit(value);
+            widget.onSubmitted?.call(value);
+          },
           onSaved: _updateCubit,
           onTap: widget.onTap,
           onTapOutside: widget.onTapOutside,
@@ -267,10 +567,11 @@ class _CoreTextFieldState extends State<CoreTextField> {
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
           autofillHints: widget.autoFillHints,
-          focusNode: widget.focusNode,
+          focusNode: _focusNode,
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           maxLength: widget.maxLength,
+          maxLengthEnforcement: widget.maxLengthEnforcement,
           autovalidateMode:
               state.validationType == ValidationType.disabled
                   ? AutovalidateMode.disabled
@@ -280,7 +581,43 @@ class _CoreTextFieldState extends State<CoreTextField> {
           textAlignVertical: widget.textAlignVertical,
           textCapitalization: widget.textCapitalization,
           textAlign: widget.textAlign,
+          style: widget.style,
+          cursorColor: widget.cursorColor,
+          cursorWidth: widget.cursorWidth,
+          cursorHeight: widget.cursorHeight,
+          cursorRadius: widget.cursorRadius,
+          scrollPadding: widget.scrollPadding,
+          scrollPhysics: widget.scrollPhysics,
+          strutStyle: widget.strutStyle,
+          textDirection: widget.textDirection,
+          autocorrect: widget.autocorrect,
+          smartDashesType: widget.smartDashesType,
+          smartQuotesType: widget.smartQuotesType,
+          selectionControls: widget.selectionControls,
+          onAppPrivateCommand: widget.onAppPrivateCommand,
+          mouseCursor: widget.mouseCursor,
+          contextMenuBuilder: widget.contextMenuBuilder,
+          magnifierConfiguration: widget.magnifierConfiguration,
+          undoController: widget.undoController,
+          restorationId: widget.restorationId,
+          stylusHandwritingEnabled: widget.stylusHandwritingEnabled,
+          enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          spellCheckConfiguration: widget.spellCheckConfiguration,
+          selectionHeightStyle: widget.selectionHeightStyle,
+          selectionWidthStyle: widget.selectionWidthStyle,
+          autofocus: widget.autofocus,
         );
+
+        // If custom error builder is provided, wrap the text field
+        if (widget.errorBuilder != null && errorText != null) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [textField, widget.errorBuilder!(context, errorText)],
+          );
+        }
+
+        return textField;
       },
     );
   }
@@ -355,7 +692,5 @@ class _CoreTextFieldState extends State<CoreTextField> {
     return finalSuffix;
   }
 
-  void _updateCubit(String? text) {
-    context.read<CoreFormCubit>().updateField(widget.name, text, context);
-  }
+ 
 }
