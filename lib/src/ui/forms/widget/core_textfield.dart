@@ -422,8 +422,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
       _focusNode.dispose();
     }
 
-   
-
+  
     textEditingController.dispose();
     super.dispose();
   }
@@ -469,10 +468,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
         if (widget.labelText != null && widget.showRequiredStar) {
           // Use the custom builder if provided
           if (widget.requiredIndicatorBuilder != null) {
-            labelWidget = widget.requiredIndicatorBuilder!(
-              context,
-              widget.labelText!,
-            );
+            labelWidget = widget.requiredIndicatorBuilder!(context, widget.labelText!);
           } else {
             // Otherwise use the default implementation
             labelWidget = Row(
@@ -494,6 +490,12 @@ class _CoreTextFieldState extends State<CoreTextField> {
           }
         }
 
+        // Prepare error widget if needed
+        Widget? errorWidget;
+        if (errorText != null && widget.errorBuilder != null) {
+          errorWidget = widget.errorBuilder!(context, errorText);
+        }
+
         InputDecoration effectiveDecoration =
             (widget.decoration ?? const InputDecoration()).copyWith(
               suffixIcon:
@@ -509,12 +511,11 @@ class _CoreTextFieldState extends State<CoreTextField> {
               hintText: widget.hintText,
               prefix: widget.prefixWidget,
               suffix: widget.suffixWidget,
+              // Only use errorText if not using custom error builder
               errorText: widget.errorBuilder == null ? errorText : null,
             );
 
         final textField = TextFormField(
-          
-
           controller: textEditingController,
           obscureText: obscureText,
           obscuringCharacter: widget.obscuringCharacter,
@@ -577,12 +578,15 @@ class _CoreTextFieldState extends State<CoreTextField> {
           autofocus: widget.autofocus,
         );
 
-        // If custom error builder is provided, wrap the text field
-        if (widget.errorBuilder != null && errorText != null) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [textField, widget.errorBuilder!(context, errorText)],
+        // If custom error builder is provided, wrap the text field in a FocusRetaining widget
+        if (errorWidget != null) {
+          return _FocusRetainingWrapper(
+            focusNode: _focusNode,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [textField, errorWidget],
+            ),
           );
         }
 
@@ -659,5 +663,50 @@ class _CoreTextFieldState extends State<CoreTextField> {
     }
 
     return finalSuffix;
+  }
+}
+
+// Add this helper widget to maintain focus
+class _FocusRetainingWrapper extends StatefulWidget {
+  const _FocusRetainingWrapper({
+    required this.child,
+    required this.focusNode,
+  });
+
+  final Widget child;
+  final FocusNode focusNode;
+
+  @override
+  State<_FocusRetainingWrapper> createState() => _FocusRetainingWrapperState();
+}
+
+class _FocusRetainingWrapperState extends State<_FocusRetainingWrapper> {
+  bool wasFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    wasFocused = widget.focusNode.hasFocus;
+  }
+
+  @override
+  void didUpdateWidget(_FocusRetainingWrapper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Check if focus was lost during rebuild
+    if (wasFocused && !widget.focusNode.hasFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !widget.focusNode.hasFocus) {
+          widget.focusNode.requestFocus();
+        }
+      });
+    }
+    wasFocused = widget.focusNode.hasFocus;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Update focus state before rendering
+    wasFocused = widget.focusNode.hasFocus;
+    return widget.child;
   }
 }
