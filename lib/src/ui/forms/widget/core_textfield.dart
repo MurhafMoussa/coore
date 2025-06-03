@@ -271,11 +271,12 @@ class CoreTextField extends StatefulWidget {
   /// Custom widget to use as the required indicator.
   /// If provided, this will be used instead of the default star.
   final Widget? requiredStarWidget;
-  
+
   /// Custom builder for the required indicator.
   /// Takes precedence over requiredStarWidget if both are provided.
   /// If null, falls back to requiredStarWidget or the default star.
-  final Widget Function(BuildContext context, String labelText)? requiredIndicatorBuilder;
+  final Widget Function(BuildContext context, String labelText)?
+  requiredIndicatorBuilder;
 
   /// The color of the cursor.
   final Color? cursorColor;
@@ -395,23 +396,24 @@ class _CoreTextFieldState extends State<CoreTextField> {
   @override
   void initState() {
     super.initState();
-    
+
     if (!ValueTester.isNull(widget.initialText)) {
       _updateCubit(widget.initialText);
     }
-    
+
     obscureText = widget.obscureText;
-    
+
     // Apply format if provided
-    final initialText = widget.formatText != null && widget.initialText != null 
-        ? widget.formatText!(widget.initialText!) 
-        : widget.initialText;
-        
+    final initialText =
+        widget.formatText != null && widget.initialText != null
+            ? widget.formatText!(widget.initialText!)
+            : widget.initialText;
+
     textEditingController = TextEditingController(text: initialText);
-    
+
     // Use provided focus node or create one
     _focusNode = widget.focusNode ?? FocusNode();
-    
+
     // Listen for changes to update value without affecting form state
     if (widget.onValueChanged != null) {
       textEditingController.addListener(_handleValueChanged);
@@ -421,36 +423,38 @@ class _CoreTextFieldState extends State<CoreTextField> {
   @override
   void dispose() {
     _debounceTimer?.cancel();
-    
+
     // Only dispose the focus node if we created it
     if (widget.focusNode == null) {
       _focusNode.dispose();
     }
-    
+
     if (widget.onValueChanged != null) {
       textEditingController.removeListener(_handleValueChanged);
     }
-    
+
     textEditingController.dispose();
     super.dispose();
   }
-  
+
   @override
   void didUpdateWidget(CoreTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Update controller if formatText or initialText changed
-    if (oldWidget.formatText != widget.formatText || 
+    if (oldWidget.formatText != widget.formatText ||
         oldWidget.initialText != widget.initialText) {
       final currentValue = textEditingController.text;
-      final formValue = context.read<CoreFormCubit>().state.values[widget.name] as String?;
-      
+      final formValue =
+          context.read<CoreFormCubit>().state.values[widget.name] as String?;
+
       // Only update if the form value differs from current controller value
       if (formValue != null && formValue != currentValue) {
-        final formattedValue = widget.formatText != null 
-            ? widget.formatText!(formValue) 
-            : formValue;
-            
+        final formattedValue =
+            widget.formatText != null
+                ? widget.formatText!(formValue)
+                : formValue;
+
         // Update controller without triggering listeners
         textEditingController.value = TextEditingValue(
           text: formattedValue,
@@ -458,7 +462,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
         );
       }
     }
-    
+
     // Update listener if onValueChanged changed
     if (oldWidget.onValueChanged != widget.onValueChanged) {
       if (oldWidget.onValueChanged != null) {
@@ -469,7 +473,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
       }
     }
   }
-  
+
   void _handleValueChanged() {
     widget.onValueChanged?.call(textEditingController.text);
   }
@@ -484,14 +488,19 @@ class _CoreTextFieldState extends State<CoreTextField> {
       _updateFormState(text);
     }
   }
-  
+
   void _updateFormState(String? text) {
     // Transform value if needed
-    final transformedText = text != null && widget.transformValue != null
-        ? widget.transformValue!(text)
-        : text;
-        
-    context.read<CoreFormCubit>().updateField(widget.name, transformedText, context);
+    final transformedText =
+        text != null && widget.transformValue != null
+            ? widget.transformValue!(text)
+            : text;
+
+    context.read<CoreFormCubit>().updateField(
+      widget.name,
+      transformedText,
+      context,
+    );
   }
 
   @override
@@ -505,7 +514,10 @@ class _CoreTextFieldState extends State<CoreTextField> {
         if (widget.labelText != null && widget.showRequiredStar) {
           // Use the custom builder if provided
           if (widget.requiredIndicatorBuilder != null) {
-            labelWidget = widget.requiredIndicatorBuilder!(context, widget.labelText!);
+            labelWidget = widget.requiredIndicatorBuilder!(
+              context,
+              widget.labelText!,
+            );
           } else {
             // Otherwise use the default implementation
             labelWidget = Row(
@@ -546,6 +558,8 @@ class _CoreTextFieldState extends State<CoreTextField> {
             );
 
         final textField = TextFormField(
+          key: ValueKey(widget.name),
+
           controller: textEditingController,
           obscureText: obscureText,
           obscuringCharacter: widget.obscuringCharacter,
@@ -691,6 +705,4 @@ class _CoreTextFieldState extends State<CoreTextField> {
 
     return finalSuffix;
   }
-
- 
 }
