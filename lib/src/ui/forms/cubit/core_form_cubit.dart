@@ -265,6 +265,115 @@ class CoreFormCubit extends Cubit<CoreFormState> {
       ),
     );
   }
+
+  /// Manually set an error for a specific field
+  ///
+  /// This allows setting custom validation errors from outside the normal validation flow.
+  /// Useful for server-side validation errors or custom validation logic.
+  ///
+  /// Parameters:
+  /// - [fieldName]: The name of the field to set the error for
+  /// - [errorMessage]: The error message to display. If null, any existing error is cleared.
+  void updateError(
+    String fieldName,
+    String? errorMessage,
+    BuildContext context,
+  ) {
+    // Ensure the field exists
+    if (!state.values.containsKey(fieldName)) {
+      throw ArgumentError('Field "$fieldName" does not exist in the form');
+    }
+
+    final newErrors = Map<String, String>.from(state.errors);
+
+    if (errorMessage != null) {
+      newErrors[fieldName] = errorMessage;
+    } else {
+      newErrors.remove(fieldName);
+    }
+
+    // Mark field as touched since we're manually validating it
+    _touchedFields[fieldName] = true;
+
+    // Compute overall validity based on current values and new errors
+    final overallValid = _computeOverallValidityWithErrors(
+      state.values,
+      newErrors,
+      _touchedFields,
+      context,
+    );
+
+    emit(state.copyWith(errors: newErrors, isValid: overallValid));
+  }
+
+  /// Manually set multiple errors at once
+  ///
+  /// This allows setting custom validation errors for multiple fields.
+  /// Useful for handling server-side validation responses.
+  ///
+  /// Parameters:
+  /// - [errors]: Map of field names to error messages. If a field's error is null, any existing error is cleared.
+  void updateErrors(Map<String, String?> errors, BuildContext context) {
+    final newErrors = Map<String, String>.from(state.errors);
+
+    // Process each error
+    for (final entry in errors.entries) {
+      final fieldName = entry.key;
+      final errorMessage = entry.value;
+
+      // Ensure the field exists
+      if (!state.values.containsKey(fieldName)) {
+        throw ArgumentError('Field "$fieldName" does not exist in the form');
+      }
+
+      // Mark field as touched since we're manually validating it
+      _touchedFields[fieldName] = true;
+
+      if (errorMessage != null) {
+        newErrors[fieldName] = errorMessage;
+      } else {
+        newErrors.remove(fieldName);
+      }
+    }
+
+    // Compute overall validity based on current values and new errors
+    final overallValid = _computeOverallValidityWithErrors(
+      state.values,
+      newErrors,
+      _touchedFields,
+      context,
+    );
+    emit(state.copyWith(errors: newErrors, isValid: overallValid));
+  }
+
+  /// Computes the overall form validity with custom errors
+  ///
+  /// This is a variation of _computeOverallValidity that takes explicit errors
+  /// rather than computing them from validators.
+  bool _computeOverallValidityWithErrors(
+    Map<String, Object?> values,
+    Map<String, String> errors,
+    Map<String, bool> touchedFields,
+    BuildContext context,
+  ) {
+    // If there are any errors, the form is not valid
+    if (errors.isNotEmpty) return false;
+
+    for (final field in values.keys) {
+      // If the field hasn't been touched yet, the form is not valid
+      if (touchedFields[field] != true) return false;
+
+      // If the field fails its validation, the form is not valid
+      final validator = _validators[field];
+      if (validator != null) {
+        final value = values[field];
+        if (validator.validate(value, context) != null) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 }
 
 /// Enum representing the available form validation strategies
