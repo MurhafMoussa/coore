@@ -364,8 +364,6 @@ class CoreTextField extends StatefulWidget {
   /// Whether this text field should focus itself if nothing else is already focused.
   final bool autofocus;
 
- 
-
   /// Time to wait before triggering form updates after typing.
   /// Useful for search fields or other scenarios where you want to
   /// reduce the number of form updates during rapid typing.
@@ -409,8 +407,6 @@ class _CoreTextFieldState extends State<CoreTextField> {
 
     // Use provided focus node or create one
     _focusNode = widget.focusNode ?? FocusNode();
-
-    
   }
 
   @override
@@ -422,15 +418,9 @@ class _CoreTextFieldState extends State<CoreTextField> {
       _focusNode.dispose();
     }
 
-  
     textEditingController.dispose();
     super.dispose();
   }
-
-  
-
-
-
 
   void _updateCubit(String? text) {
     if (widget.debounceTime != null) {
@@ -444,7 +434,6 @@ class _CoreTextFieldState extends State<CoreTextField> {
   }
 
   void _updateFormState(String? text) {
-    
     final transformedText =
         text != null && widget.transformValue != null
             ? widget.transformValue!(text)
@@ -468,7 +457,10 @@ class _CoreTextFieldState extends State<CoreTextField> {
         if (widget.labelText != null && widget.showRequiredStar) {
           // Use the custom builder if provided
           if (widget.requiredIndicatorBuilder != null) {
-            labelWidget = widget.requiredIndicatorBuilder!(context, widget.labelText!);
+            labelWidget = widget.requiredIndicatorBuilder!(
+              context,
+              widget.labelText!,
+            );
           } else {
             // Otherwise use the default implementation
             labelWidget = Row(
@@ -490,12 +482,6 @@ class _CoreTextFieldState extends State<CoreTextField> {
           }
         }
 
-        // Prepare error widget if needed
-        Widget? errorWidget;
-        if (errorText != null && widget.errorBuilder != null) {
-          errorWidget = widget.errorBuilder!(context, errorText);
-        }
-
         InputDecoration effectiveDecoration =
             (widget.decoration ?? const InputDecoration()).copyWith(
               suffixIcon:
@@ -511,11 +497,13 @@ class _CoreTextFieldState extends State<CoreTextField> {
               hintText: widget.hintText,
               prefix: widget.prefixWidget,
               suffix: widget.suffixWidget,
-              // Only use errorText if not using custom error builder
               errorText: widget.errorBuilder == null ? errorText : null,
+              error:
+                  widget.errorBuilder != null && errorText != null
+                      ? widget.errorBuilder!(context, errorText)
+                      : null,
             );
-
-        final textField = TextFormField(
+        return TextFormField(
           controller: textEditingController,
           obscureText: obscureText,
           obscuringCharacter: widget.obscuringCharacter,
@@ -577,20 +565,6 @@ class _CoreTextFieldState extends State<CoreTextField> {
           selectionWidthStyle: widget.selectionWidthStyle,
           autofocus: widget.autofocus,
         );
-
-        // If custom error builder is provided, wrap the text field in a FocusRetaining widget
-        if (errorWidget != null) {
-          return _FocusRetainingWrapper(
-            focusNode: _focusNode,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [textField, errorWidget],
-            ),
-          );
-        }
-
-        return textField;
       },
     );
   }
@@ -663,50 +637,5 @@ class _CoreTextFieldState extends State<CoreTextField> {
     }
 
     return finalSuffix;
-  }
-}
-
-// Add this helper widget to maintain focus
-class _FocusRetainingWrapper extends StatefulWidget {
-  const _FocusRetainingWrapper({
-    required this.child,
-    required this.focusNode,
-  });
-
-  final Widget child;
-  final FocusNode focusNode;
-
-  @override
-  State<_FocusRetainingWrapper> createState() => _FocusRetainingWrapperState();
-}
-
-class _FocusRetainingWrapperState extends State<_FocusRetainingWrapper> {
-  bool wasFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    wasFocused = widget.focusNode.hasFocus;
-  }
-
-  @override
-  void didUpdateWidget(_FocusRetainingWrapper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Check if focus was lost during rebuild
-    if (wasFocused && !widget.focusNode.hasFocus) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && !widget.focusNode.hasFocus) {
-          widget.focusNode.requestFocus();
-        }
-      });
-    }
-    wasFocused = widget.focusNode.hasFocus;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Update focus state before rendering
-    wasFocused = widget.focusNode.hasFocus;
-    return widget.child;
   }
 }
