@@ -138,7 +138,6 @@ class CoreTextField extends StatefulWidget {
     this.spellCheckConfiguration,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
-    this.onValueChanged,
     this.debounceTime,
     this.transformValue,
     this.formatText,
@@ -365,10 +364,7 @@ class CoreTextField extends StatefulWidget {
   /// Whether this text field should focus itself if nothing else is already focused.
   final bool autofocus;
 
-  /// Callback that is called when the text value changes.
-  /// This is different from onChanged as it can be used to listen to changes
-  /// without updating the form state.
-  final ValueChanged<String>? onValueChanged;
+ 
 
   /// Time to wait before triggering form updates after typing.
   /// Useful for search fields or other scenarios where you want to
@@ -414,10 +410,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
     // Use provided focus node or create one
     _focusNode = widget.focusNode ?? FocusNode();
 
-    // Listen for changes to update value without affecting form state
-    if (widget.onValueChanged != null) {
-      textEditingController.addListener(_handleValueChanged);
-    }
+    
   }
 
   @override
@@ -429,54 +422,16 @@ class _CoreTextFieldState extends State<CoreTextField> {
       _focusNode.dispose();
     }
 
-    if (widget.onValueChanged != null) {
-      textEditingController.removeListener(_handleValueChanged);
-    }
+   
 
     textEditingController.dispose();
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(CoreTextField oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  
 
-    // Update controller if formatText or initialText changed
-    if (oldWidget.formatText != widget.formatText ||
-        oldWidget.initialText != widget.initialText) {
-      final currentValue = textEditingController.text;
-      final formValue =
-          context.read<CoreFormCubit>().state.values[widget.name] as String?;
 
-      // Only update if the form value differs from current controller value
-      if (formValue != null && formValue != currentValue) {
-        final formattedValue =
-            widget.formatText != null
-                ? widget.formatText!(formValue)
-                : formValue;
 
-        // Update controller without triggering listeners
-        textEditingController.value = TextEditingValue(
-          text: formattedValue,
-          selection: textEditingController.selection,
-        );
-      }
-    }
-
-    // Update listener if onValueChanged changed
-    if (oldWidget.onValueChanged != widget.onValueChanged) {
-      if (oldWidget.onValueChanged != null) {
-        textEditingController.removeListener(_handleValueChanged);
-      }
-      if (widget.onValueChanged != null) {
-        textEditingController.addListener(_handleValueChanged);
-      }
-    }
-  }
-
-  void _handleValueChanged() {
-    widget.onValueChanged?.call(textEditingController.text);
-  }
 
   void _updateCubit(String? text) {
     if (widget.debounceTime != null) {
@@ -490,7 +445,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
   }
 
   void _updateFormState(String? text) {
-    // Transform value if needed
+    
     final transformedText =
         text != null && widget.transformValue != null
             ? widget.transformValue!(text)
@@ -558,7 +513,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
             );
 
         final textField = TextFormField(
-          key: ValueKey(widget.name),
+          
 
           controller: textEditingController,
           obscureText: obscureText,
