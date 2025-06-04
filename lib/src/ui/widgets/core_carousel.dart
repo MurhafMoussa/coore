@@ -83,7 +83,7 @@ class CoreCarousel extends StatelessWidget {
        itemCount = children.length,
        _carouselType = _CarouselType.normal,
        assert(
-         (itemsPerPage == null) != (viewportFraction == null),
+         (itemsPerPage == null) || (viewportFraction == null),
          'Either itemsPerPage or viewportFraction must be provided, but not both',
        ),
        assert(
@@ -136,7 +136,7 @@ class CoreCarousel extends StatelessWidget {
        separatorBuilder = null,
        _carouselType = _CarouselType.builder,
        assert(
-         (itemsPerPage == null) != (viewportFraction == null),
+         (itemsPerPage == null) || (viewportFraction == null),
          'Either itemsPerPage or viewportFraction must be provided, but not both',
        ),
        assert(
@@ -191,7 +191,7 @@ class CoreCarousel extends StatelessWidget {
   }) : children = null,
        _carouselType = _CarouselType.separated,
        assert(
-         (itemsPerPage == null) != (viewportFraction == null),
+         (itemsPerPage == null) || (viewportFraction == null),
          'Either itemsPerPage or viewportFraction must be provided, but not both',
        ),
        assert(
