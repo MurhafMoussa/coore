@@ -30,6 +30,10 @@ class CoreCarousel extends StatelessWidget {
     this.enableInfiniteScroll = true,
     this.margin = EdgeInsets.zero,
     this.onPageChanged,
+    this.mainAxisSpacing = 0,
+    this.crossAxisSpacing = 0,
+    this.mainAxisExtent,
+    this.crossAxisExtent,
   }) : itemBuilder = null,
        separatorBuilder = null,
        itemCount = children.length,
@@ -57,6 +61,10 @@ class CoreCarousel extends StatelessWidget {
     this.enableInfiniteScroll = true,
     this.margin = EdgeInsets.zero,
     this.onPageChanged,
+    this.mainAxisSpacing = 0,
+    this.crossAxisSpacing = 0,
+    this.mainAxisExtent,
+    this.crossAxisExtent,
   }) : children = null,
        _carouselType = _CarouselType.separated,
        assert(viewPortFraction >= 0 && viewPortFraction <= 1);
@@ -79,6 +87,10 @@ class CoreCarousel extends StatelessWidget {
     this.enableInfiniteScroll = true,
     this.margin = EdgeInsets.zero,
     this.onPageChanged,
+    this.mainAxisSpacing = 0,
+    this.crossAxisSpacing = 0,
+    this.mainAxisExtent,
+    this.crossAxisExtent,
   }) : children = null,
        separatorBuilder = null,
        _carouselType = _CarouselType.builder,
@@ -93,6 +105,18 @@ class CoreCarousel extends StatelessWidget {
   final bool enableInfiniteScroll;
   final EdgeInsets margin;
   final ValueSetter<int>? onPageChanged;
+  
+  /// Spacing between items in the main axis direction
+  final double mainAxisSpacing;
+  
+  /// Spacing between items in the cross axis direction
+  final double crossAxisSpacing;
+  
+  /// Fixed extent in the main axis direction (overrides aspectRatio if provided)
+  final double? mainAxisExtent;
+  
+  /// Fixed extent in the cross axis direction
+  final double? crossAxisExtent;
 
   // Mode-specific parameters:
   /// Used only in the normal mode.
@@ -120,13 +144,15 @@ class CoreCarousel extends StatelessWidget {
         carouselController: carouselController,
         itemCount: itemCount,
         itemBuilder: (context, index, realIndex) {
+          Widget item;
+          
           switch (_carouselType) {
             case _CarouselType.normal:
               // Normal mode: return the child at the given index.
-              return children![index];
+              item = children![index];
             case _CarouselType.builder:
               // Builder mode: use the provided itemBuilder.
-              return itemBuilder!(context, index, realIndex);
+              item = itemBuilder!(context, index, realIndex);
             case _CarouselType.separated:
               // Separated mode: combine the item with its separator (except for the last one)
               if (index < itemCount! - 1) {
@@ -139,9 +165,31 @@ class CoreCarousel extends StatelessWidget {
                   ],
                 );
               } else {
-                return itemBuilder!(context, index, realIndex);
+                item = itemBuilder!(context, index, realIndex);
               }
           }
+          
+          // Apply spacing if needed
+          if (mainAxisSpacing > 0 || crossAxisSpacing > 0) {
+            item = Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: mainAxisSpacing / 2,
+                vertical: crossAxisSpacing / 2,
+              ),
+              child: item,
+            );
+          }
+          
+          // Apply fixed extents if provided
+          if (crossAxisExtent != null || mainAxisExtent != null) {
+            item = SizedBox(
+              width: mainAxisExtent,
+              height: crossAxisExtent,
+              child: item,
+            );
+          }
+          
+          return item;
         },
         options: CarouselOptions(
           autoPlay: autoPlay,
