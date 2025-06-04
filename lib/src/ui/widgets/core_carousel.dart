@@ -25,19 +25,19 @@ enum _CarouselType { normal, builder, separated }
 ///     Image.network('https://example.com/image3.jpg'),
 ///   ],
 ///   height: 200,
-///   itemsPerPage: 0.8,
+///   itemsPerPage: 2, // Show 2 items per page
 ///   spacing: 8,
 /// )
 ///
-/// // Using the builder constructor
+/// // Using the builder constructor with fractional viewport
 /// CoreCarousel.builder(
 ///   itemCount: 10,
-///   itemBuilder: (context, index, realIndex) => 
+///   itemBuilder: (context, index, realIndex) =>
 ///     Container(
 ///       color: Colors.primaries[index % Colors.primaries.length],
 ///       child: Center(child: Text('Item $index')),
 ///     ),
-///   itemsPerPage: 0.8,
+///   viewportFraction: 0.8, // Each item takes 80% of the screen width
 ///   enlargeCenterItem: true,
 /// )
 /// ```
@@ -52,7 +52,8 @@ class CoreCarousel extends StatelessWidget {
   /// * [carouselController] - Optional controller to programmatically control the carousel.
   /// * [aspectRatio] - The aspect ratio of the carousel when [height] is not specified.
   /// * [height] - The fixed height of the carousel. Takes precedence over [aspectRatio].
-  /// * [itemsPerPage] - The fraction of the viewport that each item should occupy (0.0 to 1.0).
+  /// * [itemsPerPage] - Number of items to show per page (integer). Cannot be used with [viewportFraction].
+  /// * [viewportFraction] - The fraction of the viewport that each item should occupy (0.0 to 1.0). Cannot be used with [itemsPerPage].
   /// * [autoPlay] - Whether the carousel should automatically cycle through items.
   /// * [disableCenter] - Whether to disable centering of the active item.
   /// * [enableInfiniteScroll] - Whether the carousel should loop infinitely.
@@ -67,7 +68,8 @@ class CoreCarousel extends StatelessWidget {
     this.carouselController,
     this.aspectRatio = 16 / 9,
     this.height,
-    this.itemsPerPage = 1.0,
+    this.itemsPerPage,
+    this.viewportFraction,
     this.autoPlay = true,
     this.disableCenter = true,
     this.enableInfiniteScroll = true,
@@ -80,7 +82,19 @@ class CoreCarousel extends StatelessWidget {
        separatorBuilder = null,
        itemCount = children.length,
        _carouselType = _CarouselType.normal,
-       assert(itemsPerPage > 0 && itemsPerPage <= 1);
+       assert(
+         (itemsPerPage == null) != (viewportFraction == null),
+         'Either itemsPerPage or viewportFraction must be provided, but not both',
+       ),
+       assert(
+         viewportFraction == null ||
+             (viewportFraction > 0 && viewportFraction <= 1),
+         'viewportFraction must be between 0 and 1',
+       ),
+       assert(
+         itemsPerPage == null || itemsPerPage > 0,
+         'itemsPerPage must be greater than 0',
+       );
 
   /// Builder Constructor: Use this when you want to build items on-demand.
   ///
@@ -90,7 +104,8 @@ class CoreCarousel extends StatelessWidget {
   /// * [carouselController] - Optional controller to programmatically control the carousel.
   /// * [aspectRatio] - The aspect ratio of the carousel when [height] is not specified.
   /// * [height] - The fixed height of the carousel. Takes precedence over [aspectRatio].
-  /// * [itemsPerPage] - The fraction of the viewport that each item should occupy (0.0 to 1.0).
+  /// * [itemsPerPage] - Number of items to show per page (integer). Cannot be used with [viewportFraction].
+  /// * [viewportFraction] - The fraction of the viewport that each item should occupy (0.0 to 1.0). Cannot be used with [itemsPerPage].
   /// * [autoPlay] - Whether the carousel should automatically cycle through items.
   /// * [disableCenter] - Whether to disable centering of the active item.
   /// * [enableInfiniteScroll] - Whether the carousel should loop infinitely.
@@ -107,7 +122,8 @@ class CoreCarousel extends StatelessWidget {
     this.carouselController,
     this.aspectRatio = 16 / 9,
     this.height,
-    this.itemsPerPage = 1.0,
+    this.itemsPerPage,
+    this.viewportFraction,
     this.autoPlay = true,
     this.disableCenter = true,
     this.enableInfiniteScroll = true,
@@ -119,7 +135,19 @@ class CoreCarousel extends StatelessWidget {
   }) : children = null,
        separatorBuilder = null,
        _carouselType = _CarouselType.builder,
-       assert(itemsPerPage > 0 && itemsPerPage <= 1);
+       assert(
+         (itemsPerPage == null) != (viewportFraction == null),
+         'Either itemsPerPage or viewportFraction must be provided, but not both',
+       ),
+       assert(
+         viewportFraction == null ||
+             (viewportFraction > 0 && viewportFraction <= 1),
+         'viewportFraction must be between 0 and 1',
+       ),
+       assert(
+         itemsPerPage == null || itemsPerPage > 0,
+         'itemsPerPage must be greater than 0',
+       );
 
   /// Separated Constructor: Use this when you want to insert separators between items.
   ///
@@ -130,7 +158,8 @@ class CoreCarousel extends StatelessWidget {
   /// * [carouselController] - Optional controller to programmatically control the carousel.
   /// * [aspectRatio] - The aspect ratio of the carousel when [height] is not specified.
   /// * [height] - The fixed height of the carousel. Takes precedence over [aspectRatio].
-  /// * [itemsPerPage] - The fraction of the viewport that each item should occupy (0.0 to 1.0).
+  /// * [itemsPerPage] - Number of items to show per page (integer). Cannot be used with [viewportFraction].
+  /// * [viewportFraction] - The fraction of the viewport that each item should occupy (0.0 to 1.0). Cannot be used with [itemsPerPage].
   /// * [autoPlay] - Whether the carousel should automatically cycle through items.
   /// * [disableCenter] - Whether to disable centering of the active item.
   /// * [enableInfiniteScroll] - Whether the carousel should loop infinitely.
@@ -149,7 +178,8 @@ class CoreCarousel extends StatelessWidget {
     this.carouselController,
     this.aspectRatio = 16 / 9,
     this.height,
-    this.itemsPerPage = 1.0,
+    this.itemsPerPage,
+    this.viewportFraction,
     this.autoPlay = true,
     this.disableCenter = true,
     this.enableInfiniteScroll = true,
@@ -160,44 +190,60 @@ class CoreCarousel extends StatelessWidget {
     this.enlargeFactor = 0.3,
   }) : children = null,
        _carouselType = _CarouselType.separated,
-       assert(itemsPerPage > 0 && itemsPerPage <= 1);
+       assert(
+         (itemsPerPage == null) != (viewportFraction == null),
+         'Either itemsPerPage or viewportFraction must be provided, but not both',
+       ),
+       assert(
+         viewportFraction == null ||
+             (viewportFraction > 0 && viewportFraction <= 1),
+         'viewportFraction must be between 0 and 1',
+       ),
+       assert(
+         itemsPerPage == null || itemsPerPage > 0,
+         'itemsPerPage must be greater than 0',
+       );
 
   /// Optional controller to programmatically control the carousel.
   final CarouselSliderController? carouselController;
-  
+
   /// The aspect ratio of the carousel when [height] is not specified.
   final double aspectRatio;
-  
+
   /// The fixed height of the carousel. Takes precedence over [aspectRatio].
   final double? height;
-  
+
+  /// Number of items to show per page (integer).
+  /// Cannot be used with [viewportFraction].
+  final int? itemsPerPage;
+
   /// The fraction of the viewport that each item should occupy (0.0 to 1.0).
-  /// For example, 0.8 means each item takes up 80% of the viewport width.
-  final double itemsPerPage;
-  
+  /// Cannot be used with [itemsPerPage].
+  final double? viewportFraction;
+
   /// Whether the carousel should automatically cycle through items.
   final bool autoPlay;
-  
+
   /// Whether to disable centering of the active item.
   final bool disableCenter;
-  
+
   /// Whether the carousel should loop infinitely.
   final bool enableInfiniteScroll;
-  
+
   /// The margin around the carousel.
   final EdgeInsets margin;
-  
+
   /// Callback when the active page changes.
   final ValueSetter<int>? onPageChanged;
-  
+
   /// The spacing between carousel items.
   /// This adds padding to each item, creating visual separation.
   final double spacing;
-  
+
   /// Whether to enlarge the center item.
   /// When true, the center item will be larger than other items.
   final bool enlargeCenterItem;
-  
+
   /// How much to enlarge the center item (0.3 = 30% larger).
   /// Only applies when [enlargeCenterItem] is true.
   final double enlargeFactor;
@@ -206,23 +252,38 @@ class CoreCarousel extends StatelessWidget {
   /// The list of widgets to display in the carousel.
   /// Only used in the normal constructor.
   final List<Widget>? children;
-  
+
   /// Function that builds each item with context, index, and realIndex.
   /// Used in builder and separated constructors.
-  final Widget Function(BuildContext context, int index, int realIndex)? itemBuilder;
-  
+  final Widget Function(BuildContext context, int index, int realIndex)?
+  itemBuilder;
+
   /// Function that builds separators between items.
   /// Only used in the separated constructor.
   final Widget Function(BuildContext context, int index)? separatorBuilder;
-  
+
   /// The total number of items in the carousel.
   final int? itemCount;
-  
+
   /// Internal enum to track which constructor was used.
   final _CarouselType _carouselType;
 
+  /// Calculate the viewport fraction based on itemsPerPage or use the provided viewportFraction
+  double _calculateViewportFraction(BuildContext context) {
+    if (viewportFraction != null) {
+      return viewportFraction!;
+    }
+
+    // If itemsPerPage is provided, calculate the viewport fraction
+    // by dividing 1.0 by the number of items per page
+    return 1.0 / itemsPerPage!;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Calculate the effective viewport fraction
+    final effectiveViewportFraction = _calculateViewportFraction(context);
+
     return Padding(
       padding: margin,
       child: CarouselSlider.builder(
@@ -230,7 +291,7 @@ class CoreCarousel extends StatelessWidget {
         itemCount: itemCount,
         itemBuilder: (context, index, realIndex) {
           Widget item;
-          
+
           // Build the item based on carousel type
           switch (_carouselType) {
             case _CarouselType.normal:
@@ -254,7 +315,7 @@ class CoreCarousel extends StatelessWidget {
                 item = itemBuilder!(context, index, realIndex);
               }
           }
-          
+
           // Apply spacing if needed
           if (spacing > 0) {
             item = Padding(
@@ -262,27 +323,31 @@ class CoreCarousel extends StatelessWidget {
               child: item,
             );
           }
-          
+
           return item;
         },
         options: CarouselOptions(
           // Animation settings
           autoPlay: autoPlay,
           autoPlayCurve: AnimationParamsManager.slidingCurve,
-          autoPlayAnimationDuration: AnimationParamsManager.slidingAnimationDuration,
+          autoPlayAnimationDuration:
+              AnimationParamsManager.slidingAnimationDuration,
           autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
-          
+
           // Layout settings
-          viewportFraction: itemsPerPage,
+          viewportFraction: effectiveViewportFraction,
           height: height,
           aspectRatio: aspectRatio,
-          
+
           // Behavior settings
-          onPageChanged: onPageChanged != null ? (index, _) => onPageChanged!(index) : null,
+          onPageChanged:
+              onPageChanged != null
+                  ? (index, _) => onPageChanged!(index)
+                  : null,
           disableCenter: disableCenter,
           enableInfiniteScroll: enableInfiniteScroll,
           padEnds: false,
-          
+
           // Visual effects
           enlargeCenterPage: enlargeCenterItem,
           enlargeFactor: enlargeFactor,
