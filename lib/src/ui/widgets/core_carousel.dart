@@ -14,10 +14,7 @@ enum _CarouselType { normal, builder, separated }
 /// Depending on the constructor used, the [CoreCarousel] will build its content
 /// accordingly.
 class CoreCarousel extends StatelessWidget {
-  /// Normal Constructor:
-  /// Use this when you have a fixed list of child widgets.
-  ///
-  /// [children] is the list of widgets to display.
+  /// Normal Constructor: Use this when you have a fixed list of child widgets.
   const CoreCarousel({
     super.key,
     required List<Widget> this.children,
@@ -30,8 +27,7 @@ class CoreCarousel extends StatelessWidget {
     this.enableInfiniteScroll = true,
     this.margin = EdgeInsets.zero,
     this.onPageChanged,
-    this.mainAxisSpacing = 0,
-    this.crossAxisSpacing = 0,
+    this.spacing = 0,
     this.mainAxisExtent,
     this.crossAxisExtent,
   }) : itemBuilder = null,
@@ -40,11 +36,31 @@ class CoreCarousel extends StatelessWidget {
        _carouselType = _CarouselType.normal,
        assert(viewPortFraction >= 0 && viewPortFraction <= 1);
 
-  /// Separated Constructor:
-  /// Use this when you want to insert a separator between each item, similar to [ListView.separated].
-  ///
-  /// [itemCount] is the total number of items (without separators). The effective
-  /// item count will be calculated as (itemCount * 2 - 1).
+  /// Builder Constructor: Use this when you want to build items on-demand.
+  const CoreCarousel.builder({
+    super.key,
+    required Widget Function(BuildContext context, int index, int realIndex)
+    this.itemBuilder,
+
+    required int this.itemCount,
+    this.carouselController,
+    this.aspectRatio = 16 / 9,
+    this.height,
+    this.viewPortFraction = 1,
+    this.autoPlay = true,
+    this.disableCenter = true,
+    this.enableInfiniteScroll = true,
+    this.margin = EdgeInsets.zero,
+    this.onPageChanged,
+    this.spacing = 0,
+    this.mainAxisExtent,
+    this.crossAxisExtent,
+  }) : children = null,
+       separatorBuilder = null,
+       _carouselType = _CarouselType.builder,
+       assert(viewPortFraction > 0 && viewPortFraction <= 1);
+
+  /// Separated Constructor: Use this when you want to insert separators between items.
   const CoreCarousel.separated({
     super.key,
     required Widget Function(BuildContext context, int index, int realIndex)
@@ -61,41 +77,14 @@ class CoreCarousel extends StatelessWidget {
     this.enableInfiniteScroll = true,
     this.margin = EdgeInsets.zero,
     this.onPageChanged,
-    this.mainAxisSpacing = 0,
-    this.crossAxisSpacing = 0,
+    this.spacing = 0,
     this.mainAxisExtent,
     this.crossAxisExtent,
   }) : children = null,
        _carouselType = _CarouselType.separated,
-       assert(viewPortFraction >= 0 && viewPortFraction <= 1);
+       assert(viewPortFraction > 0 && viewPortFraction <= 1);
 
-  /// Builder Constructor:
-  /// Use this when you want to build items on-demand with an [itemBuilder] callback.
-  ///
-  /// [itemCount] is the total number of items (without separators).
-  const CoreCarousel.builder({
-    super.key,
-    required Widget Function(BuildContext context, int index, int realIndex)
-    this.itemBuilder,
-    required int this.itemCount,
-    this.carouselController,
-    this.aspectRatio = 16 / 9,
-    this.height,
-    this.viewPortFraction = 1,
-    this.autoPlay = true,
-    this.disableCenter = true,
-    this.enableInfiniteScroll = true,
-    this.margin = EdgeInsets.zero,
-    this.onPageChanged,
-    this.mainAxisSpacing = 0,
-    this.crossAxisSpacing = 0,
-    this.mainAxisExtent,
-    this.crossAxisExtent,
-  }) : children = null,
-       separatorBuilder = null,
-       _carouselType = _CarouselType.builder,
-       assert(viewPortFraction >= 0 && viewPortFraction <= 1);
-  // Common parameters for all modes.
+  // Common parameters
   final CarouselSliderController? carouselController;
   final double aspectRatio;
   final double? height;
@@ -105,35 +94,22 @@ class CoreCarousel extends StatelessWidget {
   final bool enableInfiniteScroll;
   final EdgeInsets margin;
   final ValueSetter<int>? onPageChanged;
-  
-  /// Spacing between items in the main axis direction
-  final double mainAxisSpacing;
-  
-  /// Spacing between items in the cross axis direction
-  final double crossAxisSpacing;
-  
-  /// Fixed extent in the main axis direction (overrides aspectRatio if provided)
+
+  /// Spacing between items
+  final double spacing;
+
+  /// Fixed width for items (overrides aspectRatio if provided)
   final double? mainAxisExtent;
-  
-  /// Fixed extent in the cross axis direction
+
+  /// Fixed height for items
   final double? crossAxisExtent;
 
-  // Mode-specific parameters:
-  /// Used only in the normal mode.
+  // Mode-specific parameters
   final List<Widget>? children;
-
-  /// The builder function used in builder and separated modes.
-  /// For separated mode, this builds the actual item widget.
   final Widget Function(BuildContext context, int index, int realIndex)?
   itemBuilder;
-
-  /// Used in separated mode to build a separator widget between items.
   final Widget Function(BuildContext context, int index)? separatorBuilder;
-
-  /// The count of actual items (not counting separators) for builder/separated modes.
   final int? itemCount;
-
-  // Internal flag to determine which mode to use.
   final _CarouselType _carouselType;
 
   @override
@@ -145,22 +121,19 @@ class CoreCarousel extends StatelessWidget {
         itemCount: itemCount,
         itemBuilder: (context, index, realIndex) {
           Widget item;
-          
+
+          // Build the item based on carousel type
           switch (_carouselType) {
             case _CarouselType.normal:
-              // Normal mode: return the child at the given index.
               item = children![index];
             case _CarouselType.builder:
-              // Builder mode: use the provided itemBuilder.
               item = itemBuilder!(context, index, realIndex);
             case _CarouselType.separated:
-              // Separated mode: combine the item with its separator (except for the last one)
               if (index < itemCount! - 1) {
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Expanded(child: itemBuilder!(context, index, realIndex)),
-                    // Build the separator after the item.
                     separatorBuilder!(context, index),
                   ],
                 );
@@ -168,27 +141,24 @@ class CoreCarousel extends StatelessWidget {
                 item = itemBuilder!(context, index, realIndex);
               }
           }
-          
+
           // Apply spacing if needed
-          if (mainAxisSpacing > 0 || crossAxisSpacing > 0) {
+          if (spacing > 0) {
             item = Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: mainAxisSpacing / 2,
-                vertical: crossAxisSpacing / 2,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: spacing / 2),
               child: item,
             );
           }
-          
-          // Apply fixed extents if provided
-          if (crossAxisExtent != null || mainAxisExtent != null) {
+
+          // Apply fixed dimensions if provided
+          if (mainAxisExtent != null || crossAxisExtent != null) {
             item = SizedBox(
               width: mainAxisExtent,
               height: crossAxisExtent,
               child: item,
             );
           }
-          
+
           return item;
         },
         options: CarouselOptions(
@@ -202,7 +172,7 @@ class CoreCarousel extends StatelessWidget {
           aspectRatio: aspectRatio,
           onPageChanged:
               onPageChanged != null
-                  ? (index, reason) => onPageChanged!(index)
+                  ? (index, _) => onPageChanged!(index)
                   : null,
           disableCenter: disableCenter,
           enableInfiniteScroll: enableInfiniteScroll,
