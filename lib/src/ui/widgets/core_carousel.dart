@@ -284,75 +284,68 @@ class CoreCarousel extends StatelessWidget {
     // Calculate the effective viewport fraction
     final effectiveViewportFraction =
         viewportFraction ?? (itemsPerPage != null ? 1.0 / itemsPerPage! : 1.0);
-    return RepaintBoundary(
-      child: Padding(
-        padding: margin,
-        child: CarouselSlider.builder(
-          carouselController: carouselController,
-          itemCount: _getEffectiveItemCount(),
-          itemBuilder: (context, index, realIndex) {
-            Widget item;
+    return Padding(
+      padding: margin,
+      child: CarouselSlider.builder(
+        carouselController: carouselController,
+        itemCount: _getEffectiveItemCount(),
+        itemBuilder: (context, index, realIndex) {
+          late final Widget item;
 
-            // Build the item based on carousel type
-            switch (_carouselType) {
-              case _CarouselType.normal:
-                // Normal mode: return the child at the given index
-                item = children![index];
-              case _CarouselType.builder:
-                // Builder mode: use the provided itemBuilder
+          // Build the item based on carousel type
+          switch (_carouselType) {
+            case _CarouselType.normal:
+              // Normal mode: return the child at the given index
+              item = children![index];
+            case _CarouselType.builder:
+              // Builder mode: use the provided itemBuilder
+              item = itemBuilder!(context, index, realIndex);
+            case _CarouselType.separated:
+              // Separated mode: combine the item with its separator (except for the last one)
+              if (index < itemCount - 1) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(child: itemBuilder!(context, index, realIndex)),
+                    // Build the separator after the item
+                    separatorBuilder!(context, index),
+                  ],
+                );
+              } else {
                 item = itemBuilder!(context, index, realIndex);
-              case _CarouselType.separated:
-                // Separated mode: combine the item with its separator (except for the last one)
-                if (index < itemCount - 1) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Expanded(child: itemBuilder!(context, index, realIndex)),
-                      // Build the separator after the item
-                      separatorBuilder!(context, index),
-                    ],
-                  );
-                } else {
-                  item = itemBuilder!(context, index, realIndex);
-                }
-            }
+              }
+          }
 
-            // Apply spacing if needed
-            if (spacing > 0) {
-              item = Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing / 2),
-                child: item,
-              );
-            }
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: spacing / 2),
+            child: item,
+          );
+        },
+        options: CarouselOptions(
+          // Animation settings
+          autoPlay: autoPlay,
+          autoPlayCurve: AnimationParamsManager.slidingCurve,
+          autoPlayAnimationDuration:
+              AnimationParamsManager.slidingAnimationDuration,
+          autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
 
-            return item;
-          },
-          options: CarouselOptions(
-            // Animation settings
-            autoPlay: autoPlay,
-            autoPlayCurve: AnimationParamsManager.slidingCurve,
-            autoPlayAnimationDuration:
-                AnimationParamsManager.slidingAnimationDuration,
-            autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
+          // Layout settings
+          viewportFraction: effectiveViewportFraction,
+          height: height,
+          aspectRatio: aspectRatio,
 
-            // Layout settings
-            viewportFraction: effectiveViewportFraction,
-            height: height,
-            aspectRatio: aspectRatio,
+          // Behavior settings
+          onPageChanged:
+              onPageChanged != null
+                  ? (index, _) => onPageChanged!(index)
+                  : null,
+          disableCenter: disableCenter,
+          enableInfiniteScroll: enableInfiniteScroll,
+          padEnds: false,
 
-            // Behavior settings
-            onPageChanged:
-                onPageChanged != null
-                    ? (index, _) => onPageChanged!(index)
-                    : null,
-            disableCenter: disableCenter,
-            enableInfiniteScroll: enableInfiniteScroll,
-            padEnds: false,
-
-            // Visual effects
-            enlargeCenterPage: enlargeCenterItem,
-            enlargeFactor: enlargeFactor,
-          ),
+          // Visual effects
+          enlargeCenterPage: enlargeCenterItem,
+          enlargeFactor: enlargeFactor,
         ),
       ),
     );
