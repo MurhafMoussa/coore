@@ -290,35 +290,16 @@ class CoreCarousel extends StatelessWidget {
         carouselController: carouselController,
         itemCount: _getEffectiveItemCount(),
         itemBuilder: (context, index, realIndex) {
-          late final Widget item;
-
-          // Build the item based on carousel type
-          switch (_carouselType) {
-            case _CarouselType.normal:
-              // Normal mode: return the child at the given index
-              item = children![index];
-            case _CarouselType.builder:
-              // Builder mode: use the provided itemBuilder
-              item = itemBuilder!(context, index, realIndex);
-            case _CarouselType.separated:
-              // Separated mode: combine the item with its separator (except for the last one)
-              if (index < itemCount - 1) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Expanded(child: itemBuilder!(context, index, realIndex)),
-                    // Build the separator after the item
-                    separatorBuilder!(context, index),
-                  ],
-                );
-              } else {
-                item = itemBuilder!(context, index, realIndex);
-              }
-          }
-
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: spacing / 2),
-            child: item,
+            child: switch (_carouselType) {
+              _CarouselType.normal => children![index],
+              _CarouselType.builder => itemBuilder!(context, index, realIndex),
+              _CarouselType.separated =>
+                index.isEven
+                    ? itemBuilder!(context, index ~/ 2, realIndex)
+                    : separatorBuilder!(context, index ~/ 2),
+            },
           );
         },
         options: CarouselOptions(
