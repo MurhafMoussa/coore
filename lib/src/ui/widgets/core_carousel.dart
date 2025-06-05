@@ -73,7 +73,7 @@ class CoreCarousel extends StatelessWidget {
     this.autoPlay = true,
     this.disableCenter = true,
     this.enableInfiniteScroll = true,
-    this.margin = EdgeInsets.zero,
+    this.margin = EdgeInsetsDirectional.zero,
     this.onPageChanged,
     this.spacing = 0,
     this.enlargeCenterItem = false,
@@ -127,7 +127,7 @@ class CoreCarousel extends StatelessWidget {
     this.autoPlay = true,
     this.disableCenter = true,
     this.enableInfiniteScroll = true,
-    this.margin = EdgeInsets.zero,
+    this.margin = EdgeInsetsDirectional.zero,
     this.onPageChanged,
     this.spacing = 0,
     this.enlargeCenterItem = false,
@@ -183,7 +183,7 @@ class CoreCarousel extends StatelessWidget {
     this.autoPlay = true,
     this.disableCenter = true,
     this.enableInfiniteScroll = true,
-    this.margin = EdgeInsets.zero,
+    this.margin = EdgeInsetsDirectional.zero,
     this.onPageChanged,
     this.spacing = 0,
     this.enlargeCenterItem = false,
@@ -231,7 +231,7 @@ class CoreCarousel extends StatelessWidget {
   final bool enableInfiniteScroll;
 
   /// The margin around the carousel.
-  final EdgeInsets margin;
+  final EdgeInsetsDirectional margin;
 
   /// Callback when the active page changes.
   final ValueSetter<int>? onPageChanged;
@@ -284,50 +284,56 @@ class CoreCarousel extends StatelessWidget {
     // Calculate the effective viewport fraction
     final effectiveViewportFraction =
         viewportFraction ?? (itemsPerPage != null ? 1.0 / itemsPerPage! : 1.0);
-    return Padding(
-      padding: margin,
-      child: CarouselSlider.builder(
-        carouselController: carouselController,
-        itemCount: _getEffectiveItemCount(),
-        itemBuilder: (context, index, realIndex) {
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: spacing / 2),
-            child: switch (_carouselType) {
-              _CarouselType.normal => children![index],
-              _CarouselType.builder => itemBuilder!(context, index, realIndex),
-              _CarouselType.separated =>
-                index.isEven
-                    ? itemBuilder!(context, index ~/ 2, realIndex)
-                    : separatorBuilder!(context, index ~/ 2),
-            },
-          );
-        },
-        options: CarouselOptions(
-          // Animation settings
-          autoPlay: autoPlay,
-          autoPlayCurve: AnimationParamsManager.slidingCurve,
-          autoPlayAnimationDuration:
-              AnimationParamsManager.slidingAnimationDuration,
-          autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
-
-          // Layout settings
-          viewportFraction: effectiveViewportFraction,
-          height: height,
-          aspectRatio: aspectRatio,
-
-          // Behavior settings
-          onPageChanged:
-              onPageChanged != null
-                  ? (index, _) => onPageChanged!(index)
-                  : null,
-          disableCenter: disableCenter,
-          enableInfiniteScroll: enableInfiniteScroll,
-          padEnds: false,
-
-          // Visual effects
-          enlargeCenterPage: enlargeCenterItem,
-          enlargeFactor: enlargeFactor,
-        ),
+    return CarouselSlider.builder(
+      carouselController: carouselController,
+      itemCount: _getEffectiveItemCount(),
+      itemBuilder: (context, index, realIndex) {
+            // remove left and right margin from the first and last items
+        final isFirst = index == 0;
+        final isLast = index == _getEffectiveItemCount() - 1;
+        
+        return Padding(
+          padding: EdgeInsetsDirectional.only(
+            start: isFirst ? margin.start : spacing / 2,
+            end: isLast ? margin.end : spacing / 2,
+            top: margin.top,
+            bottom: margin.bottom
+          ),
+          child: switch (_carouselType) {
+            _CarouselType.normal => children![index],
+            _CarouselType.builder => itemBuilder!(context, index, realIndex),
+            _CarouselType.separated =>
+              index.isEven
+                  ? itemBuilder!(context, index ~/ 2, realIndex)
+                  : separatorBuilder!(context, index ~/ 2),
+          },
+        );
+      },
+      options: CarouselOptions(
+        // Animation settings
+        autoPlay: autoPlay,
+        autoPlayCurve: AnimationParamsManager.slidingCurve,
+        autoPlayAnimationDuration:
+            AnimationParamsManager.slidingAnimationDuration,
+        autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
+    
+        // Layout settings
+        viewportFraction: effectiveViewportFraction,
+        height: height,
+        aspectRatio: aspectRatio,
+    
+        // Behavior settings
+        onPageChanged:
+            onPageChanged != null
+                ? (index, _) => onPageChanged!(index)
+                : null,
+        disableCenter: disableCenter,
+        enableInfiniteScroll: enableInfiniteScroll,
+        padEnds: false,
+    
+        // Visual effects
+        enlargeCenterPage: enlargeCenterItem,
+        enlargeFactor: enlargeFactor,
       ),
     );
   }
