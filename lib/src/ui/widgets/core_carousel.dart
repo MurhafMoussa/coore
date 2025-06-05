@@ -62,6 +62,7 @@ class CoreCarousel extends StatelessWidget {
   /// * [spacing] - The spacing between carousel items.
   /// * [enlargeCenterItem] - Whether to enlarge the center item.
   /// * [enlargeFactor] - How much to enlarge the center item (0.3 = 30% larger).
+  /// * [padEnds] - Whether to add padding at the beginning and end of the carousel.
   const CoreCarousel({
     super.key,
     required List<Widget> this.children,
@@ -78,6 +79,7 @@ class CoreCarousel extends StatelessWidget {
     this.spacing = 0,
     this.enlargeCenterItem = false,
     this.enlargeFactor = 0.3,
+    this.padEnds = false,
   }) : itemBuilder = null,
        separatorBuilder = null,
        itemCount = children.length,
@@ -114,6 +116,7 @@ class CoreCarousel extends StatelessWidget {
   /// * [spacing] - The spacing between carousel items.
   /// * [enlargeCenterItem] - Whether to enlarge the center item.
   /// * [enlargeFactor] - How much to enlarge the center item (0.3 = 30% larger).
+  /// * [padEnds] - Whether to add padding at the beginning and end of the carousel.
   const CoreCarousel.builder({
     super.key,
     required Widget Function(BuildContext context, int index, int realIndex)
@@ -132,6 +135,7 @@ class CoreCarousel extends StatelessWidget {
     this.spacing = 0,
     this.enlargeCenterItem = false,
     this.enlargeFactor = 0.3,
+    this.padEnds = false,
   }) : children = null,
        separatorBuilder = null,
        _carouselType = _CarouselType.builder,
@@ -168,6 +172,7 @@ class CoreCarousel extends StatelessWidget {
   /// * [spacing] - The spacing between carousel items.
   /// * [enlargeCenterItem] - Whether to enlarge the center item.
   /// * [enlargeFactor] - How much to enlarge the center item (0.3 = 30% larger).
+  /// * [padEnds] - Whether to add padding at the beginning and end of the carousel.
   const CoreCarousel.separated({
     super.key,
     required Widget Function(BuildContext context, int index, int realIndex)
@@ -188,6 +193,7 @@ class CoreCarousel extends StatelessWidget {
     this.spacing = 0,
     this.enlargeCenterItem = false,
     this.enlargeFactor = 0.3,
+    this.padEnds = false,
   }) : children = null,
        _carouselType = _CarouselType.separated,
        assert(
@@ -248,6 +254,10 @@ class CoreCarousel extends StatelessWidget {
   /// Only applies when [enlargeCenterItem] is true.
   final double enlargeFactor;
 
+  /// Whether to add padding at the beginning and end of the carousel.
+  /// When true, adds extra space before the first item and after the last item.
+  final bool padEnds;
+
   // Mode-specific parameters
   /// The list of widgets to display in the carousel.
   /// Only used in the normal constructor.
@@ -288,16 +298,16 @@ class CoreCarousel extends StatelessWidget {
       carouselController: carouselController,
       itemCount: _getEffectiveItemCount(),
       itemBuilder: (context, index, realIndex) {
-            // remove left and right margin from the first and last items
+        // remove left and right margin from the first and last items
         final isFirst = index == 0;
         final isLast = index == _getEffectiveItemCount() - 1;
-        
+
         return Padding(
           padding: EdgeInsetsDirectional.only(
             start: isFirst ? margin.start : spacing / 2,
             end: isLast ? margin.end : spacing / 2,
             top: margin.top,
-            bottom: margin.bottom
+            bottom: margin.bottom,
           ),
           child: switch (_carouselType) {
             _CarouselType.normal => children![index],
@@ -316,21 +326,19 @@ class CoreCarousel extends StatelessWidget {
         autoPlayAnimationDuration:
             AnimationParamsManager.slidingAnimationDuration,
         autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
-    
+
         // Layout settings
         viewportFraction: effectiveViewportFraction,
         height: height,
         aspectRatio: aspectRatio,
-    
+
         // Behavior settings
         onPageChanged:
-            onPageChanged != null
-                ? (index, _) => onPageChanged!(index)
-                : null,
+            onPageChanged != null ? (index, _) => onPageChanged!(index) : null,
         disableCenter: disableCenter,
         enableInfiniteScroll: enableInfiniteScroll,
-        padEnds: false,
-    
+        padEnds: padEnds,
+
         // Visual effects
         enlargeCenterPage: enlargeCenterItem,
         enlargeFactor: enlargeFactor,
