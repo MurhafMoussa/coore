@@ -118,7 +118,7 @@ class CoreCarousel extends StatelessWidget {
     super.key,
     required Widget Function(BuildContext context, int index, int realIndex)
     this.itemBuilder,
-    required int this.itemCount,
+    required this.itemCount,
     this.carouselController,
     this.aspectRatio = 16 / 9,
     this.height,
@@ -174,7 +174,7 @@ class CoreCarousel extends StatelessWidget {
     this.itemBuilder,
     required Widget Function(BuildContext context, int index)
     this.separatorBuilder,
-    required int this.itemCount,
+    required this.itemCount,
     this.carouselController,
     this.aspectRatio = 16 / 9,
     this.height,
@@ -263,94 +263,96 @@ class CoreCarousel extends StatelessWidget {
   final Widget Function(BuildContext context, int index)? separatorBuilder;
 
   /// The total number of items in the carousel.
-  final int? itemCount;
+  final int itemCount;
 
   /// Internal enum to track which constructor was used.
   final _CarouselType _carouselType;
 
-  /// Calculate the viewport fraction based on itemsPerPage or use the provided viewportFraction
-  double _calculateViewportFraction(BuildContext context) {
-    if (viewportFraction != null) {
-      return viewportFraction!;
+  // Calculate the effective item count based on carousel type
+  int _getEffectiveItemCount() {
+    switch (_carouselType) {
+      case _CarouselType.normal:
+      case _CarouselType.builder:
+        return itemCount;
+      case _CarouselType.separated:
+        return itemCount * 2 - 1;
     }
-
-    // If itemsPerPage is provided, calculate the viewport fraction
-    // by dividing 1.0 by the number of items per page
-    return 1.0 / itemsPerPage!;
   }
 
   @override
   Widget build(BuildContext context) {
     // Calculate the effective viewport fraction
-    final effectiveViewportFraction = _calculateViewportFraction(context);
+    final effectiveViewportFraction =
+        viewportFraction ?? (itemsPerPage != null ? 1.0 / itemsPerPage! : 1.0);
+    return RepaintBoundary(
+      child: Padding(
+        padding: margin,
+        child: CarouselSlider.builder(
+          carouselController: carouselController,
+          itemCount: _getEffectiveItemCount(),
+          itemBuilder: (context, index, realIndex) {
+            Widget item;
 
-    return Padding(
-      padding: margin,
-      child: CarouselSlider.builder(
-        carouselController: carouselController,
-        itemCount: itemCount,
-        itemBuilder: (context, index, realIndex) {
-          Widget item;
-
-          // Build the item based on carousel type
-          switch (_carouselType) {
-            case _CarouselType.normal:
-              // Normal mode: return the child at the given index
-              item = children![index];
-            case _CarouselType.builder:
-              // Builder mode: use the provided itemBuilder
-              item = itemBuilder!(context, index, realIndex);
-            case _CarouselType.separated:
-              // Separated mode: combine the item with its separator (except for the last one)
-              if (index < itemCount! - 1) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Expanded(child: itemBuilder!(context, index, realIndex)),
-                    // Build the separator after the item
-                    separatorBuilder!(context, index),
-                  ],
-                );
-              } else {
+            // Build the item based on carousel type
+            switch (_carouselType) {
+              case _CarouselType.normal:
+                // Normal mode: return the child at the given index
+                item = children![index];
+              case _CarouselType.builder:
+                // Builder mode: use the provided itemBuilder
                 item = itemBuilder!(context, index, realIndex);
-              }
-          }
+              case _CarouselType.separated:
+                // Separated mode: combine the item with its separator (except for the last one)
+                if (index < itemCount - 1) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(child: itemBuilder!(context, index, realIndex)),
+                      // Build the separator after the item
+                      separatorBuilder!(context, index),
+                    ],
+                  );
+                } else {
+                  item = itemBuilder!(context, index, realIndex);
+                }
+            }
 
-          // Apply spacing if needed
-          if (spacing > 0) {
-            item = Padding(
-              padding: EdgeInsets.symmetric(horizontal: spacing / 2),
-              child: item,
-            );
-          }
+            // Apply spacing if needed
+            if (spacing > 0) {
+              item = Padding(
+                padding: EdgeInsets.symmetric(horizontal: spacing / 2),
+                child: item,
+              );
+            }
 
-          return item;
-        },
-        options: CarouselOptions(
-          // Animation settings
-          autoPlay: autoPlay,
-          autoPlayCurve: AnimationParamsManager.slidingCurve,
-          autoPlayAnimationDuration:
-              AnimationParamsManager.slidingAnimationDuration,
-          autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
+            return item;
+          },
+          options: CarouselOptions(
+            // Animation settings
+            autoPlay: autoPlay,
+            autoPlayCurve: AnimationParamsManager.slidingCurve,
+            autoPlayAnimationDuration:
+                AnimationParamsManager.slidingAnimationDuration,
+            autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
 
-          // Layout settings
-          viewportFraction: effectiveViewportFraction,
-          height: height,
-          aspectRatio: aspectRatio,
+            // Layout settings
+            viewportFraction: effectiveViewportFraction,
+            height: height,
+            aspectRatio: aspectRatio,
 
-          // Behavior settings
-          onPageChanged:
-              onPageChanged != null
-                  ? (index, _) => onPageChanged!(index)
-                  : null,
-          disableCenter: disableCenter,
-          enableInfiniteScroll: enableInfiniteScroll,
-          padEnds: false,
+            // Behavior settings
+            onPageChanged:
+                onPageChanged != null
+                    ? (index, _) => onPageChanged!(index)
+                    : null,
+            disableCenter: disableCenter,
+            enableInfiniteScroll: enableInfiniteScroll,
+            padEnds: false,
 
-          // Visual effects
-          enlargeCenterPage: enlargeCenterItem,
-          enlargeFactor: enlargeFactor,
+            // Visual effects
+            enlargeCenterPage: enlargeCenterItem,
+            enlargeFactor: enlargeFactor,
+          ),
         ),
       ),
     );
