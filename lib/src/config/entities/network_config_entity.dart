@@ -5,9 +5,9 @@ class NetworkConfigEntity extends Equatable {
   const NetworkConfigEntity({
     required this.baseUrl,
     this.authInterceptorType = AuthInterceptorType.cookieBased,
-    this.connectTimeout = const Duration(seconds: 10),
-    this.sendTimeout = const Duration(seconds: 10),
-    this.receiveTimeout = const Duration(seconds: 10),
+    this.connectTimeout = const Duration(seconds: 60),
+    this.sendTimeout = const Duration(seconds: 60),
+    this.receiveTimeout = const Duration(seconds: 60),
    
     this.defaultQueryParams = const {},
     this.staticHeaders = const {
@@ -17,7 +17,7 @@ class NetworkConfigEntity extends Equatable {
     this.interceptors = const [],
     this.defaultContentType = 'application/json',
     this.maxRetries = 3,
-    this.retryInterval = const Duration(seconds: 1),
+    this.retryInterval = const Duration(seconds: 3),
     this.retryOnStatusCodes = const [500, 502, 503, 504],
     this.enableCache = false,
     this.cacheDuration = const Duration(minutes: 5),
