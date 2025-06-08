@@ -1,9 +1,10 @@
 {
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": true,
-    "editor.defaultFormatter": "Dart-Code.dart-code",
-    "editor.formatOnType": true,
-    "cSpell.words": [
-        "coore"
-    ]
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "Dart-Code.dart-code",
+  "editor.formatOnType": true,
+  "cSpell.words": [
+    "coore"
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/3.32.2"
 }
