@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// - Custom scroll controller for programmatic control.
 class CoreListViewCarousel extends StatefulWidget {
   /// The scroll controller for programmatic scrolling.
-  final CoreListViewCarouselController controller;
+  final CoreListViewCarouselController? controller;
 
   /// The total height (for horizontal) or width (for vertical) of the carousel.
   final double height;
@@ -15,14 +15,14 @@ class CoreListViewCarousel extends StatefulWidget {
   /// Number of items visible per viewport (i.e., fraction of viewport each child occupies = 1/childPerScreen).
   final double childPerScreen;
 
-  /// Spacing between items (ignored for [separated] constructor).
-  final double spacing;
-
   /// Scroll direction (default: horizontal).
   final Axis scrollDirection;
 
   /// Outer padding for the ListView.
   final EdgeInsets? padding;
+
+  /// Scroll physics for the ListView.
+  final ScrollPhysics? physics;
 
   /// For default constructor: the list of children.
   final List<Widget>? children;
@@ -42,10 +42,10 @@ class CoreListViewCarousel extends StatefulWidget {
     required this.children,
     required this.height,
     required this.childPerScreen,
-    required this.controller,
-    this.spacing = 0.0,
+    this.controller,
     this.scrollDirection = Axis.horizontal,
     this.padding,
+    this.physics,
   }) : itemBuilder = null,
        separatorBuilder = null,
        itemCount = null;
@@ -57,10 +57,10 @@ class CoreListViewCarousel extends StatefulWidget {
     required this.itemCount,
     required this.height,
     required this.childPerScreen,
-    required this.controller,
-    this.spacing = 0.0,
+    this.controller,
     this.scrollDirection = Axis.horizontal,
     this.padding,
+    this.physics,
   }) : children = null,
        separatorBuilder = null;
 
@@ -74,10 +74,10 @@ class CoreListViewCarousel extends StatefulWidget {
     required this.itemCount,
     required this.height,
     required this.childPerScreen,
-    required this.controller,
-    this.spacing = 0.0,
+    this.controller,
     this.scrollDirection = Axis.horizontal,
     this.padding,
+    this.physics,
   }) : children = null;
 
   @override
@@ -91,41 +91,17 @@ class _CoreListViewCarouselState extends State<CoreListViewCarousel> {
       height: widget.height,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final effectiveSpacing = widget.separatorBuilder != null
-              ? 0.0
-              : widget.spacing;
-          final totalSpacing = effectiveSpacing * (widget.childPerScreen - 1);
-          final itemExtent =
-              (constraints.maxWidth - totalSpacing) / widget.childPerScreen;
+          final itemExtent = (constraints.maxWidth) / widget.childPerScreen;
+          final defaultPhysics = widget.physics ?? const PageScrollPhysics();
 
           if (widget.children != null) {
-            // Default list of children.
-            final items = widget.children!.asMap().entries.map((entry) {
-              final idx = entry.key;
-              final child = entry.value;
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: idx == widget.children!.length - 1
-                      ? 0
-                      : widget.spacing,
-                ),
-                child: SizedBox(
-                  width: widget.scrollDirection == Axis.horizontal
-                      ? itemExtent
-                      : null,
-                  height: widget.scrollDirection == Axis.vertical
-                      ? itemExtent
-                      : null,
-                  child: child,
-                ),
-              );
-            }).toList();
-
             return ListView(
               controller: widget.controller,
+              itemExtent: itemExtent,
               scrollDirection: widget.scrollDirection,
               padding: widget.padding,
-              children: items,
+              physics: defaultPhysics,
+              children: widget.children!,
             );
           }
 
@@ -135,6 +111,7 @@ class _CoreListViewCarouselState extends State<CoreListViewCarousel> {
               controller: widget.controller,
               scrollDirection: widget.scrollDirection,
               padding: widget.padding,
+              physics: defaultPhysics,
               itemCount: widget.itemCount!,
               itemBuilder: (context, index) => SizedBox(
                 width: widget.scrollDirection == Axis.horizontal
@@ -154,23 +131,10 @@ class _CoreListViewCarouselState extends State<CoreListViewCarousel> {
             controller: widget.controller,
             scrollDirection: widget.scrollDirection,
             padding: widget.padding,
+            physics: defaultPhysics,
             itemCount: widget.itemCount,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: index == widget.itemCount! - 1 ? 0 : widget.spacing,
-                ),
-                child: SizedBox(
-                  width: widget.scrollDirection == Axis.horizontal
-                      ? itemExtent
-                      : null,
-                  height: widget.scrollDirection == Axis.vertical
-                      ? itemExtent
-                      : null,
-                  child: widget.itemBuilder!(context, index),
-                ),
-              );
-            },
+            itemExtent: itemExtent,
+            itemBuilder: widget.itemBuilder!,
           );
         },
       ),
