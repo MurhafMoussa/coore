@@ -294,54 +294,47 @@ class CoreCarousel extends StatelessWidget {
     // Calculate the effective viewport fraction
     final effectiveViewportFraction =
         viewportFraction ?? (itemsPerPage != null ? 1.0 / itemsPerPage! : 1.0);
-    return CarouselSlider.builder(
-      carouselController: carouselController,
-      itemCount: _getEffectiveItemCount(),
-      itemBuilder: (context, index, realIndex) {
-        // remove left and right margin from the first and last items
-        final isFirst = index == 0;
-        final isLast = index == _getEffectiveItemCount() - 1;
-
-        return Padding(
-          padding: EdgeInsetsDirectional.only(
-            start: isFirst ? margin.start : spacing / 2,
-            end: isLast ? margin.end : spacing / 2,
-            top: margin.top,
-            bottom: margin.bottom,
-          ),
-          child: switch (_carouselType) {
+    return Padding(
+      padding: margin,
+      child: CarouselSlider.builder(
+        carouselController: carouselController,
+        itemCount: _getEffectiveItemCount(),
+        itemBuilder: (context, index, realIndex) {
+      
+      
+          return switch (_carouselType) {
             _CarouselType.normal => children![index],
             _CarouselType.builder => itemBuilder!(context, index, realIndex),
             _CarouselType.separated =>
               index.isEven
                   ? itemBuilder!(context, index ~/ 2, realIndex)
                   : separatorBuilder!(context, index ~/ 2),
-          },
-        );
-      },
-      options: CarouselOptions(
-        // Animation settings
-        autoPlay: autoPlay,
-        autoPlayCurve: AnimationParamsManager.slidingCurve,
-        autoPlayAnimationDuration:
-            AnimationParamsManager.slidingAnimationDuration,
-        autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
-
-        // Layout settings
-        viewportFraction: effectiveViewportFraction,
-        height: height,
-        aspectRatio: aspectRatio,
-
-        // Behavior settings
-        onPageChanged:
-            onPageChanged != null ? (index, _) => onPageChanged!(index) : null,
-        disableCenter: disableCenter,
-        enableInfiniteScroll: enableInfiniteScroll,
-        padEnds: padEnds,
-
-        // Visual effects
-        enlargeCenterPage: enlargeCenterItem,
-        enlargeFactor: enlargeFactor,
+          };
+        },
+        options: CarouselOptions(
+          // Animation settings
+          autoPlay: autoPlay,
+          autoPlayCurve: AnimationParamsManager.slidingCurve,
+          autoPlayAnimationDuration:
+              AnimationParamsManager.slidingAnimationDuration,
+          autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
+      
+          // Layout settings
+          viewportFraction: effectiveViewportFraction,
+          height: height,
+          aspectRatio: aspectRatio,
+      
+          // Behavior settings
+          onPageChanged:
+              onPageChanged != null ? (index, _) => onPageChanged!(index) : null,
+          disableCenter: disableCenter,
+          enableInfiniteScroll: enableInfiniteScroll,
+          padEnds: padEnds,
+      
+          // Visual effects
+          enlargeCenterPage: enlargeCenterItem,
+          enlargeFactor: enlargeFactor,
+        ),
       ),
     );
   }
