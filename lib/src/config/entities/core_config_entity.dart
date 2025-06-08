@@ -9,7 +9,7 @@ class CoreConfigEntity extends Equatable {
     required this.currentEnvironment,
     required this.networkConfigEntity,
     required this.localizationConfigEntity,
-    this.shouldLog=true,  
+    this.shouldLog = true,
     required this.themeConfigEntity,
   });
   final CoreEnvironment currentEnvironment;
