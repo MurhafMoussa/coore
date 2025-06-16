@@ -16,19 +16,36 @@ enum CoreEnvironment {
 
 class EnvironmentConfig {
   /// Load the .env file and optionally merge with additional environment variables.
-  Future<void> loadEnv(CoreEnvironment environment) async {
+  Future<void> loadEnv(
+    CoreEnvironment environment, {
+    String? customPath,
+  }) async {
     switch (environment) {
       case CoreEnvironment.development:
-        await dotenv.load(fileName: '.env.development');
+        await dotenv.load(
+          fileName: customPath != null
+              ? '$customPath.env.development'
+              : '.env.development',
+        );
         break;
       case CoreEnvironment.staging:
-        await dotenv.load(fileName: '.env.staging');
+        await dotenv.load(
+          fileName: customPath != null
+              ? '$customPath.env.staging'
+              : '.env.staging',
+        );
         break;
       case CoreEnvironment.uat:
-        await dotenv.load(fileName: '.env.uat');
+        await dotenv.load(
+          fileName: customPath != null ? '$customPath.env.uat' : '.env.uat',
+        );
         break;
       case CoreEnvironment.production:
-        await dotenv.load(fileName: '.env.production');
+        await dotenv.load(
+          fileName: customPath != null
+              ? '$customPath.env.production'
+              : '.env.production',
+        );
         break;
     }
   }
