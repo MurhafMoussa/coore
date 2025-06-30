@@ -4,17 +4,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-/// {@category Pagination}
-/// {@template pagination_config}
-/// Inherited widget that provides pagination configuration to descendant widgets.
-/// 
-/// Contains all customizable parameters for pagination behavior and UI components.
-/// {@endtemplate}
+// =====================================================================================
+// PAGINATION CONFIGURATION
+// =====================================================================================
+
+/// An inherited configuration widget that provides all pagination-related settings
+/// to descendant widgets via [BuildContext].
+///
+/// Offers two mutually-exclusive builder callbacks:
+/// 1. [scrollableBuilder]: returns a single [ScrollView] (e.g., [ListView], [GridView]).
+/// 2. [sliversBuilder]: returns a list of [Sliver] widgets (e.g., [SliverList], [SliverGrid]).
+///
+/// Exactly one of these builders must be non-null, otherwise an assertion error is thrown.
 class PaginationConfig<T extends Identifiable> extends InheritedWidget {
-  /// {@macro pagination_config}
+  /// Creates a pagination configuration. Supply either [scrollableBuilder] or [sliversBuilder].
   const PaginationConfig({
     super.key,
-    required this.scrollableBuilder,
+    this.scrollableBuilder,
+    this.sliversBuilder,
     required this.paginationFunction,
     required this.paginationStrategy,
     required this.reverse,
@@ -23,7 +30,6 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
     this.emptyBuilder,
     this.scrollDirection = Axis.vertical,
     this.physics,
-  
     this.showRefreshIndicator = true,
     this.headerBuilder,
     this.footerBuilder,
@@ -31,181 +37,138 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
     this.emptyEntity,
     this.enableScrollToTop = true,
     required super.child,
-  });
+  }) : assert(
+         (scrollableBuilder != null) ^ (sliversBuilder != null),
+         'Provide exactly one of scrollableBuilder or sliversBuilder',
+       );
 
-  /// {@template scrollable_builder}
-  /// Builder function for creating the main scrollable content.
-  /// 
-  /// Parameters:
-  /// - [context]: Build context
-  /// - [items]: List of currently loaded items
-  /// - [scrollController]: Controller attached to the scroll view
-  /// 
-  /// Must return a ScrollView (ListView, GridView, CustomScrollView, etc.)
-  /// {@endtemplate}
+  // ---------------------------------------------------------------------------------
+  // BUILDERS
+  // ---------------------------------------------------------------------------------
+
+  /// Builder for classic ScrollView mode.
   final Widget Function(
     BuildContext context,
     List<T> items,
-    ScrollController? scrollController,
-  ) scrollableBuilder;
+    ScrollController? controller,
+  )?
+  scrollableBuilder;
 
-  /// {@template pagination_function}
-  /// Data fetching function for paginated results.
-  /// 
-  /// Parameters:
-  /// - [batch]: Current page/batch number (1-based)
-  /// - [limit]: Number of items per page
-  /// 
-  /// Returns Future containing either the item list or failure
-  /// {@endtemplate}
+  /// Builder for Sliver mode.
+  final List<Widget> Function(
+    BuildContext context,
+    List<T> items,
+    ScrollController? controller,
+  )?
+  sliversBuilder;
+
+  // ---------------------------------------------------------------------------------
+  // PAGINATION DATA
+  // ---------------------------------------------------------------------------------
+
+  /// Function to fetch a page of data. [batch] is 1-based, [limit] is from strategy.
   final UseCaseFutureResponse<List<T>> Function(int batch, int limit)
-      paginationFunction;
+  paginationFunction;
 
-  /// {@template pagination_strategy}
-  /// Determines pagination behavior and loading thresholds
-  /// {@endtemplate}
+  /// Strategy defining page size and thresholds.
   final PaginationStrategy paginationStrategy;
 
-  /// {@template reverse_scroll}
-  /// Whether to reverse the scroll direction (bottom-to-top/right-to-left)
-  /// {@endtemplate}
+  // ---------------------------------------------------------------------------------
+  // SCROLL BEHAVIOUR
+  // ---------------------------------------------------------------------------------
+
+  /// Reverse scroll direction if true (e.g., chat timelines).
   final bool reverse;
 
-  /// {@template loading_builder}
-  /// Custom loading indicator builder.
-  /// 
-  /// If null, shows skeletonized version of the scrollable content
-  /// {@endtemplate}
+  /// Axis of scrolling (vertical or horizontal).
+  final Axis scrollDirection;
+
+  /// Custom scroll physics (e.g., BouncingScrollPhysics).
+  final ScrollPhysics? physics;
+
+  // ---------------------------------------------------------------------------------
+  // UI HOOKS
+  // ---------------------------------------------------------------------------------
+
+  /// Custom full-screen loading widget. If null, skeleton placeholders are used.
   final Widget Function(BuildContext context)? loadingBuilder;
 
-  /// {@template error_builder}
+  /// Custom empty state widget when no items found.
+  final Widget Function(BuildContext context)? emptyBuilder;
+
   /// Custom error state builder.
-  /// 
-  /// Parameters:
-  /// - [context]: Build context
-  /// - [failure]: Error information
-  /// - [retry]: Retry callback function
-  /// - [alreadyFetchedItemsWidget]: Widget showing previously loaded items
-  /// {@endtemplate}
+  /// Parameters: [failure], [retry], [alreadyFetchedItemsWidget].
   final Widget Function(
     BuildContext context,
     Failure failure,
     VoidCallback? retry,
     Widget alreadyFetchedItemsWidget,
-  )? errorBuilder;
+  )?
+  errorBuilder;
 
-  /// {@template empty_builder}
-  /// Custom empty state builder when no items are found
-  /// {@endtemplate}
-  final Widget Function(BuildContext context)? emptyBuilder;
+  // ---------------------------------------------------------------------------------
+  // PULL-TO-REFRESH
+  // ---------------------------------------------------------------------------------
 
-  /// {@template scroll_direction}
-  /// Axis direction for scrolling (vertical/horizontal)
-  /// {@endtemplate}
-  final Axis scrollDirection;
-
-  /// {@template scroll_physics}
-  /// Physics behavior for the scroll view
-  /// {@endtemplate}
-  final ScrollPhysics? physics;
-
-
-  /// {@template show_refresh_indicator}
-  /// Whether to enable pull-to-refresh functionality
-  /// {@endtemplate}
+  /// Whether pull-down-to-refresh is enabled.
   final bool showRefreshIndicator;
 
-  /// {@template header_builder}
-  /// Custom header widget for the SmartRefresher
-  /// 
-  /// Defaults to ClassicHeader if not provided
-  /// {@endtemplate}
+  /// Custom header widget builder for refresh.
   final Widget Function(BuildContext context, RefreshController controller)?
-      headerBuilder;
+  headerBuilder;
 
-  /// {@template footer_builder}
-  /// Custom footer widget for the SmartRefresher
-  /// 
-  /// Defaults to ClassicFooter if not provided
-  /// {@endtemplate}
+  /// Custom footer widget builder for load-more.
   final Widget Function(BuildContext context, RefreshController controller)?
-      footerBuilder;
+  footerBuilder;
 
-  /// {@template skeleton_item_count}
-  /// Number of skeleton items to show during loading.
-  /// 
-  /// If null, uses the pagination strategy's limit
-  /// {@endtemplate}
+  // ---------------------------------------------------------------------------------
+  // SKELETON LOADING
+  // ---------------------------------------------------------------------------------
+
+  /// Number of skeleton items to display. Defaults to strategy.limit.
   final int? skeletonItemCount;
 
-  /// {@template empty_entity}
-  /// Prototype entity used for skeleton loading visualization
-  /// 
-  /// Required if loadingBuilder is not provided
-  /// {@endtemplate}
+  /// A prototype entity for skeleton placeholders. Required if [loadingBuilder] is null.
   final T? emptyEntity;
 
-  /// {@template enable_scroll_to_top}
-  /// Whether to show a floating button for scrolling to top
-  /// {@endtemplate}
+  // ---------------------------------------------------------------------------------
+  // MISC
+  // ---------------------------------------------------------------------------------
+
+  /// Whether to show a floating button to scroll to top.
   final bool enableScrollToTop;
 
-  /// {@macro pagination_config.of}
+  /// Retrieves nearest [PaginationConfig] of type [T] from context.
   static PaginationConfig<T> of<T extends Identifiable>(BuildContext context) {
-    final config =
-        context.dependOnInheritedWidgetOfExactType<PaginationConfig<T>>();
-    assert(config != null, 'No PaginationConfig found in context');
-    return config!;
+    final cfg = context
+        .dependOnInheritedWidgetOfExactType<PaginationConfig<T>>();
+    assert(cfg != null, 'No PaginationConfig<$T> found in context');
+    return cfg!;
   }
 
   @override
-  bool updateShouldNotify(PaginationConfig<T> oldWidget) {
-    return scrollableBuilder != oldWidget.scrollableBuilder ||
-        paginationFunction != oldWidget.paginationFunction ||
-        paginationStrategy != oldWidget.paginationStrategy ||
-        reverse != oldWidget.reverse ||
-        loadingBuilder != oldWidget.loadingBuilder ||
-        errorBuilder != oldWidget.errorBuilder ||
-        emptyBuilder != oldWidget.emptyBuilder ||
-        scrollDirection != oldWidget.scrollDirection ||
-        physics != oldWidget.physics ||
-        
-        showRefreshIndicator != oldWidget.showRefreshIndicator ||
-        headerBuilder != oldWidget.headerBuilder ||
-        footerBuilder != oldWidget.footerBuilder ||
-        skeletonItemCount != oldWidget.skeletonItemCount ||
-        emptyEntity != oldWidget.emptyEntity ||
-        enableScrollToTop != oldWidget.enableScrollToTop;
-  }
+  bool updateShouldNotify(covariant PaginationConfig<T> oldWidget) =>
+      this != oldWidget;
 }
+// =====================================================================================
+// CORE PAGINATION WIDGET
+// =====================================================================================
 
-/// {@category Pagination}
-/// {@template core_pagination_widget}
-/// Main pagination widget that orchestrates all pagination functionality.
-/// 
-/// Wraps content in a [PaginationConfig] and provides [CorePaginationCubit].
-/// 
-/// {@tool snippet}
-/// Basic usage example:
-/// ```dart
-/// CorePaginationWidget<Product>(
-///   scrollableBuilder: (context, items, controller) => ListView.builder(
-///     controller: controller,
-///     itemCount: items.length,
-///     itemBuilder: (_, index) => ProductItem(item: items[index]),
-///   ),
-///   paginationFunction: (batch, limit) => usecase.getProducts(batch, limit),
-///   paginationStrategy: const PageBasedStrategy(limit: 20),
-///   emptyEntity: Product.empty(),
-/// )
-/// ```
-/// {@end-tool}
-/// {@endtemplate}
+/// A ready-to-use pagination widget that wires:
+///  • [PaginationConfig] inheritance
+///  • [CorePaginationCubit] state management
+///  • Pull-to-refresh and load-more via [SmartRefresher]
+///  • Skeleton loading or custom loader
+///  • Error handling with retry
+///  • Optional scroll-to-top FAB
+///
+/// Supply either [scrollableBuilder] or [sliversBuilder]. All other parameters are optional.
 class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
-  /// {@macro core_pagination_widget}
+  /// Creates a pagination wrapper. Exactly one builder must be provided.
   const CorePaginationWidget({
     super.key,
-    required this.scrollableBuilder,
+    this.scrollableBuilder,
+    this.sliversBuilder,
     required this.paginationFunction,
     required this.paginationStrategy,
     this.reverse = false,
@@ -214,7 +177,6 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
     this.emptyBuilder,
     this.scrollDirection = Axis.vertical,
     this.physics,
-
     this.showRefreshIndicator = true,
     this.headerBuilder,
     this.footerBuilder,
@@ -222,133 +184,67 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
     this.emptyEntity,
     this.enableScrollToTop = true,
   }) : assert(
-          emptyEntity != null || loadingBuilder != null,
-          'You must provide either empty entity or a loading builder',
-        );
+         (scrollableBuilder != null) ^ (sliversBuilder != null),
+         'Provide exactly one of scrollableBuilder or sliversBuilder',
+       );
 
-  
-  /// {@template scrollable_builder}
-  /// Builder function for creating the main scrollable content.
-  /// 
-  /// Parameters:
-  /// - [context]: Build context
-  /// - [items]: List of currently loaded items
-  /// - [scrollController]: Controller attached to the scroll view
-  /// 
-  /// Must return a ScrollView (ListView, GridView, CustomScrollView, etc.)
-  /// {@endtemplate}
-  final Widget Function(
-    BuildContext context,
-    List<T> items,
-    ScrollController? scrollController,
-  ) scrollableBuilder;
+  /// Builder for classic ScrollView mode.
+  final Widget Function(BuildContext, List<T>, ScrollController?)?
+  scrollableBuilder;
 
-  /// {@template pagination_function}
-  /// Data fetching function for paginated results.
-  /// 
-  /// Parameters:
-  /// - [batch]: Current page/batch number (1-based)
-  /// - [limit]: Number of items per page
-  /// 
-  /// Returns Future containing either the item list or failure
-  /// {@endtemplate}
+  /// Builder for Sliver mode.
+  final List<Widget> Function(BuildContext, List<T>, ScrollController?)?
+  sliversBuilder;
+
+  /// Function to fetch data pages.
   final UseCaseFutureResponse<List<T>> Function(int batch, int limit)
-      paginationFunction;
+  paginationFunction;
 
-  /// {@template pagination_strategy}
-  /// Determines pagination behavior and loading thresholds
-  /// {@endtemplate}
+  /// Defines page size and thresholds.
   final PaginationStrategy paginationStrategy;
 
-  /// {@template reverse_scroll}
-  /// Whether to reverse the scroll direction (bottom-to-top/right-to-left)
-  /// {@endtemplate}
+  /// Reverse scroll direction.
   final bool reverse;
 
-  /// {@template loading_builder}
-  /// Custom loading indicator builder.
-  /// 
-  /// If null, shows skeletonized version of the scrollable content
-  /// {@endtemplate}
-  final Widget Function(BuildContext context)? loadingBuilder;
+  /// Custom loading widget.
+  final Widget Function(BuildContext)? loadingBuilder;
 
-  /// {@template error_builder}
-  /// Custom error state builder.
-  /// 
-  /// Parameters:
-  /// - [context]: Build context
-  /// - [failure]: Error information
-  /// - [retry]: Retry callback function
-  /// - [alreadyFetchedItemsWidget]: Widget showing previously loaded items
-  /// {@endtemplate}
-  final Widget Function(
-    BuildContext context,
-    Failure failure,
-    VoidCallback? retry,
-    Widget alreadyFetchedItemsWidget,
-  )? errorBuilder;
+  /// Custom error builder.
+  final Widget Function(BuildContext, Failure, VoidCallback?, Widget)?
+  errorBuilder;
 
-  /// {@template empty_builder}
-  /// Custom empty state builder when no items are found
-  /// {@endtemplate}
-  final Widget Function(BuildContext context)? emptyBuilder;
+  /// Custom empty state builder.
+  final Widget Function(BuildContext)? emptyBuilder;
 
-  /// {@template scroll_direction}
-  /// Axis direction for scrolling (vertical/horizontal)
-  /// {@endtemplate}
+  /// Axis of scrolling.
   final Axis scrollDirection;
 
-  /// {@template scroll_physics}
-  /// Physics behavior for the scroll view
-  /// {@endtemplate}
+  /// Scroll physics.
   final ScrollPhysics? physics;
 
-
-
-  /// {@template show_refresh_indicator}
-  /// Whether to enable pull-to-refresh functionality
-  /// {@endtemplate}
+  /// Enable pull-to-refresh.
   final bool showRefreshIndicator;
 
-  /// {@template header_builder}
-  /// Custom header widget for the SmartRefresher
-  /// 
-  /// Defaults to ClassicHeader if not provided
-  /// {@endtemplate}
-  final Widget Function(BuildContext context, RefreshController controller)?
-      headerBuilder;
+  /// Custom refresh header.
+  final Widget Function(BuildContext, RefreshController)? headerBuilder;
 
-  /// {@template footer_builder}
-  /// Custom footer widget for the SmartRefresher
-  /// 
-  /// Defaults to ClassicFooter if not provided
-  /// {@endtemplate}
-  final Widget Function(BuildContext context, RefreshController controller)?
-      footerBuilder;
+  /// Custom load-more footer.
+  final Widget Function(BuildContext, RefreshController)? footerBuilder;
 
-  /// {@template skeleton_item_count}
-  /// Number of skeleton items to show during loading.
-  /// 
-  /// If null, uses the pagination strategy's limit
-  /// {@endtemplate}
+  /// Number of skeleton placeholders.
   final int? skeletonItemCount;
 
-  /// {@template empty_entity}
-  /// Prototype entity used for skeleton loading visualization
-  /// 
-  /// Required if loadingBuilder is not provided
-  /// {@endtemplate}
+  /// Prototype entity for skeleton.
   final T? emptyEntity;
 
-  /// {@template enable_scroll_to_top}
-  /// Whether to show a floating button for scrolling to top
-  /// {@endtemplate}
+  /// Show scroll-to-top FAB.
   final bool enableScrollToTop;
 
   @override
   Widget build(BuildContext context) {
     return PaginationConfig<T>(
       scrollableBuilder: scrollableBuilder,
+      sliversBuilder: sliversBuilder,
       paginationFunction: paginationFunction,
       paginationStrategy: paginationStrategy,
       reverse: reverse,
@@ -357,7 +253,6 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
       emptyBuilder: emptyBuilder,
       scrollDirection: scrollDirection,
       physics: physics,
-  
       showRefreshIndicator: showRefreshIndicator,
       headerBuilder: headerBuilder,
       footerBuilder: footerBuilder,
@@ -368,17 +263,20 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
         builder: (context) {
           return BlocProvider<CorePaginationCubit<T>>(
             create: (context) {
-              final element = context.getElementForInheritedWidgetOfExactType<PaginationConfig<T>>();
+              final element = context
+                  .getElementForInheritedWidgetOfExactType<
+                    PaginationConfig<T>
+                  >();
               assert(element != null, 'No PaginationConfig found in context');
               final config = element!.widget as PaginationConfig<T>;
-              
+
               return CorePaginationCubit<T>(
                 paginationFunction: config.paginationFunction,
                 paginationStrategy: config.paginationStrategy,
                 reverse: config.reverse,
               )..fetchInitialData();
             },
-            child:  _PaginationContent<T>(),
+            child: _PaginationContent<T>(),
           );
         },
       ),
@@ -386,14 +284,7 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
   }
 }
 
-/// {@nodoc}
-/// {@template pagination_content}
-/// Private widget that handles scroll-to-top functionality and state management.
-/// 
-/// Decides whether to show scroll-to-top FAB based on configuration.
-/// {@endtemplate}
 class _PaginationContent<T extends Identifiable> extends StatelessWidget {
-  /// {@macro pagination_content}
   const _PaginationContent();
 
   @override
@@ -403,9 +294,8 @@ class _PaginationContent<T extends Identifiable> extends StatelessWidget {
       builder: (context, state) {
         return config.enableScrollToTop
             ? CoreScrollableContentWithFab(
-                scrollableBuilder: (controller) => _SmartRefresherWidget<T>(
-                  controller: controller,
-                ),
+                scrollableBuilder: (controller) =>
+                    _SmartRefresherWidget<T>(controller: controller),
               )
             : _SmartRefresherWidget<T>();
       },
@@ -413,17 +303,9 @@ class _PaginationContent<T extends Identifiable> extends StatelessWidget {
   }
 }
 
-/// {@nodoc}
-/// {@template smart_refresher_widget}
-/// Wrapper widget that integrates pull-to-refresh functionality.
-/// 
-/// Uses the SmartRefresher package to handle refresh gestures and pagination.
-/// {@endtemplate}
 class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
-  /// {@macro smart_refresher_widget}
   const _SmartRefresherWidget({this.controller});
 
-  /// Optional external scroll controller
   final ScrollController? controller;
 
   @override
@@ -439,119 +321,114 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
       enablePullDown: config.showRefreshIndicator,
       onRefresh: cubit.fetchInitialData,
       onLoading: cubit.fetchMoreData,
-      header: config.headerBuilder?.call(context, cubit.refreshController) ,
-      footer: config.footerBuilder?.call(context, cubit.refreshController) 
-         , 
+      header: config.headerBuilder?.call(context, cubit.refreshController),
+      footer: config.footerBuilder?.call(context, cubit.refreshController),
       child: _contentBuilder(context),
     );
   }
-  Widget  _contentBuilder(BuildContext context){
- final state = context.watch<CorePaginationCubit<T>>().state;
+
+  Widget _contentBuilder(BuildContext context) {
+    final state = context.watch<CorePaginationCubit<T>>().state;
     return switch (state) {
-      PaginationSucceeded<T>(:final items) =>successStateWidget(
-          context,items,
-        ),
+      PaginationSucceeded<T>(:final items) => buildPaginated(
+        context,
+        items,
+        controller,
+      ),
       PaginationFailed<T>(:final failure, :final items, :final retryFunction) =>
-        errorStateWidget(
-        context,items,failure,retryFunction,
-        ),
+        errorStateWidget(context, items, failure, retryFunction),
       _ => _LoadingStateWidget<T>(scrollController: controller),
     };
+  }
 
-  }/// {@nodoc}
-/// {@template error_state}
-/// Handles error display while potentially showing already loaded items.
-/// 
-/// Prioritizes custom error builder if provided, falls back to default error UI.
-/// {@endtemplate}
-  Widget successStateWidget(BuildContext context,List<T> items){
-    final config = PaginationConfig.of<T>(context);
-
+  /// Builds the UI for a successful data load (or partial load with existing items).
+  ///
+  /// - If [items] is empty, renders [PaginationConfig.emptyBuilder] or default empty.
+  /// - If [sliversBuilder] is provided, wraps slivers in a [CustomScrollView].
+  /// - Otherwise uses [scrollableBuilder].
+  Widget buildPaginated(
+    BuildContext ctx,
+    List<T> items,
+    ScrollController? ctrl,
+  ) {
+    final cfg = PaginationConfig.of<T>(ctx);
     if (items.isEmpty) {
-      return config.emptyBuilder?.call(context) ?? const _EmptyState();
+      return cfg.emptyBuilder?.call(ctx) ?? const _EmptyState();
     }
+    if (cfg.sliversBuilder != null) {
+      return CustomScrollView(
+        scrollDirection: cfg.scrollDirection,
+        reverse: cfg.reverse,
+        physics: cfg.physics,
+        controller: ctrl,
+        slivers: cfg.sliversBuilder!(ctx, items, ctrl),
+      );
+    }
+    return cfg.scrollableBuilder!(ctx, items, ctrl);
+  }
 
-    final scrollableWidget = config.scrollableBuilder(
-      context,
-      items,
-      controller,
-    );
-    assert(
-      scrollableWidget is ScrollView,
-      'Scrollable builder must return GridView, ListView, or Slivers',
-    );
-    return scrollableWidget;
-  }  
-/// {@nodoc}
-/// {@template error_state}
-/// Handles error display while potentially showing already loaded items.
-/// 
-/// Prioritizes custom error builder if provided, falls back to default error UI.
-/// {@endtemplate}
-  Widget errorStateWidget(BuildContext context,List<T> items,Failure failure,VoidCallback? retryFunction){
-     final config = PaginationConfig.of<T>(context);
+  Widget errorStateWidget(
+    BuildContext context,
+    List<T> items,
+    Failure failure,
+    VoidCallback? retryFunction,
+  ) {
+    final config = PaginationConfig.of<T>(context);
 
     if (config.errorBuilder != null) {
       return config.errorBuilder!(
         context,
         failure,
         retryFunction,
-        config.scrollableBuilder(context, items, controller),
+        buildPaginated(context, items, controller),
       );
     }
 
     if (items.isNotEmpty) {
-      return config.scrollableBuilder(context, items, controller);
+      return buildPaginated(context, items, controller);
     }
 
-    return  CoreDefaultErrorWidget(message: failure.message,onRetry: retryFunction,);
-  }
-}
-
-
-
-
-
-
-
-/// {@nodoc}
-/// {@template loading_state}
-/// Shows loading state using either custom loading builder or skeletonized items.
-/// {@endtemplate}
-class _LoadingStateWidget<T extends Identifiable> extends StatelessWidget {
-  /// {@macro loading_state}
-  const _LoadingStateWidget({super.key, this.scrollController});
-
-  /// Scroll controller
-  final ScrollController? scrollController;
-
-  @override
-  Widget build(BuildContext context) {
-    final config = PaginationConfig.of<T>(context);
-    final cubit = context.read<CorePaginationCubit<T>>();
-    if (config.loadingBuilder != null) return config.loadingBuilder!(context);
-
-    return Skeletonizer(
-      child: config.scrollableBuilder(
-        context,
-        List<T>.generate(
-          config.skeletonItemCount ?? cubit.paginationStrategy.limit,
-          (index) => config.emptyEntity!,
-        ),
-        scrollController,
-      ),
+    return CoreDefaultErrorWidget(
+      message: failure.message,
+      onRetry: retryFunction,
     );
   }
 }
 
-/// {@nodoc}
-/// {@template empty_state}
-/// Default empty state shown when no items are available.
-/// 
-/// Displays an icon with "No items found" message.
-/// {@endtemplate}
+class _LoadingStateWidget<T extends Identifiable> extends StatelessWidget {
+  const _LoadingStateWidget({super.key, this.scrollController});
+  final ScrollController? scrollController;
+  @override
+  Widget build(BuildContext context) {
+    final cfg = PaginationConfig.of<T>(context);
+    final cubit = context.read<CorePaginationCubit<T>>();
+    if (cfg.loadingBuilder != null) {
+      return cfg.loadingBuilder!(context);
+    }
+    final placeholders = List<T>.generate(
+      cfg.skeletonItemCount ?? cubit.paginationStrategy.limit,
+      (_) => cfg.emptyEntity!,
+    );
+    Widget skeletonChild;
+    if (cfg.sliversBuilder != null) {
+      skeletonChild = CustomScrollView(
+        scrollDirection: cfg.scrollDirection,
+        reverse: cfg.reverse,
+        physics: cfg.physics,
+        slivers: cfg.sliversBuilder!(context, placeholders, scrollController),
+      );
+    } else {
+      skeletonChild = cfg.scrollableBuilder!(
+        context,
+        placeholders,
+        scrollController,
+      );
+    }
+    return Skeletonizer(child: skeletonChild);
+  }
+}
+
 class _EmptyState extends StatelessWidget {
-  /// {@macro empty_state}
   const _EmptyState();
 
   @override
