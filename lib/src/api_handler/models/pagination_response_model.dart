@@ -8,12 +8,16 @@ part 'pagination_response_model.g.dart';
 abstract class PaginationResponseModel<T>
     with _$PaginationResponseModel<T>
     implements Paginatable<T> {
+  const PaginationResponseModel._();
+
   const factory PaginationResponseModel({
     @Default([]) List<T> data,
     MetaModel? meta,
   }) = _PaginationResponseModel<T>;
+
   @override
   List<T> get items => data;
+
   factory PaginationResponseModel.fromJson(
     Map<String, dynamic> json,
     T Function(Object?) fromJsonT,

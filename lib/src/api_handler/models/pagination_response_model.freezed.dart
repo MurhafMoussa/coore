@@ -92,8 +92,8 @@ $MetaModelCopyWith<$Res>? get meta {
 /// @nodoc
 @JsonSerializable(genericArgumentFactories: true)
 
-class _PaginationResponseModel<T> implements PaginationResponseModel<T> {
-  const _PaginationResponseModel({final  List<T> data = const [], this.meta}): _data = data;
+class _PaginationResponseModel<T> extends PaginationResponseModel<T> {
+  const _PaginationResponseModel({final  List<T> data = const [], this.meta}): _data = data,super._();
   factory _PaginationResponseModel.fromJson(Map<String, dynamic> json,T Function(Object?) fromJsonT) => _$PaginationResponseModelFromJson(json,fromJsonT);
 
  final  List<T> _data;
