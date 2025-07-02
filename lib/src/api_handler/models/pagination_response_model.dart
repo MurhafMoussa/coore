@@ -12,7 +12,8 @@ abstract class PaginationResponseModel<T>
     @Default([]) List<T> data,
     MetaModel? meta,
   }) = _PaginationResponseModel<T>;
-
+  @override
+  List<T> get items => data;
   factory PaginationResponseModel.fromJson(
     Map<String, dynamic> json,
     T Function(Object?) fromJsonT,
