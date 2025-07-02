@@ -24,7 +24,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
     this.sliversBuilder,
     required this.paginationFunction,
     required this.paginationStrategy,
-    required this.reverse,
+    this.reverse = false,
     this.loadingBuilder,
     this.errorBuilder,
     this.emptyBuilder,
@@ -49,7 +49,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   /// Builder for classic ScrollView mode.
   final Widget Function(
     BuildContext context,
-    List<T> items,
+    PaginationResponseModel<T> items,
     ScrollController? controller,
   )?
   scrollableBuilder;
@@ -57,7 +57,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   /// Builder for Sliver mode.
   final List<Widget> Function(
     BuildContext context,
-    List<T> items,
+    PaginationResponseModel<T> items,
     ScrollController? controller,
   )?
   sliversBuilder;
@@ -192,11 +192,19 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
        );
 
   /// Builder for classic ScrollView mode.
-  final Widget Function(BuildContext, List<T>, ScrollController?)?
+  final Widget Function(
+    BuildContext,
+    PaginationResponseModel<T>,
+    ScrollController?,
+  )?
   scrollableBuilder;
 
   /// Builder for Sliver mode.
-  final List<Widget> Function(BuildContext, List<T>, ScrollController?)?
+  final List<Widget> Function(
+    BuildContext,
+    PaginationResponseModel<T>,
+    ScrollController?,
+  )?
   sliversBuilder;
 
   /// Function to fetch data pages.
@@ -336,12 +344,13 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
   Widget _contentBuilder(BuildContext context) {
     final state = context.watch<CorePaginationCubit<T>>().state;
     return switch (state) {
-      PaginationSucceeded<T>(:final items) => buildPaginated(
-        context,
-        items,
-        controller,
-      ),
-      PaginationFailed<T>(:final failure, :final items, :final retryFunction) =>
+      PaginationSucceeded<T>(paginatedResponseModel: final items) =>
+        buildPaginated(context, items, controller),
+      PaginationFailed<T>(
+        :final failure,
+        paginatedResponseModel: final items,
+        :final retryFunction,
+      ) =>
         errorStateWidget(context, items, failure, retryFunction),
       _ => _LoadingStateWidget<T>(scrollController: controller),
     };
@@ -349,16 +358,16 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
 
   /// Builds the UI for a successful data load (or partial load with existing items).
   ///
-  /// - If [items] is empty, renders [PaginationConfig.emptyBuilder] or default empty.
+  /// - If [paginatedResponseModel] is empty, renders [PaginationConfig.emptyBuilder] or default empty.
   /// - If [sliversBuilder] is provided, wraps slivers in a [CustomScrollView].
   /// - Otherwise uses [scrollableBuilder].
   Widget buildPaginated(
     BuildContext ctx,
-    List<T> items,
+    PaginationResponseModel<T> model,
     ScrollController? ctrl,
   ) {
     final cfg = PaginationConfig.of<T>(ctx);
-    if (items.isEmpty) {
+    if (model.data.isEmpty) {
       return cfg.emptyBuilder?.call(ctx) ?? const _EmptyState();
     }
     if (cfg.sliversBuilder != null) {
@@ -367,15 +376,15 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
         reverse: cfg.reverse,
         physics: cfg.physics,
         controller: ctrl,
-        slivers: cfg.sliversBuilder!(ctx, items, ctrl),
+        slivers: cfg.sliversBuilder!(ctx, model, ctrl),
       );
     }
-    return cfg.scrollableBuilder!(ctx, items, ctrl);
+    return cfg.scrollableBuilder!(ctx, model, ctrl);
   }
 
   Widget errorStateWidget(
     BuildContext context,
-    List<T> items,
+    PaginationResponseModel<T> model,
     Failure failure,
     VoidCallback? retryFunction,
   ) {
@@ -386,12 +395,12 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
         context,
         failure,
         retryFunction,
-        buildPaginated(context, items, controller),
+        buildPaginated(context, model, controller),
       );
     }
 
-    if (items.isNotEmpty) {
-      return buildPaginated(context, items, controller);
+    if (model.data.isNotEmpty) {
+      return buildPaginated(context, model, controller);
     }
 
     return CoreDefaultErrorWidget(
@@ -413,9 +422,11 @@ class _LoadingStateWidget<T extends Identifiable> extends StatelessWidget {
     if (cfg.loadingBuilder != null) {
       return cfg.loadingBuilder!(context);
     }
-    final placeholders = List<T>.generate(
-      cfg.skeletonItemCount ?? cubit.paginationStrategy.limit,
-      (_) => cfg.emptyEntity!,
+    final placeholders = PaginationResponseModel(
+      data: List<T>.generate(
+        cfg.skeletonItemCount ?? cubit.paginationStrategy.limit,
+        (_) => cfg.emptyEntity!,
+      ),
     );
     Widget skeletonChild;
     if (cfg.sliversBuilder != null) {

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PaginationResponseModel<T> {
 
- List<T> get data; MetaModel? get meta;
+ List<T> get data; MetaModel get meta;
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,11 +49,11 @@ abstract mixin class $PaginationResponseModelCopyWith<T,$Res>  {
   factory $PaginationResponseModelCopyWith(PaginationResponseModel<T> value, $Res Function(PaginationResponseModel<T>) _then) = _$PaginationResponseModelCopyWithImpl;
 @useResult
 $Res call({
- List<T> data, MetaModel? meta
+ List<T> data, MetaModel meta
 });
 
 
-$MetaModelCopyWith<$Res>? get meta;
+$MetaModelCopyWith<$Res> get meta;
 
 }
 /// @nodoc
@@ -66,23 +66,20 @@ class _$PaginationResponseModelCopyWithImpl<T,$Res>
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? meta = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? meta = null,}) {
   return _then(_self.copyWith(
 data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as List<T>,meta: freezed == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
-as MetaModel?,
+as List<T>,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as MetaModel,
   ));
 }
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$MetaModelCopyWith<$Res>? get meta {
-    if (_self.meta == null) {
-    return null;
-  }
-
-  return $MetaModelCopyWith<$Res>(_self.meta!, (value) {
+$MetaModelCopyWith<$Res> get meta {
+  
+  return $MetaModelCopyWith<$Res>(_self.meta, (value) {
     return _then(_self.copyWith(meta: value));
   });
 }
@@ -93,7 +90,7 @@ $MetaModelCopyWith<$Res>? get meta {
 @JsonSerializable(genericArgumentFactories: true)
 
 class _PaginationResponseModel<T> extends PaginationResponseModel<T> {
-  const _PaginationResponseModel({final  List<T> data = const [], this.meta}): _data = data,super._();
+  const _PaginationResponseModel({final  List<T> data = const [], this.meta = const MetaModel()}): _data = data,super._();
   factory _PaginationResponseModel.fromJson(Map<String, dynamic> json,T Function(Object?) fromJsonT) => _$PaginationResponseModelFromJson(json,fromJsonT);
 
  final  List<T> _data;
@@ -103,7 +100,7 @@ class _PaginationResponseModel<T> extends PaginationResponseModel<T> {
   return EqualUnmodifiableListView(_data);
 }
 
-@override final  MetaModel? meta;
+@override@JsonKey() final  MetaModel meta;
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
@@ -138,11 +135,11 @@ abstract mixin class _$PaginationResponseModelCopyWith<T,$Res> implements $Pagin
   factory _$PaginationResponseModelCopyWith(_PaginationResponseModel<T> value, $Res Function(_PaginationResponseModel<T>) _then) = __$PaginationResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- List<T> data, MetaModel? meta
+ List<T> data, MetaModel meta
 });
 
 
-@override $MetaModelCopyWith<$Res>? get meta;
+@override $MetaModelCopyWith<$Res> get meta;
 
 }
 /// @nodoc
@@ -155,11 +152,11 @@ class __$PaginationResponseModelCopyWithImpl<T,$Res>
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? meta = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? meta = null,}) {
   return _then(_PaginationResponseModel<T>(
 data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
-as List<T>,meta: freezed == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
-as MetaModel?,
+as List<T>,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as MetaModel,
   ));
 }
 
@@ -167,12 +164,9 @@ as MetaModel?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$MetaModelCopyWith<$Res>? get meta {
-    if (_self.meta == null) {
-    return null;
-  }
-
-  return $MetaModelCopyWith<$Res>(_self.meta!, (value) {
+$MetaModelCopyWith<$Res> get meta {
+  
+  return $MetaModelCopyWith<$Res>(_self.meta, (value) {
     return _then(_self.copyWith(meta: value));
   });
 }

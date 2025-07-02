@@ -13,7 +13,7 @@ _PaginationResponseModel<T> _$PaginationResponseModelFromJson<T>(
   data: (json['data'] as List<dynamic>?)?.map(fromJsonT).toList() ?? const [],
   meta:
       json['meta'] == null
-          ? null
+          ? const MetaModel()
           : MetaModel.fromJson(json['meta'] as Map<String, dynamic>),
 );
 

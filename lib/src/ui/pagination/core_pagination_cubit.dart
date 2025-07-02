@@ -90,7 +90,8 @@ class CorePaginationCubit<T extends Identifiable>
     if (!isClosed) {
       result.fold(
         (failure) => _handleFailure(failure, isInitial),
-        (paginatable) => _handleSuccess(paginatable.data, isInitial),
+        (paginatedResponseModel) =>
+            _handleSuccess(paginatedResponseModel, isInitial),
       );
     }
   }
@@ -103,7 +104,7 @@ class CorePaginationCubit<T extends Identifiable>
     emit(
       CorePaginationState.failed(
         failure: failure,
-        items: state.items,
+        paginatedResponseModel: state.paginatedResponseModel,
         retryFunction: isInitial ? fetchInitialData : fetchMoreData,
       ),
     );
@@ -115,12 +116,23 @@ class CorePaginationCubit<T extends Identifiable>
   /// - Merges new items with existing state
   /// - Determines pagination completion
   /// - Updates refresh controller
-  void _handleSuccess(List<T> items, bool isInitial) {
-    final hasReachedMax = items.length < paginationStrategy.limit;
+  void _handleSuccess(
+    PaginationResponseModel<T> paginatedResponseModel,
+    bool isInitial,
+  ) {
+    final hasReachedMax =
+        paginatedResponseModel.data.length < paginationStrategy.limit;
 
     emit(
       CorePaginationState.succeeded(
-        items: isInitial ? items : [...state.items, ...items],
+        paginatedResponseModel: isInitial
+            ? paginatedResponseModel
+            : state.paginatedResponseModel.copyWith(
+                data: [
+                  ...state.paginatedResponseModel.data,
+                  ...paginatedResponseModel.data,
+                ],
+              ),
         hasReachedMax: hasReachedMax,
       ),
     );

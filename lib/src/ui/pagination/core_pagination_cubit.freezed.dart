@@ -128,16 +128,10 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 
 
 class PaginationSucceeded<T> extends CorePaginationState<T> with DiagnosticableTreeMixin {
-  const PaginationSucceeded({required final  List<T> items, required this.hasReachedMax}): _items = items,super._();
+  const PaginationSucceeded({required this.paginatedResponseModel, required this.hasReachedMax}): super._();
   
 
- final  List<T> _items;
- List<T> get items {
-  if (_items is EqualUnmodifiableListView) return _items;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_items);
-}
-
+ final  PaginationResponseModel<T> paginatedResponseModel;
  final  bool hasReachedMax;
 
 /// Create a copy of CorePaginationState
@@ -151,21 +145,21 @@ $PaginationSucceededCopyWith<T, PaginationSucceeded<T>> get copyWith => _$Pagina
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>.succeeded'))
-    ..add(DiagnosticsProperty('items', items))..add(DiagnosticsProperty('hasReachedMax', hasReachedMax));
+    ..add(DiagnosticsProperty('paginatedResponseModel', paginatedResponseModel))..add(DiagnosticsProperty('hasReachedMax', hasReachedMax));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationSucceeded<T>&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationSucceeded<T>&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),hasReachedMax);
+int get hashCode => Object.hash(runtimeType,paginatedResponseModel,hasReachedMax);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>.succeeded(items: $items, hasReachedMax: $hasReachedMax)';
+  return 'CorePaginationState<$T>.succeeded(paginatedResponseModel: $paginatedResponseModel, hasReachedMax: $hasReachedMax)';
 }
 
 
@@ -176,11 +170,11 @@ abstract mixin class $PaginationSucceededCopyWith<T,$Res> implements $CorePagina
   factory $PaginationSucceededCopyWith(PaginationSucceeded<T> value, $Res Function(PaginationSucceeded<T>) _then) = _$PaginationSucceededCopyWithImpl;
 @useResult
 $Res call({
- List<T> items, bool hasReachedMax
+ PaginationResponseModel<T> paginatedResponseModel, bool hasReachedMax
 });
 
 
-
+$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel;
 
 }
 /// @nodoc
@@ -193,32 +187,35 @@ class _$PaginationSucceededCopyWithImpl<T,$Res>
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? items = null,Object? hasReachedMax = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? paginatedResponseModel = null,Object? hasReachedMax = null,}) {
   return _then(PaginationSucceeded<T>(
-items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<T>,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
+paginatedResponseModel: null == paginatedResponseModel ? _self.paginatedResponseModel : paginatedResponseModel // ignore: cast_nullable_to_non_nullable
+as PaginationResponseModel<T>,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
 
-
+/// Create a copy of CorePaginationState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel {
+  
+  return $PaginationResponseModelCopyWith<T, $Res>(_self.paginatedResponseModel, (value) {
+    return _then(_self.copyWith(paginatedResponseModel: value));
+  });
+}
 }
 
 /// @nodoc
 
 
 class PaginationRetryFailure<T> extends CorePaginationState<T> with DiagnosticableTreeMixin {
-  const PaginationRetryFailure({required this.failure, required final  List<T> items}): _items = items,super._();
+  const PaginationRetryFailure({required this.failure, required this.paginatedResponseModel}): super._();
   
 
  final  Failure failure;
- final  List<T> _items;
- List<T> get items {
-  if (_items is EqualUnmodifiableListView) return _items;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_items);
-}
-
+ final  PaginationResponseModel<T> paginatedResponseModel;
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
@@ -231,21 +228,21 @@ $PaginationRetryFailureCopyWith<T, PaginationRetryFailure<T>> get copyWith => _$
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>.retryFailure'))
-    ..add(DiagnosticsProperty('failure', failure))..add(DiagnosticsProperty('items', items));
+    ..add(DiagnosticsProperty('failure', failure))..add(DiagnosticsProperty('paginatedResponseModel', paginatedResponseModel));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationRetryFailure<T>&&(identical(other.failure, failure) || other.failure == failure)&&const DeepCollectionEquality().equals(other._items, _items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationRetryFailure<T>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,failure,const DeepCollectionEquality().hash(_items));
+int get hashCode => Object.hash(runtimeType,failure,paginatedResponseModel);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>.retryFailure(failure: $failure, items: $items)';
+  return 'CorePaginationState<$T>.retryFailure(failure: $failure, paginatedResponseModel: $paginatedResponseModel)';
 }
 
 
@@ -256,11 +253,11 @@ abstract mixin class $PaginationRetryFailureCopyWith<T,$Res> implements $CorePag
   factory $PaginationRetryFailureCopyWith(PaginationRetryFailure<T> value, $Res Function(PaginationRetryFailure<T>) _then) = _$PaginationRetryFailureCopyWithImpl;
 @useResult
 $Res call({
- Failure failure, List<T> items
+ Failure failure, PaginationResponseModel<T> paginatedResponseModel
 });
 
 
-
+$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel;
 
 }
 /// @nodoc
@@ -273,32 +270,35 @@ class _$PaginationRetryFailureCopyWithImpl<T,$Res>
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? failure = null,Object? items = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? failure = null,Object? paginatedResponseModel = null,}) {
   return _then(PaginationRetryFailure<T>(
 failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as Failure,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<T>,
+as Failure,paginatedResponseModel: null == paginatedResponseModel ? _self.paginatedResponseModel : paginatedResponseModel // ignore: cast_nullable_to_non_nullable
+as PaginationResponseModel<T>,
   ));
 }
 
-
+/// Create a copy of CorePaginationState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel {
+  
+  return $PaginationResponseModelCopyWith<T, $Res>(_self.paginatedResponseModel, (value) {
+    return _then(_self.copyWith(paginatedResponseModel: value));
+  });
+}
 }
 
 /// @nodoc
 
 
 class PaginationFailed<T> extends CorePaginationState<T> with DiagnosticableTreeMixin {
-  const PaginationFailed({required this.failure, required final  List<T> items, this.retryFunction}): _items = items,super._();
+  const PaginationFailed({required this.failure, required this.paginatedResponseModel, this.retryFunction}): super._();
   
 
  final  Failure failure;
- final  List<T> _items;
- List<T> get items {
-  if (_items is EqualUnmodifiableListView) return _items;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_items);
-}
-
+ final  PaginationResponseModel<T> paginatedResponseModel;
  final  VoidCallback? retryFunction;
 
 /// Create a copy of CorePaginationState
@@ -312,21 +312,21 @@ $PaginationFailedCopyWith<T, PaginationFailed<T>> get copyWith => _$PaginationFa
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>.failed'))
-    ..add(DiagnosticsProperty('failure', failure))..add(DiagnosticsProperty('items', items))..add(DiagnosticsProperty('retryFunction', retryFunction));
+    ..add(DiagnosticsProperty('failure', failure))..add(DiagnosticsProperty('paginatedResponseModel', paginatedResponseModel))..add(DiagnosticsProperty('retryFunction', retryFunction));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationFailed<T>&&(identical(other.failure, failure) || other.failure == failure)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.retryFunction, retryFunction) || other.retryFunction == retryFunction));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationFailed<T>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel)&&(identical(other.retryFunction, retryFunction) || other.retryFunction == retryFunction));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,failure,const DeepCollectionEquality().hash(_items),retryFunction);
+int get hashCode => Object.hash(runtimeType,failure,paginatedResponseModel,retryFunction);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>.failed(failure: $failure, items: $items, retryFunction: $retryFunction)';
+  return 'CorePaginationState<$T>.failed(failure: $failure, paginatedResponseModel: $paginatedResponseModel, retryFunction: $retryFunction)';
 }
 
 
@@ -337,11 +337,11 @@ abstract mixin class $PaginationFailedCopyWith<T,$Res> implements $CorePaginatio
   factory $PaginationFailedCopyWith(PaginationFailed<T> value, $Res Function(PaginationFailed<T>) _then) = _$PaginationFailedCopyWithImpl;
 @useResult
 $Res call({
- Failure failure, List<T> items, VoidCallback? retryFunction
+ Failure failure, PaginationResponseModel<T> paginatedResponseModel, VoidCallback? retryFunction
 });
 
 
-
+$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel;
 
 }
 /// @nodoc
@@ -354,16 +354,25 @@ class _$PaginationFailedCopyWithImpl<T,$Res>
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? failure = null,Object? items = null,Object? retryFunction = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? failure = null,Object? paginatedResponseModel = null,Object? retryFunction = freezed,}) {
   return _then(PaginationFailed<T>(
 failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as Failure,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<T>,retryFunction: freezed == retryFunction ? _self.retryFunction : retryFunction // ignore: cast_nullable_to_non_nullable
+as Failure,paginatedResponseModel: null == paginatedResponseModel ? _self.paginatedResponseModel : paginatedResponseModel // ignore: cast_nullable_to_non_nullable
+as PaginationResponseModel<T>,retryFunction: freezed == retryFunction ? _self.retryFunction : retryFunction // ignore: cast_nullable_to_non_nullable
 as VoidCallback?,
   ));
 }
 
-
+/// Create a copy of CorePaginationState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel {
+  
+  return $PaginationResponseModelCopyWith<T, $Res>(_self.paginatedResponseModel, (value) {
+    return _then(_self.copyWith(paginatedResponseModel: value));
+  });
+}
 }
 
 // dart format on
