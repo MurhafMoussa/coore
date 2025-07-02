@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:coore/lib.dart';
-import 'package:coore/src/api_handler/entities/paginatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -36,7 +35,10 @@ class CorePaginationCubit<T extends Identifiable>
   /// The data fetching function signature:
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
-  final UseCaseFutureResponse<Paginatable<T>> Function(int batch, int limit)
+  final UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+    int batch,
+    int limit,
+  )
   paginationFunction;
 
   /// Active pagination strategy implementation
@@ -88,7 +90,7 @@ class CorePaginationCubit<T extends Identifiable>
     if (!isClosed) {
       result.fold(
         (failure) => _handleFailure(failure, isInitial),
-        (paginatable) => _handleSuccess(paginatable.items, isInitial),
+        (paginatable) => _handleSuccess(paginatable.data, isInitial),
       );
     }
   }

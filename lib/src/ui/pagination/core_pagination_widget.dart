@@ -1,5 +1,4 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/api_handler/entities/paginatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -68,7 +67,10 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   // ---------------------------------------------------------------------------------
 
   /// Function to fetch a page of data. [batch] is 1-based, [limit] is from strategy.
-  final UseCaseFutureResponse<Paginatable<T>> Function(int batch, int limit)
+  final UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+    int batch,
+    int limit,
+  )
   paginationFunction;
 
   /// Strategy defining page size and thresholds.
@@ -198,7 +200,10 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
   sliversBuilder;
 
   /// Function to fetch data pages.
-  final UseCaseFutureResponse<Paginatable<T>> Function(int batch, int limit)
+  final UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+    int batch,
+    int limit,
+  )
   paginationFunction;
 
   /// Defines page size and thresholds.
