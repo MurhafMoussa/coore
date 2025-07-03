@@ -21,25 +21,28 @@ class CorePaginationCubit<T extends Identifiable>
   /// {@macro core_pagination_cubit}
   CorePaginationCubit({
     /// Async function that fetches paginated data from usecase
-    required this.paginationFunction,
+    required UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+      int,
+      int,
+    )
+    paginationFunction,
 
     /// Pagination strategy implementation (Page/Skip)
     required this.paginationStrategy,
 
     /// Reverse order loading (for chat-like timelines)
     this.reverse = false,
-  }) : super(CorePaginationState<T>.loading()) {
+  }) : _paginationFunction = paginationFunction,
+       super(CorePaginationState<T>.loading()) {
     _refreshController = RefreshController();
+    _paginationFunction = paginationFunction;
   }
 
   /// The data fetching function signature:
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
-  final UseCaseFutureResponse<PaginationResponseModel<T>> Function(
-    int batch,
-    int limit,
-  )
-  paginationFunction;
+  UseCaseFutureResponse<PaginationResponseModel<T>> Function(int, int)
+  _paginationFunction;
 
   /// Active pagination strategy implementation
   final PaginationStrategy paginationStrategy;
@@ -82,7 +85,7 @@ class CorePaginationCubit<T extends Identifiable>
   /// - Routes to success/error handlers
   /// - Maintains initial/non-initial context
   Future<void> _fetchNetworkData({required bool isInitial}) async {
-    final result = await paginationFunction(
+    final result = await _paginationFunction(
       paginationStrategy.nextBatch,
       paginationStrategy.limit,
     );
@@ -166,5 +169,15 @@ class CorePaginationCubit<T extends Identifiable>
   Future<void> close() {
     _refreshController.dispose();
     return super.close();
+  }
+
+  void updatePaginationFunction(
+    UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+      int batch,
+      int limit,
+    )
+    paginationFunction,
+  ) {
+    _paginationFunction = paginationFunction;
   }
 }

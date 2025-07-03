@@ -166,7 +166,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
 ///  • Optional scroll-to-top FAB
 ///
 /// Supply either [scrollableBuilder] or [sliversBuilder]. All other parameters are optional.
-class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
+class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
   /// Creates a pagination wrapper. Exactly one builder must be provided.
   const CorePaginationWidget({
     super.key,
@@ -255,41 +255,61 @@ class CorePaginationWidget<T extends Identifiable> extends StatelessWidget {
   final bool enableScrollToTop;
 
   @override
+  State<CorePaginationWidget> createState() => _CorePaginationWidgetState();
+}
+
+class _CorePaginationWidgetState<T extends Identifiable>
+    extends State<CorePaginationWidget<T>> {
+  late final CorePaginationCubit<T> _cubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit = CorePaginationCubit<T>(
+      paginationFunction: widget.paginationFunction,
+      paginationStrategy: widget.paginationStrategy,
+      reverse: widget.reverse,
+    )..fetchInitialData();
+  }
+
+  @override
+  void didUpdateWidget(covariant CorePaginationWidget<T> old) {
+    super.didUpdateWidget(old);
+
+    if (old.paginationFunction != widget.paginationFunction) {
+      _cubit.updatePaginationFunction(widget.paginationFunction);
+    }
+  }
+
+  @override
+  void dispose() {
+    _cubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PaginationConfig<T>(
-      scrollableBuilder: scrollableBuilder,
-      sliversBuilder: sliversBuilder,
-      paginationFunction: paginationFunction,
-      paginationStrategy: paginationStrategy,
-      reverse: reverse,
-      loadingBuilder: loadingBuilder,
-      errorBuilder: errorBuilder,
-      emptyBuilder: emptyBuilder,
-      scrollDirection: scrollDirection,
-      physics: physics,
-      showRefreshIndicator: showRefreshIndicator,
-      headerBuilder: headerBuilder,
-      footerBuilder: footerBuilder,
-      skeletonItemCount: skeletonItemCount,
-      emptyEntity: emptyEntity,
-      enableScrollToTop: enableScrollToTop,
+      scrollableBuilder: widget.scrollableBuilder,
+      sliversBuilder: widget.sliversBuilder,
+      paginationFunction: widget.paginationFunction,
+      paginationStrategy: widget.paginationStrategy,
+      reverse: widget.reverse,
+      loadingBuilder: widget.loadingBuilder,
+      errorBuilder: widget.errorBuilder,
+      emptyBuilder: widget.emptyBuilder,
+      scrollDirection: widget.scrollDirection,
+      physics: widget.physics,
+      showRefreshIndicator: widget.showRefreshIndicator,
+      headerBuilder: widget.headerBuilder,
+      footerBuilder: widget.footerBuilder,
+      skeletonItemCount: widget.skeletonItemCount,
+      emptyEntity: widget.emptyEntity,
+      enableScrollToTop: widget.enableScrollToTop,
       child: Builder(
         builder: (context) {
-          return BlocProvider<CorePaginationCubit<T>>(
-            create: (context) {
-              final element = context
-                  .getElementForInheritedWidgetOfExactType<
-                    PaginationConfig<T>
-                  >();
-              assert(element != null, 'No PaginationConfig found in context');
-              final config = element!.widget as PaginationConfig<T>;
-
-              return CorePaginationCubit<T>(
-                paginationFunction: config.paginationFunction,
-                paginationStrategy: config.paginationStrategy,
-                reverse: config.reverse,
-              )..fetchInitialData();
-            },
+          return BlocProvider<CorePaginationCubit<T>>.value(
+            value: _cubit,
             child: _PaginationContent<T>(),
           );
         },
