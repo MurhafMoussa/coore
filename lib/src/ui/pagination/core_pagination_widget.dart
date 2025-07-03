@@ -255,7 +255,8 @@ class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
   final bool enableScrollToTop;
 
   @override
-  State<CorePaginationWidget> createState() => _CorePaginationWidgetState();
+  State<CorePaginationWidget<T>> createState() =>
+      _CorePaginationWidgetState<T>();
 }
 
 class _CorePaginationWidgetState<T extends Identifiable>
