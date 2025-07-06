@@ -7,6 +7,7 @@ import 'package:hive_ce/hive.dart';
 
 class HiveLocalDatabase implements LocalDatabaseInterface {
   HiveLocalDatabase(this._boxName);
+
   final String _boxName;
 
   late Box _box;
@@ -26,7 +27,7 @@ class HiveLocalDatabase implements LocalDatabaseInterface {
       _isInitialized = true;
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheInitializationFailure(e, stackTrace));
+      return left(CacheInitializationFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -44,7 +45,7 @@ class HiveLocalDatabase implements LocalDatabaseInterface {
       await _box.close();
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheCorruptedFailure(e, stackTrace));
+      return left(CacheCorruptedFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -57,7 +58,7 @@ class HiveLocalDatabase implements LocalDatabaseInterface {
         return right(unit);
       });
     } catch (e, stackTrace) {
-      return left(CacheWriteFailure(e, stackTrace));
+      return left(CacheWriteFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -67,7 +68,7 @@ class HiveLocalDatabase implements LocalDatabaseInterface {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) => right(_box.get(key) as T?));
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e, stackTrace));
+      return left(CacheReadFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -80,7 +81,7 @@ class HiveLocalDatabase implements LocalDatabaseInterface {
         return right(unit);
       });
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e, stackTrace));
+      return left(CacheDeleteFailure(e, stackTrace: stackTrace));
     }
   }
 }

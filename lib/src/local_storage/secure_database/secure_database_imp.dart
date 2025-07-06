@@ -6,13 +6,14 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
   SecureDatabaseImp(this._flutterSecureStorage);
 
   final FlutterSecureStorage _flutterSecureStorage;
+
   @override
   CacheResponse<Unit> delete(String key) async {
     try {
       await _flutterSecureStorage.delete(key: key);
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e, stackTrace));
+      return left(CacheDeleteFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -22,7 +23,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       await _flutterSecureStorage.deleteAll();
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e, stackTrace));
+      return left(CacheDeleteFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -31,7 +32,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
     try {
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheInitializationFailure(e, stackTrace));
+      return left(CacheInitializationFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -41,7 +42,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       final value = await _flutterSecureStorage.read(key: key);
       return right(value);
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e, stackTrace));
+      return left(CacheReadFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -51,7 +52,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       final value = await _flutterSecureStorage.readAll();
       return right(value);
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e, stackTrace));
+      return left(CacheReadFailure(e, stackTrace: stackTrace));
     }
   }
 
@@ -61,7 +62,7 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
       await _flutterSecureStorage.write(key: key, value: value);
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheWriteFailure(e, stackTrace));
+      return left(CacheWriteFailure(e, stackTrace: stackTrace));
     }
   }
 }
