@@ -1,8 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable implements Exception {
-
-  const Failure(this.message, [this.stackTrace]);
+  const Failure(this.message, {this.stackTrace});
   final String message;
   final StackTrace? stackTrace;
 
@@ -11,6 +10,6 @@ abstract class Failure extends Equatable implements Exception {
 }
 
 class UnknownFailure extends Failure {
-  const UnknownFailure([StackTrace? stackTrace])
-    : super('Unknown failure', stackTrace);
+  const UnknownFailure({StackTrace? stackTrace})
+    : super('Unknown failure', stackTrace: stackTrace);
 }

@@ -54,7 +54,9 @@ class DioApiHandler implements ApiHandlerInterface {
       if (error is DioException) {
         return left(_exceptionMapper.mapException(error, stackTrace));
       }
-      return left(NoInternetConnectionFailure(error.toString(), stackTrace));
+      return left(
+        NoInternetConnectionFailure(error.toString(), stackTrace: stackTrace),
+      );
     }
   }
 
@@ -112,19 +114,17 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data =
-          (formData != null && body != null)
-              ? formData.createFormData(body)
-              : body;
+      final data = (formData != null && body != null)
+          ? formData.createFormData(body)
+          : body;
       return _dio.post(
         path,
         data: data,
         queryParameters: queryParameters,
         options: _buildOptions(isAuthorized: isAuthorized),
-        onSendProgress:
-            onSendProgress != null
-                ? (count, total) => onSendProgress(count / total)
-                : null,
+        onSendProgress: onSendProgress != null
+            ? (count, total) => onSendProgress(count / total)
+            : null,
         cancelToken: _cancelToken(cancelRequestAdapter),
       );
     });
@@ -177,10 +177,9 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data =
-          (formData != null && body != null)
-              ? formData.createFormData(body)
-              : body;
+      final data = (formData != null && body != null)
+          ? formData.createFormData(body)
+          : body;
       return _dio.put(
         path,
         data: data,
@@ -212,10 +211,9 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data =
-          (formData != null && body != null)
-              ? formData.createFormData(body)
-              : body;
+      final data = (formData != null && body != null)
+          ? formData.createFormData(body)
+          : body;
       return _dio.patch(
         path,
         data: data,
@@ -252,10 +250,9 @@ class DioApiHandler implements ApiHandlerInterface {
         downloadDestinationPath,
         queryParameters: queryParameters,
         options: _buildOptions(isAuthorized: isAuthorized),
-        onReceiveProgress:
-            onReceiveProgress != null
-                ? (count, total) => onReceiveProgress(count / total)
-                : null,
+        onReceiveProgress: onReceiveProgress != null
+            ? (count, total) => onReceiveProgress(count / total)
+            : null,
         cancelToken: _cancelToken(cancelRequestAdapter),
       ),
     );
