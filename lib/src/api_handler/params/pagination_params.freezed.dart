@@ -151,4 +151,143 @@ as CancelRequestAdapter?,
 
 }
 
+
+/// @nodoc
+mixin _$PagePaginationParams {
+
+ int get batch; int get limit;@JsonKey(includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
+/// Create a copy of PagePaginationParams
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PagePaginationParamsCopyWith<PagePaginationParams> get copyWith => _$PagePaginationParamsCopyWithImpl<PagePaginationParams>(this as PagePaginationParams, _$identity);
+
+  /// Serializes this PagePaginationParams to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PagePaginationParams&&(identical(other.batch, batch) || other.batch == batch)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.cancelRequestAdapter, cancelRequestAdapter) || other.cancelRequestAdapter == cancelRequestAdapter));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,batch,limit,cancelRequestAdapter);
+
+@override
+String toString() {
+  return 'PagePaginationParams(batch: $batch, limit: $limit, cancelRequestAdapter: $cancelRequestAdapter)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $PagePaginationParamsCopyWith<$Res>  {
+  factory $PagePaginationParamsCopyWith(PagePaginationParams value, $Res Function(PagePaginationParams) _then) = _$PagePaginationParamsCopyWithImpl;
+@useResult
+$Res call({
+ int batch, int limit,@JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+});
+
+
+
+
+}
+/// @nodoc
+class _$PagePaginationParamsCopyWithImpl<$Res>
+    implements $PagePaginationParamsCopyWith<$Res> {
+  _$PagePaginationParamsCopyWithImpl(this._self, this._then);
+
+  final PagePaginationParams _self;
+  final $Res Function(PagePaginationParams) _then;
+
+/// Create a copy of PagePaginationParams
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? batch = null,Object? limit = null,Object? cancelRequestAdapter = freezed,}) {
+  return _then(_self.copyWith(
+batch: null == batch ? _self.batch : batch // ignore: cast_nullable_to_non_nullable
+as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
+as int,cancelRequestAdapter: freezed == cancelRequestAdapter ? _self.cancelRequestAdapter : cancelRequestAdapter // ignore: cast_nullable_to_non_nullable
+as CancelRequestAdapter?,
+  ));
+}
+
+}
+
+
+/// @nodoc
+@JsonSerializable()
+
+class _PagePaginationParams extends PagePaginationParams {
+  const _PagePaginationParams({required this.batch, required this.limit, @JsonKey(includeFromJson: false) this.cancelRequestAdapter}): super._();
+  factory _PagePaginationParams.fromJson(Map<String, dynamic> json) => _$PagePaginationParamsFromJson(json);
+
+@override final  int batch;
+@override final  int limit;
+@override@JsonKey(includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
+
+/// Create a copy of PagePaginationParams
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PagePaginationParamsCopyWith<_PagePaginationParams> get copyWith => __$PagePaginationParamsCopyWithImpl<_PagePaginationParams>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$PagePaginationParamsToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PagePaginationParams&&(identical(other.batch, batch) || other.batch == batch)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.cancelRequestAdapter, cancelRequestAdapter) || other.cancelRequestAdapter == cancelRequestAdapter));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,batch,limit,cancelRequestAdapter);
+
+@override
+String toString() {
+  return 'PagePaginationParams(batch: $batch, limit: $limit, cancelRequestAdapter: $cancelRequestAdapter)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PagePaginationParamsCopyWith<$Res> implements $PagePaginationParamsCopyWith<$Res> {
+  factory _$PagePaginationParamsCopyWith(_PagePaginationParams value, $Res Function(_PagePaginationParams) _then) = __$PagePaginationParamsCopyWithImpl;
+@override @useResult
+$Res call({
+ int batch, int limit,@JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+});
+
+
+
+
+}
+/// @nodoc
+class __$PagePaginationParamsCopyWithImpl<$Res>
+    implements _$PagePaginationParamsCopyWith<$Res> {
+  __$PagePaginationParamsCopyWithImpl(this._self, this._then);
+
+  final _PagePaginationParams _self;
+  final $Res Function(_PagePaginationParams) _then;
+
+/// Create a copy of PagePaginationParams
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? batch = null,Object? limit = null,Object? cancelRequestAdapter = freezed,}) {
+  return _then(_PagePaginationParams(
+batch: null == batch ? _self.batch : batch // ignore: cast_nullable_to_non_nullable
+as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
+as int,cancelRequestAdapter: freezed == cancelRequestAdapter ? _self.cancelRequestAdapter : cancelRequestAdapter // ignore: cast_nullable_to_non_nullable
+as CancelRequestAdapter?,
+  ));
+}
+
+
+}
+
 // dart format on
