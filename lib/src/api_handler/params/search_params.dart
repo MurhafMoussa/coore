@@ -1,31 +1,24 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:coore/lib.dart';
+import 'package:coore/src/api_handler/cancel_request_adapter.dart';
+import 'package:coore/src/api_handler/params/cancelable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class SearchParams extends BaseParams {
-  const SearchParams({super.cancelTokenAdapter, required this.query});
+part 'search_params.freezed.dart';
+part 'search_params.g.dart';
 
-  final String query;
+@freezed
+abstract class SearchParams with _$SearchParams implements Cancelable {
+  const SearchParams._();
+
+  const factory SearchParams({
+    required String query,
+    @JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter,
+  }) = _SearchParams;
+
+  factory SearchParams.fromJson(Map<String, dynamic> json) =>
+      _$SearchParamsFromJson(json);
+
   @override
-  BaseParams attachCancelToken({
-    CancelRequestAdapter? cancelTokenAdapter,
-    String? query,
-  }) => SearchParams(
-    query: query ?? this.query,
-    cancelTokenAdapter: cancelTokenAdapter ?? this.cancelTokenAdapter,
-
-  );
-   
-  @override
-  List<Object?> get props => [query];
-
-  @override
-  Map<String, dynamic> toJson() => {'query': query};
-
-  SearchParams copyWith({
-    String? query,
-  }) {
-    return SearchParams(
-      query: query ?? this.query,
-    );
+  SearchParams copyWithCancelRequest(CancelRequestAdapter adapter) {
+    return copyWith(cancelRequestAdapter: adapter);
   }
 }

@@ -1,62 +1,39 @@
-import 'package:coore/src/api_handler/cancel_request_adapter.dart';
+import 'package:coore/lib.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'package:coore/src/api_handler/params/base_params.dart';
+part 'pagination_params.freezed.dart';
+part 'pagination_params.g.dart';
 
-abstract class PaginationParams extends BaseParams {
-  const PaginationParams({
-    required this.batch,
-    required this.limit,
-    super.cancelTokenAdapter,
-  });
-  final int batch;
-  final int limit;
-  @override
-  List<Object> get props => [batch, limit];
+/// Abstract base for all pagination strategies
+abstract class PaginationParams implements Cancelable {
+  int get batch;
+
+  int get limit;
 }
 
-class SkipPagingStrategyParams extends PaginationParams {
-  const SkipPagingStrategyParams({
-    required this.take,
-    required this.skip,
-    super.cancelTokenAdapter,
-  }) : super(batch: skip, limit: take);
-  final int take;
-  final int skip;
-  @override
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{'skip': batch, 'take': limit};
-  }
+@freezed
+abstract class SkipPagingStrategyParams
+    with _$SkipPagingStrategyParams
+    implements PaginationParams, Cancelable {
+  const SkipPagingStrategyParams._();
+
+  const factory SkipPagingStrategyParams({
+    required int take,
+    required int skip,
+    @JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter,
+  }) = _SkipPagingStrategyParams;
+
+  factory SkipPagingStrategyParams.fromJson(Map<String, dynamic> json) =>
+      _$SkipPagingStrategyParamsFromJson(json);
 
   @override
-  BaseParams attachCancelToken({CancelRequestAdapter? cancelTokenAdapter}) {
-    return SkipPagingStrategyParams(
-      take: take,
-      skip: skip,
-      cancelTokenAdapter: cancelTokenAdapter ?? this.cancelTokenAdapter,
-    );
-  }
-}
-
-class PagePaginationParams extends PaginationParams {
-  const PagePaginationParams({
-    required super.limit,
-    required super.batch,
-    super.cancelTokenAdapter,
-  }) ;
-
-
+  int get batch => skip;
 
   @override
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{'page': batch, 'limit': limit};
-  }
+  int get limit => take;
 
   @override
-  BaseParams attachCancelToken({CancelRequestAdapter? cancelTokenAdapter}) {
-    return PagePaginationParams(
-      batch: batch,
-      limit: limit,
-      cancelTokenAdapter: cancelTokenAdapter ?? this.cancelTokenAdapter,
-    );
+  SkipPagingStrategyParams copyWithCancelRequest(CancelRequestAdapter adapter) {
+    return copyWith(cancelRequestAdapter: adapter);
   }
 }
