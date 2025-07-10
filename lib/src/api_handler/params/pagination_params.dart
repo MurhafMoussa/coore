@@ -37,3 +37,24 @@ abstract class SkipPagingStrategyParams
     return copyWith(cancelRequestAdapter: adapter);
   }
 }
+
+@freezed
+abstract class PagePaginationParams
+    with _$PagePaginationParams
+    implements PaginationParams, Cancelable {
+  const PagePaginationParams._(); // Enables custom methods
+
+  const factory PagePaginationParams({
+    required int batch,
+    required int limit,
+    @JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter,
+  }) = _PagePaginationParams;
+
+  factory PagePaginationParams.fromJson(Map<String, dynamic> json) =>
+      _$PagePaginationParamsFromJson(json);
+
+  @override
+  PagePaginationParams copyWithCancelRequest(CancelRequestAdapter adapter) {
+    return copyWith(cancelRequestAdapter: adapter);
+  }
+}
