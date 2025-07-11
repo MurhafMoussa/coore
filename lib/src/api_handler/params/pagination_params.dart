@@ -42,7 +42,7 @@ abstract class SkipPagingStrategyParams
 abstract class PagePaginationParams
     with _$PagePaginationParams
     implements PaginationParams, Cancelable {
-  const PagePaginationParams._(); // Enables custom methods
+  const PagePaginationParams._();
 
   const factory PagePaginationParams({
     required int batch,
