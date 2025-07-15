@@ -11,6 +11,7 @@ class CoreConfigEntity extends Equatable {
     required this.localizationConfigEntity,
     this.shouldLog = true,
     required this.themeConfigEntity,
+    this.enableSecureStorage = false,
   });
   final CoreEnvironment currentEnvironment;
   final NetworkConfigEntity networkConfigEntity;
@@ -18,6 +19,7 @@ class CoreConfigEntity extends Equatable {
 
   final ThemeConfigEntity themeConfigEntity;
   final bool shouldLog;
+  final bool enableSecureStorage;
   @override
   List<Object> get props => [
     currentEnvironment,

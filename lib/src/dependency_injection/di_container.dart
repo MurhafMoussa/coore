@@ -56,9 +56,7 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
     ..registerLazySingleton(
       () => AuthTokenManager(
         getIt(),
-        secureStorageEnabled:
-            coreEntity.networkConfigEntity.authInterceptorType ==
-            AuthInterceptorType.tokenBased,
+        secureStorageEnabled: coreEntity.enableSecureStorage,
       ),
     )
     ..registerLazySingleton(
@@ -126,6 +124,7 @@ Dio _createDio(
       {
         authInterceptor = TokenAuthInterceptor(getIt());
       }
+
     case AuthInterceptorType.cookieBased:
       {
         final String appDocPath = directory.path;
@@ -143,10 +142,9 @@ Dio _createDio(
         baseUrl: entity.baseUrl,
         connectTimeout: entity.connectTimeout,
         contentType: entity.defaultContentType,
-        followRedirects:
-            interceptors.first is TokenAuthInterceptor
-                ? entity.followRedirects
-                : false,
+        followRedirects: interceptors.first is TokenAuthInterceptor
+            ? entity.followRedirects
+            : false,
         maxRedirects: entity.maxRedirects,
         queryParameters: entity.defaultQueryParams,
         sendTimeout: entity.sendTimeout,
