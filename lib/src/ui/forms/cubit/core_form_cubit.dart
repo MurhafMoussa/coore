@@ -47,9 +47,11 @@ class CoreFormCubit extends Cubit<CoreFormState> {
   /// Type-safe update method for a single field
   void updateField<T>(String fieldName, T? value, BuildContext context) {
     // Type check
-    final expectedType = state.fieldTypes[fieldName];
-    if (expectedType != null && expectedType != T) {
-      throw TypeError();
+    if (value != null) {
+      final expectedType = state.fieldTypes[fieldName];
+      if (expectedType != null && expectedType != T) {
+        throw TypeError();
+      }
     }
 
     final newValues = Map<String, Object?>.from(state.values)
@@ -185,9 +187,11 @@ class CoreFormCubit extends Cubit<CoreFormState> {
       final value = entry.value;
 
       // Type check
-      final expectedType = state.fieldTypes[fieldName];
-      if (expectedType != null && expectedType != T) {
-        throw TypeError();
+      if (value != null) {
+        final expectedType = state.fieldTypes[fieldName];
+        if (expectedType != null && expectedType != T) {
+          throw TypeError();
+        }
       }
 
       // Update value and mark as touched
