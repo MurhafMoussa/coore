@@ -1,32 +1,66 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
-/// An adapter for creating multipart form data.
+/// Abstract adapter for creating multipart/form-data.
 ///
-/// This interface abstracts the process of converting a map of key-value
-/// pairs into a [FormData] object suitable for sending multipart/form-data
-/// HTTP requests. It is useful for ensuring that your application can
-/// easily swap out implementations if needed.
+/// Holds the request body internally and exposes a single create() method.
 abstract class FormDataAdapter {
-  /// Creates a [FormData] instance from the provided [data] map.
-  ///
-  /// The [data] map should contain key-value pairs where values can be
-  /// primitive types, lists, or [MultipartFile] instances. The returned
-  /// [dynamic type] is ready to be used in an HTTP request.
-  dynamic createFormData(Map<String, dynamic> data);
+  /// Internal representation of body data.
+  final Map<String, dynamic> _body;
+
+  /// Accepts the raw body map on construction.
+  const FormDataAdapter(this._body);
+
+  /// Builds a [FormData] from the internal body.
+  FormData create();
 }
 
-/// A Dio-based implementation of the [FormDataAdapter] interface.
-///
-/// This implementation leverages Dio's [FormData.fromMap] constructor
-/// to build a multipart form data object from a map of key-value pairs.
-class DioFormDataAdapter implements FormDataAdapter {
-  /// Creates and returns a [FormData] object from the provided [data] map.
-  ///
-  /// This method uses Dio's [FormData.fromMap] to convert the input data into
-  /// a [FormData] instance, which is then suitable for use in a multipart
-  /// HTTP request.
+/// Default implementation: wraps Dio's FormData.fromMap directly.
+class DefaultFormDataAdapter extends FormDataAdapter {
+  const DefaultFormDataAdapter(super.body);
+
   @override
-  FormData createFormData(Map<String, dynamic> data) {
-    return FormData.fromMap(data);
+  FormData create() {
+    return FormData.fromMap(_body);
   }
 }
+
+/// Custom multipart adapter: handles files and fields explicitly.
+class MultipartFormDataAdapter extends FormDataAdapter {
+  const MultipartFormDataAdapter(super.body);
+
+  @override
+  FormData create() {
+    final form = FormData();
+
+    _body.forEach((key, value) {
+      if (value is File) {
+        // Single file
+        form.files.add(MapEntry(key, MultipartFile.fromFileSync(value.path)));
+      } else if (value is List<File>) {
+        // List of files under same key
+        for (final file in value) {
+          form.files.add(MapEntry(key, MultipartFile.fromFileSync(file.path)));
+        }
+      } else {
+        // Primitive or other types
+        form.fields.add(MapEntry(key, value.toString()));
+      }
+    });
+
+    return form;
+  }
+}
+
+/// Usage example:
+///
+/// final body = {
+///   'name': 'John',
+///   'profile_pic': File('/path/to/pic.jpg'),
+///   'attachments': [File('/a.pdf'), File('/b.pdf')],
+/// };
+/// final adapter = MultipartFormDataAdapter(body);
+/// final formData = adapter.create();
+///
+/// dio.post('/upload', data: formData);

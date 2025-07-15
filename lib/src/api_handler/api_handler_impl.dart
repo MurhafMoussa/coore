@@ -114,9 +114,7 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data = (formData != null && body != null)
-          ? formData.createFormData(body)
-          : body;
+      final data = (formData != null) ? formData.create() : body;
       return _dio.post(
         path,
         data: data,
@@ -177,9 +175,7 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data = (formData != null && body != null)
-          ? formData.createFormData(body)
-          : body;
+      final data = (formData != null) ? formData.create() : body;
       return _dio.put(
         path,
         data: data,
@@ -211,9 +207,7 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data = (formData != null && body != null)
-          ? formData.createFormData(body)
-          : body;
+      final data = (formData != null) ? formData.create() : body;
       return _dio.patch(
         path,
         data: data,
@@ -249,7 +243,9 @@ class DioApiHandler implements ApiHandlerInterface {
         url,
         downloadDestinationPath,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized: isAuthorized),
+        options: _buildOptions(
+          isAuthorized: isAuthorized,
+        ).copyWith(responseType: ResponseType.stream),
         onReceiveProgress: onReceiveProgress != null
             ? (count, total) => onReceiveProgress(count / total)
             : null,
