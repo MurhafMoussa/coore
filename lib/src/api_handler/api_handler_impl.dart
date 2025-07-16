@@ -28,13 +28,19 @@ class DioApiHandler implements ApiHandlerInterface {
   Options _buildOptions({
     required bool isAuthorized,
     bool shouldCache = false,
+    bool isFormData = false,
   }) {
     final headers = <String, dynamic>{
       'isAuthorized': isAuthorized,
       'shouldCache': shouldCache,
     };
 
-    return Options(extra: headers);
+    return Options(
+      extra: headers,
+      contentType: isFormData
+          ? Headers.multipartFormDataContentType
+          : Headers.jsonContentType,
+    );
   }
 
   /// A common method for handling API responses.
@@ -114,12 +120,15 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data = (formData != null) ? formData.create() : body;
+      final data = formData != null ? formData.create() : body;
       return _dio.post(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized: isAuthorized),
+        options: _buildOptions(
+          isAuthorized: isAuthorized,
+          isFormData: formData != null,
+        ),
         onSendProgress: onSendProgress != null
             ? (count, total) => onSendProgress(count / total)
             : null,
@@ -175,12 +184,15 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data = (formData != null) ? formData.create() : body;
+      final data = formData != null ? formData.create() : body;
       return _dio.put(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized: isAuthorized),
+        options: _buildOptions(
+          isAuthorized: isAuthorized,
+          isFormData: formData != null,
+        ),
         cancelToken: _cancelToken(cancelRequestAdapter),
       );
     });
@@ -207,12 +219,15 @@ class DioApiHandler implements ApiHandlerInterface {
     bool isAuthorized = true,
   }) {
     return _handleResponse(() {
-      final data = (formData != null) ? formData.create() : body;
+      final data = formData != null ? formData.create() : body;
       return _dio.patch(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized: isAuthorized),
+        options: _buildOptions(
+          isAuthorized: isAuthorized,
+          isFormData: formData != null,
+        ),
         cancelToken: _cancelToken(cancelRequestAdapter),
       );
     });
