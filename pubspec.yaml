@@ -34,6 +34,7 @@ dependencies:
   logger: ^2.5.0
   mutex: ^3.1.0
   path: any
+  pinput: ^5.0.1
   path_provider: ^2.1.5
   pull_to_refresh: ^2.0.0
   readmore: ^3.0.0
