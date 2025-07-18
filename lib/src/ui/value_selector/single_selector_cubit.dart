@@ -1,4 +1,3 @@
-import 'package:coore/src/api_handler/entities/identifiable.dart';
 import 'package:coore/src/ui/value_selector/value_selector_cubit.dart';
 import 'package:coore/src/ui/value_selector/value_selector_state.dart';
 
@@ -6,8 +5,7 @@ import 'package:coore/src/ui/value_selector/value_selector_state.dart';
 ///
 /// This class allows only one value to be selected at a time. It handles the logic
 /// for selecting and unselecting a single value.
-class SingleSelectorCubit<T extends Identifiable>
-    extends ValueSelectorCubit<T> {
+class SingleSelectorCubit<T> extends ValueSelectorCubit<T> {
   /// Creates a [SingleSelectorCubit] instance.
   ///
   /// [values]: The list of values that can be selected.

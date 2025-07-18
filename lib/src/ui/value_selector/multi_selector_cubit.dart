@@ -1,4 +1,3 @@
-import 'package:coore/src/api_handler/entities/identifiable.dart';
 import 'package:coore/src/ui/value_selector/value_selector_cubit.dart';
 import 'package:coore/src/ui/value_selector/value_selector_state.dart';
 
@@ -6,7 +5,7 @@ import 'package:coore/src/ui/value_selector/value_selector_state.dart';
 ///
 /// This class allows multiple values to be selected at once. It handles the logic
 /// for adding or removing values from the selection.
-class MultiSelectorCubit<T extends Identifiable> extends ValueSelectorCubit<T> {
+class MultiSelectorCubit<T> extends ValueSelectorCubit<T> {
   /// Creates a [MultiSelectorCubit] instance.
   ///
   /// [values]: The list of values that can be selected.

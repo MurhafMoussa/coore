@@ -1,4 +1,3 @@
-import 'package:coore/src/api_handler/entities/identifiable.dart';
 import 'package:coore/src/ui/value_selector/value_selector_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,8 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// This class provides common functionality for both single and multi-selection
 /// scenarios. It manages the selection state and provides methods to query and
 /// modify the selection.
-abstract class ValueSelectorCubit<T extends Identifiable>
-    extends Cubit<ValueSelectorState<T>> {
+abstract class ValueSelectorCubit<T> extends Cubit<ValueSelectorState<T>> {
   /// Creates a [ValueSelectorCubit] instance.
   ///
   /// [values]: The list of values that can be selected.
