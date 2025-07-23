@@ -93,8 +93,9 @@ extension DateTimeX on DateTime {
   /// print(date.lastDayOfMonth); // Output: 2023-08-31 00:00:00.000
   /// ```
   DateTime get lastDayOfMonth {
-    final nextMonth =
-        (month < 12) ? DateTime(year, month + 1) : DateTime(year + 1);
+    final nextMonth = (month < 12)
+        ? DateTime(year, month + 1)
+        : DateTime(year + 1);
     return nextMonth.subtract(const Duration(days: 1));
   }
 
@@ -296,8 +297,9 @@ extension DateTimeX on DateTime {
   DateTime get lastDayOfQuarter {
     final nextQuarterMonth = (quarter * 3) + 1;
     final nextQuarterYear = nextQuarterMonth > 12 ? year + 1 : year;
-    final adjustedMonth =
-        nextQuarterMonth > 12 ? nextQuarterMonth - 12 : nextQuarterMonth;
+    final adjustedMonth = nextQuarterMonth > 12
+        ? nextQuarterMonth - 12
+        : nextQuarterMonth;
     return DateTime(
       nextQuarterYear,
       adjustedMonth,
@@ -338,11 +340,10 @@ extension DateTimeX on DateTime {
     int newYear = year + ((newMonth - 1) ~/ 12);
     newMonth = ((newMonth - 1) % 12) + 1;
     // Get the maximum number of days in the new month.
-    final lastDay =
-        DateTime(
-          newYear,
-          newMonth + 1,
-        ).subtract(const Duration(days: 1)).day;
+    final lastDay = DateTime(
+      newYear,
+      newMonth + 1,
+    ).subtract(const Duration(days: 1)).day;
     final newDay = day > lastDay ? lastDay : day;
     return DateTime(
       newYear,

@@ -11,10 +11,9 @@ _PaginationResponseModel<T> _$PaginationResponseModelFromJson<T>(
   T Function(Object? json) fromJsonT,
 ) => _PaginationResponseModel<T>(
   data: (json['data'] as List<dynamic>?)?.map(fromJsonT).toList() ?? const [],
-  meta:
-      json['meta'] == null
-          ? const MetaModel()
-          : MetaModel.fromJson(json['meta'] as Map<String, dynamic>),
+  meta: json['meta'] == null
+      ? const MetaModel()
+      : MetaModel.fromJson(json['meta'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$PaginationResponseModelToJson<T>(

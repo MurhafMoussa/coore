@@ -219,9 +219,9 @@ class CoreSearchWidget<T> extends StatelessWidget {
                     builder: (context, state) {
                       return state.apiState.isLoading
                           ? const Padding(
-                            padding: EdgeInsets.all(8),
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                              padding: EdgeInsets.all(8),
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : const Icon(Icons.arrow_drop_down);
                     },
                   ),
@@ -254,15 +254,14 @@ class CoreSearchWidget<T> extends StatelessWidget {
               }
               return apiState.data.fold(
                 () => [const Center(child: Text('No results found'))],
-                (t) =>
-                    t.isEmpty
-                        ? [const Center(child: Text('No results found'))]
-                        : t
-                            .map(
-                              (item) =>
-                                  resultBuilder(item, cubit.searchController),
-                            )
-                            .toList(),
+                (t) => t.isEmpty
+                    ? [const Center(child: Text('No results found'))]
+                    : t
+                          .map(
+                            (item) =>
+                                resultBuilder(item, cubit.searchController),
+                          )
+                          .toList(),
               );
             },
           );

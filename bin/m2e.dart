@@ -144,7 +144,8 @@ Future<void> main() async {
       return;
     }
 
-    final extensionCode = '''
+    final extensionCode =
+        '''
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 extension ${modelClassName}ToEntity on $modelClassName {

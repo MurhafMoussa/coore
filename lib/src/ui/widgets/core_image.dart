@@ -286,18 +286,18 @@ class CoreImage extends StatelessWidget {
           imageBuilder ??
           (borderRadius != null
               ? (context, imageProvider) => DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: borderRadius,
-                  image: DecorationImage(
-                    image: imageProvider,
-                    fit: fit,
-                    colorFilter: ColorFilter.mode(
-                      color ?? Colors.transparent,
-                      colorBlendMode ?? BlendMode.color,
+                  decoration: BoxDecoration(
+                    borderRadius: borderRadius,
+                    image: DecorationImage(
+                      image: imageProvider,
+                      fit: fit,
+                      colorFilter: ColorFilter.mode(
+                        color ?? Colors.transparent,
+                        colorBlendMode ?? BlendMode.color,
+                      ),
                     ),
                   ),
-                ),
-              )
+                )
               : null),
       fadeOutDuration: fadeOutDuration,
       fadeOutCurve: fadeOutCurve,
@@ -333,16 +333,16 @@ class CoreImage extends StatelessWidget {
     return isSvg
         ? _buildSvgImage()
         : Image.asset(
-          imagePath!,
-          key: key,
-          scale: scale,
-          width: width,
-          height: height,
-          color: color,
-          fit: fit,
-          alignment: alignment,
-          colorBlendMode: colorBlendMode,
-        );
+            imagePath!,
+            key: key,
+            scale: scale,
+            width: width,
+            height: height,
+            color: color,
+            fit: fit,
+            alignment: alignment,
+            colorBlendMode: colorBlendMode,
+          );
   }
 
   Widget _buildSvgImage() {
@@ -350,10 +350,9 @@ class CoreImage extends StatelessWidget {
       imagePath!,
       width: width,
       height: height,
-      colorFilter:
-          color != null
-              ? ColorFilter.mode(color!, colorBlendMode ?? BlendMode.srcOver)
-              : null,
+      colorFilter: color != null
+          ? ColorFilter.mode(color!, colorBlendMode ?? BlendMode.srcOver)
+          : null,
       fit: fit,
       alignment: alignment,
     );
@@ -404,35 +403,34 @@ class CoreImage extends StatelessWidget {
 
   Widget _buildPlaceholderIcon(BuildContext context) {
     return LayoutBuilder(
-      builder:
-          (context, constraints) => Center(
-            child: Icon(
-              Icons.photo,
-              size: constraints.maxWidth * 0.4,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
+      builder: (context, constraints) => Center(
+        child: Icon(
+          Icons.photo,
+          size: constraints.maxWidth * 0.4,
+          color: Theme.of(context).colorScheme.outline,
+        ),
+      ),
     );
   }
 
   Widget _defaultErrorBuilder(BuildContext context, String url, dynamic error) {
     return placeholderAssetImage != null
         ? Image.asset(
-          placeholderAssetImage!,
-          width: width,
-          height: height,
-          fit: fit,
-          color: Colors.grey.shade300,
-        )
+            placeholderAssetImage!,
+            width: width,
+            height: height,
+            fit: fit,
+            color: Colors.grey.shade300,
+          )
         : LayoutBuilder(
-          builder: (context, constraints) {
-            return Icon(
-              Icons.broken_image,
-              size: constraints.maxWidth * 0.4,
-              color: Theme.of(context).colorScheme.error,
-            );
-          },
-        );
+            builder: (context, constraints) {
+              return Icon(
+                Icons.broken_image,
+                size: constraints.maxWidth * 0.4,
+                color: Theme.of(context).colorScheme.error,
+              );
+            },
+          );
   }
 
   /// The default progress indicator widget builder.

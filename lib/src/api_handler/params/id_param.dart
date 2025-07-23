@@ -9,7 +9,7 @@ part 'id_param.g.dart';
 abstract class IdParam with _$IdParam implements Cancelable {
   const factory IdParam({
     required Id id,
-    @JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter,
+    @Default(null) CancelRequestAdapter? cancelRequestAdapter,
   }) = _IdParam;
 
   factory IdParam.fromJson(Map<String, dynamic> json) =>

@@ -15,7 +15,6 @@ import 'package:dio/dio.dart';
 /// The interceptor uses a [BaseCacheStore] to persist cache entries and
 /// utilizes configurable keys and durations for cache management.
 class CachingInterceptor extends Interceptor {
-
   /// Creates a new [CachingInterceptor] instance.
   ///
   /// [cacheStore] is required to store and retrieve cache entries.
@@ -28,6 +27,7 @@ class CachingInterceptor extends Interceptor {
     this.cacheKeyExtra = 'cacheKey',
     this.forceRefreshExtra = 'forceRefresh',
   });
+
   /// The cache store used for saving and retrieving cached responses.
   final BaseCacheStore cacheStore;
 

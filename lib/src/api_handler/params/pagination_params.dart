@@ -20,7 +20,7 @@ abstract class SkipPagingStrategyParams
   const factory SkipPagingStrategyParams({
     required int take,
     required int skip,
-    @JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter,
+    @Default(null) CancelRequestAdapter? cancelRequestAdapter,
   }) = _SkipPagingStrategyParams;
 
   factory SkipPagingStrategyParams.fromJson(Map<String, dynamic> json) =>
@@ -47,7 +47,7 @@ abstract class PagePaginationParams
   const factory PagePaginationParams({
     required int batch,
     required int limit,
-    @JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter,
+    @Default(null) CancelRequestAdapter? cancelRequestAdapter,
   }) = _PagePaginationParams;
 
   factory PagePaginationParams.fromJson(Map<String, dynamic> json) =>

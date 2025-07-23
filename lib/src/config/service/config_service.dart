@@ -34,10 +34,9 @@ class ConfigService {
     );
     return themeConfigEither.fold(
       (l) => defaultThemeMode,
-      (r) =>
-          r != null
-              ? ThemeMode.values.firstWhere((element) => element.name == r)
-              : defaultThemeMode,
+      (r) => r != null
+          ? ThemeMode.values.firstWhere((element) => element.name == r)
+          : defaultThemeMode,
     );
   }
 

@@ -46,10 +46,9 @@ class LoggingInterceptor extends Interceptor {
   }
 
   String _formatRequest(RequestOptions options) {
-    final buffer =
-        StringBuffer()
-          ..writeln('*** Request ***')
-          ..writeln('[${options.method}] ${options.uri}');
+    final buffer = StringBuffer()
+      ..writeln('*** Request ***')
+      ..writeln('[${options.method}] ${options.uri}');
 
     // Headers
     if (options.headers.isNotEmpty) {
@@ -83,10 +82,9 @@ class LoggingInterceptor extends Interceptor {
   }
 
   String _formatResponse(Response response) {
-    final buffer =
-        StringBuffer()
-          ..writeln('*** Response ***')
-          ..writeln('[${response.statusCode}] ${response.requestOptions.uri}');
+    final buffer = StringBuffer()
+      ..writeln('*** Response ***')
+      ..writeln('[${response.statusCode}] ${response.requestOptions.uri}');
 
     // Headers
     if (!response.headers.isEmpty) {
@@ -108,11 +106,10 @@ class LoggingInterceptor extends Interceptor {
   }
 
   String _formatError(DioException err) {
-    final buffer =
-        StringBuffer()
-          ..writeln('*** Error ***')
-          ..writeln('[${err.type}] ${err.message}')
-          ..writeln('URI: ${err.requestOptions.uri}');
+    final buffer = StringBuffer()
+      ..writeln('*** Error ***')
+      ..writeln('[${err.type}] ${err.message}')
+      ..writeln('URI: ${err.requestOptions.uri}');
 
     if (err.response != null) {
       buffer.writeln('Status Code: ${err.response?.statusCode}');

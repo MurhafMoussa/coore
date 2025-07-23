@@ -6,7 +6,7 @@ class NavigationConfigEntity extends Equatable {
   const NavigationConfigEntity({
     required this.routes,
     required this.initialRoute,
-    
+
     this.errorBuilder,
     this.redirect,
     this.navigationObservers = const [],
@@ -14,7 +14,7 @@ class NavigationConfigEntity extends Equatable {
   });
   final List<RouteBase> routes;
   final String initialRoute;
- 
+
   final Widget Function(BuildContext, GoRouterState)? errorBuilder;
   final Future<String?> Function(BuildContext, GoRouterState)? redirect;
   final Listenable? refreshListenable;
@@ -24,7 +24,7 @@ class NavigationConfigEntity extends Equatable {
   List<Object?> get props => [
     routes,
     initialRoute,
- 
+
     errorBuilder,
     redirect,
     navigationObservers,

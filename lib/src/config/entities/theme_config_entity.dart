@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 class ThemeConfigEntity extends Equatable {
-
   const ThemeConfigEntity({
     required this.themeMode,
     required this.lightTheme,

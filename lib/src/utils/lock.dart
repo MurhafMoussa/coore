@@ -2,13 +2,13 @@
 class Lock {
   bool _locked = false;
 
-  Future<void> synchronized(Function() func) async {
+  Future<T> synchronized<T>(Future<T> Function() func) async {
     while (_locked) {
-      await Future.delayed(const Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
     }
     _locked = true;
     try {
-      func();
+      return await func();
     } finally {
       _locked = false;
     }

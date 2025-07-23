@@ -11,7 +11,7 @@ abstract class SearchParams with _$SearchParams implements Cancelable {
 
   const factory SearchParams({
     required String query,
-    @JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter,
+    @Default(null) CancelRequestAdapter? cancelRequestAdapter,
   }) = _SearchParams;
 
   factory SearchParams.fromJson(Map<String, dynamic> json) =>

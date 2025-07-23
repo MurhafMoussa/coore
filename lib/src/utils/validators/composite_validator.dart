@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class CompositeValidator<T> implements Validator<T> {
   /// Creates a composite validator with the given list of validators.
   CompositeValidator(this.validators);
-  
+
   /// The list of validators to run in sequence.
   final List<Validator<T>> validators;
 

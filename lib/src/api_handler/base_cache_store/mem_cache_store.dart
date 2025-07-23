@@ -8,21 +8,23 @@ class MemoryCacheStore implements BaseCacheStore {
 
   @override
   Future<CacheEntry?> get(String key) async {
-    await _lock.synchronized(() {});
-    return _storage[key];
+    return _lock.synchronized<CacheEntry?>(() async {
+      return _storage[key];
+    });
   }
 
   @override
   Future<void> save(String key, CacheEntry entry) async {
-    await _lock.synchronized(() {
+    await _lock.synchronized<void>(() async {
       _storage[key] = entry;
     });
   }
 
   @override
   Future<void> delete(String key) async =>
-      _lock.synchronized(() => _storage.remove(key));
+      _lock.synchronized<void>(() async => _storage.remove(key));
 
   @override
-  Future<void> clear() async => _lock.synchronized(() => _storage.clear());
+  Future<void> clear() async =>
+      _lock.synchronized<void>(() async => _storage.clear());
 }

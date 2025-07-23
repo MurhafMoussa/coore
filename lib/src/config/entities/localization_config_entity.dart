@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 class LocalizationConfigEntity extends Equatable {
-
   const LocalizationConfigEntity({
     required this.supportedLocales,
     required this.localizationsDelegates,

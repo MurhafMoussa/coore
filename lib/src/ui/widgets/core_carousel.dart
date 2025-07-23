@@ -300,8 +300,6 @@ class CoreCarousel extends StatelessWidget {
         carouselController: carouselController,
         itemCount: _getEffectiveItemCount(),
         itemBuilder: (context, index, realIndex) {
-      
-      
           return switch (_carouselType) {
             _CarouselType.normal => children![index],
             _CarouselType.builder => itemBuilder!(context, index, realIndex),
@@ -318,19 +316,20 @@ class CoreCarousel extends StatelessWidget {
           autoPlayAnimationDuration:
               AnimationParamsManager.slidingAnimationDuration,
           autoPlayInterval: AnimationParamsManager.slidingIntervalDuration,
-      
+
           // Layout settings
           viewportFraction: effectiveViewportFraction,
           height: height,
           aspectRatio: aspectRatio,
-      
+
           // Behavior settings
-          onPageChanged:
-              onPageChanged != null ? (index, _) => onPageChanged!(index) : null,
+          onPageChanged: onPageChanged != null
+              ? (index, _) => onPageChanged!(index)
+              : null,
           disableCenter: disableCenter,
           enableInfiniteScroll: enableInfiniteScroll,
           padEnds: padEnds,
-      
+
           // Visual effects
           enlargeCenterPage: enlargeCenterItem,
           enlargeFactor: enlargeFactor,

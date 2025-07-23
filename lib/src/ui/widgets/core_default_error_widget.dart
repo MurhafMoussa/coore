@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 
 class CoreDefaultErrorWidget extends StatelessWidget {
   const CoreDefaultErrorWidget({
-    super.key, required this.message, this.onRetry,
+    super.key,
+    required this.message,
+    this.onRetry,
   });
   final String message;
   final VoidCallback? onRetry;

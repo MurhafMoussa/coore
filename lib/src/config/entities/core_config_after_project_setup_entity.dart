@@ -1,15 +1,15 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:coore/src/src.dart';
 import 'package:equatable/equatable.dart';
 
 class CoreConfigAfterProjectSetupEntity extends Equatable {
-  const CoreConfigAfterProjectSetupEntity( {
+  const CoreConfigAfterProjectSetupEntity({
     required this.navigationConfigEntity,
     required this.shouldLog,
   });
 
   final NavigationConfigEntity navigationConfigEntity;
   final bool shouldLog;
+
   @override
   List<Object> get props => [navigationConfigEntity];
 }

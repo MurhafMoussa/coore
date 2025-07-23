@@ -20,8 +20,9 @@ class LocalizationCubit extends Cubit<Locale> {
   List<Locale> get supportedLocales => config.supportedLocales;
   Future<void> _fetchLocale() async {
     final languageCode = await service.getLanguageCode();
-    final locale =
-        languageCode.isNotEmpty ? Locale(languageCode) : config.defaultLocale;
+    final locale = languageCode.isNotEmpty
+        ? Locale(languageCode)
+        : config.defaultLocale;
     emit(locale);
   }
 

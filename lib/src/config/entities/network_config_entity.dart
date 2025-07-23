@@ -8,7 +8,7 @@ class NetworkConfigEntity extends Equatable {
     this.connectTimeout = const Duration(seconds: 60),
     this.sendTimeout = const Duration(seconds: 60),
     this.receiveTimeout = const Duration(seconds: 60),
-   
+
     this.defaultQueryParams = const {},
     this.staticHeaders = const {
       'Accept': 'application/json',
@@ -37,8 +37,6 @@ class NetworkConfigEntity extends Equatable {
 
   /// Timeout for receiving server responses
   final Duration receiveTimeout;
-
-
 
   /// Static headers added to every request
   final Map<String, String> staticHeaders;
@@ -79,7 +77,6 @@ class NetworkConfigEntity extends Equatable {
     connectTimeout,
     sendTimeout,
     receiveTimeout,
-
 
     staticHeaders,
 

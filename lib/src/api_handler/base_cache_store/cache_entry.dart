@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 
 class CacheEntry {
-
   CacheEntry({
     required this.data,
     required this.headers,

@@ -398,10 +398,9 @@ class _CoreTextFieldState extends State<CoreTextField> {
     obscureText = widget.obscureText;
 
     // Apply format if provided
-    final initialText =
-        widget.formatText != null && widget.initialText != null
-            ? widget.formatText!(widget.initialText!)
-            : widget.initialText;
+    final initialText = widget.formatText != null && widget.initialText != null
+        ? widget.formatText!(widget.initialText!)
+        : widget.initialText;
 
     textEditingController = TextEditingController(text: initialText);
 
@@ -434,10 +433,9 @@ class _CoreTextFieldState extends State<CoreTextField> {
   }
 
   void _updateFormState(String? text) {
-    final transformedText =
-        text != null && widget.transformValue != null
-            ? widget.transformValue!(text)
-            : text;
+    final transformedText = text != null && widget.transformValue != null
+        ? widget.transformValue!(text)
+        : text;
 
     context.read<CoreFormCubit>().updateField(
       widget.name,
@@ -484,24 +482,21 @@ class _CoreTextFieldState extends State<CoreTextField> {
 
         InputDecoration effectiveDecoration =
             (widget.decoration ?? const InputDecoration()).copyWith(
-              suffixIcon:
-                  widget.switchBetweenPrefixAndSuffix
-                      ? _buildPrefixIcons()
-                      : _buildSuffixIcons(state),
-              prefixIcon:
-                  widget.switchBetweenPrefixAndSuffix
-                      ? _buildSuffixIcons(state)
-                      : _buildPrefixIcons(),
+              suffixIcon: widget.switchBetweenPrefixAndSuffix
+                  ? _buildPrefixIcons()
+                  : _buildSuffixIcons(state),
+              prefixIcon: widget.switchBetweenPrefixAndSuffix
+                  ? _buildSuffixIcons(state)
+                  : _buildPrefixIcons(),
               labelText: widget.showRequiredStar ? null : widget.labelText,
               label: labelWidget,
               hintText: widget.hintText,
               prefix: widget.prefixWidget,
               suffix: widget.suffixWidget,
               errorText: widget.errorBuilder == null ? errorText : null,
-              error:
-                  widget.errorBuilder != null && errorText != null
-                      ? widget.errorBuilder!(context, errorText)
-                      : null,
+              error: widget.errorBuilder != null && errorText != null
+                  ? widget.errorBuilder!(context, errorText)
+                  : null,
             );
         return TextFormField(
           controller: textEditingController,
@@ -530,10 +525,9 @@ class _CoreTextFieldState extends State<CoreTextField> {
           minLines: widget.minLines,
           maxLength: widget.maxLength,
           maxLengthEnforcement: widget.maxLengthEnforcement,
-          autovalidateMode:
-              state.validationType == ValidationType.disabled
-                  ? AutovalidateMode.disabled
-                  : widget.autovalidateMode,
+          autovalidateMode: state.validationType == ValidationType.disabled
+              ? AutovalidateMode.disabled
+              : widget.autovalidateMode,
           enableSuggestions: widget.enableSuggestions,
           showCursor: widget.showCursor,
           textAlignVertical: widget.textAlignVertical,
@@ -582,10 +576,9 @@ class _CoreTextFieldState extends State<CoreTextField> {
   IconButton _buildVisibilityIcon() {
     return IconButton(
       icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
-      onPressed:
-          () => setState(() {
-            obscureText = !obscureText;
-          }),
+      onPressed: () => setState(() {
+        obscureText = !obscureText;
+      }),
     );
   }
 
@@ -602,10 +595,9 @@ class _CoreTextFieldState extends State<CoreTextField> {
     // If we have more than one widget, wrap them in a Row.
     Widget? finalPrefix;
     if (prefixWidgets.isNotEmpty) {
-      finalPrefix =
-          prefixWidgets.length == 1
-              ? prefixWidgets.first
-              : Row(mainAxisSize: MainAxisSize.min, children: prefixWidgets);
+      finalPrefix = prefixWidgets.length == 1
+          ? prefixWidgets.first
+          : Row(mainAxisSize: MainAxisSize.min, children: prefixWidgets);
     }
 
     return finalPrefix;
@@ -626,14 +618,13 @@ class _CoreTextFieldState extends State<CoreTextField> {
     // If we have more than one widget, wrap them in a Row.
     Widget? finalSuffix;
     if (suffixWidgets.isNotEmpty) {
-      finalSuffix =
-          suffixWidgets.length == 1
-              ? suffixWidgets.first
-              : Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: suffixWidgets,
-              );
+      finalSuffix = suffixWidgets.length == 1
+          ? suffixWidgets.first
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: suffixWidgets,
+            );
     }
 
     return finalSuffix;

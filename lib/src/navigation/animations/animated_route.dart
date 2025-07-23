@@ -7,20 +7,18 @@ class FadePage extends CustomTransitionPage {
     Duration? transitionDuration,
     Duration? reverseTransitionDuration,
   }) : super(
-          transitionDuration:
-              transitionDuration ?? const Duration(milliseconds: 300),
-          reverseTransitionDuration:
-              reverseTransitionDuration ?? const Duration(milliseconds: 300),
-          transitionsBuilder: (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-        );
+         transitionDuration:
+             transitionDuration ?? const Duration(milliseconds: 300),
+         reverseTransitionDuration:
+             reverseTransitionDuration ?? const Duration(milliseconds: 300),
+         transitionsBuilder:
+             (
+               BuildContext context,
+               Animation<double> animation,
+               Animation<double> secondaryAnimation,
+               Widget child,
+             ) {
+               return FadeTransition(opacity: animation, child: child);
+             },
+       );
 }

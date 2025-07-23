@@ -7,8 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// A wrapper widget that provides [ThemeCubit] to the widget tree
 /// and builds a [MaterialApp] whose theme mode is controlled by the cubit's state.
 class ThemeWrapper extends StatelessWidget {
-
   const ThemeWrapper({super.key, required this.builder});
+
   /// The builder that will wrap the material app.
   final Widget Function(BuildContext context, ThemeConfigEntity themeConfig)
   builder;
@@ -20,10 +20,9 @@ class ThemeWrapper extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return BlocBuilder<ThemeCubit, ThemeConfigEntity>(
-            buildWhen:
-                (previous, current) =>
-                    previous.themeMode != current.themeMode ||
-                    previous.enableAutoSwitch != current.enableAutoSwitch,
+            buildWhen: (previous, current) =>
+                previous.themeMode != current.themeMode ||
+                previous.enableAutoSwitch != current.enableAutoSwitch,
             builder: builder,
           );
         },

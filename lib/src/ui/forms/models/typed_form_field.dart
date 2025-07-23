@@ -11,12 +11,12 @@ abstract class TypedFormField<T> with _$TypedFormField<T> {
     required List<Validator<T>> validators,
     T? initialValue,
   }) = _TypedFormField<T>;
-  
+
   const TypedFormField._();
-  
+
   /// Get the runtime type of the field value
   Type get valueType => T;
-  
+
   /// Create a validator for this field
   Validator<T> createValidator() => CompositeValidator<T>(validators);
 }

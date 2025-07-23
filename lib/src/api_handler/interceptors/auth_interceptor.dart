@@ -108,7 +108,9 @@ abstract class AuthInterceptor extends Interceptor {
     final retryDio = getIt<Dio>();
     try {
       // Re-execute the original request.
-      final response = await retryDio.fetch(err.requestOptions);
+      final response = await retryDio.fetch<Map<String, dynamic>>(
+        err.requestOptions,
+      );
       handler.resolve(response);
     } on DioException catch (e) {
       // Reject if an error occurs during retry.

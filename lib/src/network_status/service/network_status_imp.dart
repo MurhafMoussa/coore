@@ -27,20 +27,21 @@ class NetworkStatusImp implements NetworkStatusInterface {
       _latestStatus == ConnectionStatus.connected;
 
   Future<void> _init() async {
-    _subscription = _internetConnection.onStatusChange.listen((status) {
-      switch (status) {
-        case InternetStatus.connected:
-          _latestStatus = ConnectionStatus.connected;
-          _controller.add(ConnectionStatus.connected);
+    _subscription =
+        _internetConnection.onStatusChange.listen((status) {
+          switch (status) {
+            case InternetStatus.connected:
+              _latestStatus = ConnectionStatus.connected;
+              _controller.add(ConnectionStatus.connected);
 
-          break;
-        case InternetStatus.disconnected:
-          _latestStatus = ConnectionStatus.disconnected;
-          _controller.add(ConnectionStatus.disconnected);
-          break;
-      }
-    })..onError((Object? e, StackTrace s) {
-      _logger.error('Some thing went wrong in NetworkStatus', e, s);
-    });
+              break;
+            case InternetStatus.disconnected:
+              _latestStatus = ConnectionStatus.disconnected;
+              _controller.add(ConnectionStatus.disconnected);
+              break;
+          }
+        })..onError((Object? e, StackTrace s) {
+          _logger.error('Some thing went wrong in NetworkStatus', e, s);
+        });
   }
 }

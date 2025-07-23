@@ -45,8 +45,8 @@ abstract final class ValueTester {
 
   static bool isLengthEqualTo(dynamic value, int otherLength) =>
       dynamicLength(value) != null
-          ? dynamicLength(value)! == otherLength
-          : false;
+      ? dynamicLength(value)! == otherLength
+      : false;
 
   static bool isLengthBetween(dynamic value, int minLength, int maxLength) =>
       value != null &&

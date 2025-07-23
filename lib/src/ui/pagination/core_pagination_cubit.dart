@@ -180,4 +180,136 @@ class CorePaginationCubit<T extends Identifiable>
   ) {
     _paginationFunction = paginationFunction;
   }
+
+  /// Adds an item to the end of the list.
+  void addLast(T item) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
+        ..add(item);
+      emit(
+        CorePaginationState.succeeded(
+          paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
+            data: updatedData,
+          ),
+          hasReachedMax: currentState.hasReachedMax,
+        ),
+      );
+    }
+  }
+
+  /// Adds an item to the beginning of the list.
+  void addFirst(T item) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
+        ..insert(0, item);
+      emit(
+        CorePaginationState.succeeded(
+          paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
+            data: updatedData,
+          ),
+          hasReachedMax: currentState.hasReachedMax,
+        ),
+      );
+    }
+  }
+
+  /// Updates an existing item in the list.
+  void update(T item) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      final updatedData = List<T>.from(
+        currentState.paginatedResponseModel.data,
+      );
+      final index = updatedData.indexWhere((element) => element.id == item.id);
+      if (index != -1) {
+        updatedData[index] = item;
+        emit(
+          CorePaginationState.succeeded(
+            paginatedResponseModel: currentState.paginatedResponseModel
+                .copyWith(data: updatedData),
+            hasReachedMax: currentState.hasReachedMax,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Deletes an item from the list by its ID.
+  void delete(String id) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
+        ..removeWhere((element) => element.id == id);
+      emit(
+        CorePaginationState.succeeded(
+          paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
+            data: updatedData,
+          ),
+          hasReachedMax: currentState.hasReachedMax,
+        ),
+      );
+    }
+  }
+
+  /// Adds a list of items to the end of the list.
+  void bulkAdd(List<T> items) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
+        ..addAll(items);
+      emit(
+        CorePaginationState.succeeded(
+          paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
+            data: updatedData,
+          ),
+          hasReachedMax: currentState.hasReachedMax,
+        ),
+      );
+    }
+  }
+
+  /// Updates multiple items in the list.
+  void bulkUpdate(List<T> items) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      final updatedData = List<T>.from(
+        currentState.paginatedResponseModel.data,
+      );
+      for (final item in items) {
+        final index = updatedData.indexWhere(
+          (element) => element.id == item.id,
+        );
+        if (index != -1) {
+          updatedData[index] = item;
+        }
+      }
+      emit(
+        CorePaginationState.succeeded(
+          paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
+            data: updatedData,
+          ),
+          hasReachedMax: currentState.hasReachedMax,
+        ),
+      );
+    }
+  }
+
+  /// Deletes multiple items from the list by their IDs.
+  void bulkDelete(List<String> ids) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
+        ..removeWhere((element) => ids.contains(element.id));
+      emit(
+        CorePaginationState.succeeded(
+          paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
+            data: updatedData,
+          ),
+          hasReachedMax: currentState.hasReachedMax,
+        ),
+      );
+    }
+  }
 }

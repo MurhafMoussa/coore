@@ -22,8 +22,8 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
     super.key,
     this.scrollableBuilder,
     this.sliversBuilder,
-    required this.paginationFunction,
-    required this.paginationStrategy,
+    this.paginationFunction,
+    this.paginationStrategy,
     this.reverse = false,
     this.loadingBuilder,
     this.errorBuilder,
@@ -70,11 +70,11 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   final UseCaseFutureResponse<PaginationResponseModel<T>> Function(
     int batch,
     int limit,
-  )
+  )?
   paginationFunction;
 
   /// Strategy defining page size and thresholds.
-  final PaginationStrategy paginationStrategy;
+  final PaginationStrategy? paginationStrategy;
 
   // ---------------------------------------------------------------------------------
   // SCROLL BEHAVIOUR
@@ -172,8 +172,9 @@ class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
     super.key,
     this.scrollableBuilder,
     this.sliversBuilder,
-    required this.paginationFunction,
-    required this.paginationStrategy,
+    this.paginationFunction,
+    this.paginationStrategy,
+    this.paginationCubit,
     this.reverse = false,
     this.loadingBuilder,
     this.errorBuilder,
@@ -189,7 +190,14 @@ class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
   }) : assert(
          (scrollableBuilder != null) ^ (sliversBuilder != null),
          'Provide exactly one of scrollableBuilder or sliversBuilder',
+       ),
+       assert(
+         (paginationCubit != null) ||
+             (paginationFunction != null && paginationStrategy != null),
+         'Either paginationCubit or both paginationFunction and paginationStrategy must be provided',
        );
+
+  final CorePaginationCubit<T>? paginationCubit;
 
   /// Builder for classic ScrollView mode.
   final Widget Function(
@@ -211,11 +219,11 @@ class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
   final UseCaseFutureResponse<PaginationResponseModel<T>> Function(
     int batch,
     int limit,
-  )
+  )?
   paginationFunction;
 
   /// Defines page size and thresholds.
-  final PaginationStrategy paginationStrategy;
+  final PaginationStrategy? paginationStrategy;
 
   /// Reverse scroll direction.
   final bool reverse;
@@ -266,19 +274,23 @@ class _CorePaginationWidgetState<T extends Identifiable>
   @override
   void initState() {
     super.initState();
-    _cubit = CorePaginationCubit<T>(
-      paginationFunction: widget.paginationFunction,
-      paginationStrategy: widget.paginationStrategy,
-      reverse: widget.reverse,
-    )..fetchInitialData();
+    _cubit =
+        (widget.paginationCubit ??
+              CorePaginationCubit<T>(
+                paginationFunction: widget.paginationFunction!,
+                paginationStrategy: widget.paginationStrategy!,
+                reverse: widget.reverse,
+              ))
+          ..fetchInitialData();
   }
 
   @override
   void didUpdateWidget(covariant CorePaginationWidget<T> old) {
     super.didUpdateWidget(old);
 
-    if (old.paginationFunction != widget.paginationFunction) {
-      _cubit.updatePaginationFunction(widget.paginationFunction);
+    if (old.paginationFunction != widget.paginationFunction &&
+        widget.paginationFunction != null) {
+      _cubit.updatePaginationFunction(widget.paginationFunction!);
     }
   }
 

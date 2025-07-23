@@ -10,7 +10,7 @@ class ScreenBreakpoints {
 }
 
 /// Returns a value based on the current screen width.
-/// 
+///
 /// Supports multiple breakpoints for responsive design:
 /// - Large Desktop: >= 1200px
 /// - Desktop: >= 992px
@@ -77,6 +77,18 @@ T getValueForScreenType<T>({
 }
 
 /// Helper function to get the first non-null value from a list of values
-T _getValueWithFallback<T>(T? primary, T? fallback1, T? fallback2, T? fallback3, T? fallback4, [T? fallback5]) {
-  return primary ?? fallback1 ?? fallback2 ?? fallback3 ?? fallback4 ?? (fallback5 as T);
+T _getValueWithFallback<T>(
+  T? primary,
+  T? fallback1,
+  T? fallback2,
+  T? fallback3,
+  T? fallback4, [
+  T? fallback5,
+]) {
+  return primary ??
+      fallback1 ??
+      fallback2 ??
+      fallback3 ??
+      fallback4 ??
+      (fallback5 as T);
 }

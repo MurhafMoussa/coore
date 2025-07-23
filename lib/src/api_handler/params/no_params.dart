@@ -10,7 +10,7 @@ abstract class NoParams with _$NoParams implements Cancelable {
   const NoParams._();
 
   const factory NoParams({
-    @JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter,
+    @Default(null) CancelRequestAdapter? cancelRequestAdapter,
   }) = _NoParams;
 
   factory NoParams.fromJson(Map<String, dynamic> json) =>

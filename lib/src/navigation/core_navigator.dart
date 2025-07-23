@@ -170,7 +170,8 @@ class CoreNavigator {
       navigatorKey: _routeNavigationKey,
       routes: _configEntity.routes,
       errorBuilder: _configEntity.errorBuilder ?? _defaultErrorWidget,
-      debugLogDiagnostics: shouldLog,restorationScopeId: 'coreRouter',
+      debugLogDiagnostics: shouldLog,
+      restorationScopeId: 'coreRouter',
       redirect: _configEntity.redirect,
       refreshListenable: refreshListenable,
       observers: [

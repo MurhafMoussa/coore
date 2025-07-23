@@ -226,10 +226,9 @@ extension StringExtensions on String {
     if (parts.isEmpty) return this;
     String newString = parts
         .map(
-          (word) =>
-              word.isEmpty
-                  ? ''
-                  : word[0].toUpperCase() + word.substring(1).toLowerCase(),
+          (word) => word.isEmpty
+              ? ''
+              : word[0].toUpperCase() + word.substring(1).toLowerCase(),
         )
         .join();
     return newString[0].toLowerCase() + newString.substring(1);

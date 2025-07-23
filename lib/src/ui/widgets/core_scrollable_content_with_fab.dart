@@ -86,13 +86,13 @@ class _CoreScrollableContentWithFabState
           builder: (context, isVisible, child) {
             return isVisible
                 ? Positioned(
-                  right: 16,
-                  bottom: 16,
-                  child: FloatingActionButton(
-                    onPressed: _scrollToTop,
-                    child: const Icon(Icons.arrow_upward),
-                  ),
-                )
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton(
+                      onPressed: _scrollToTop,
+                      child: const Icon(Icons.arrow_upward),
+                    ),
+                  )
                 : const SizedBox.shrink();
           },
         ),

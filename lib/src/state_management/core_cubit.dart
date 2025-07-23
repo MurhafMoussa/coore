@@ -12,8 +12,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 abstract class CoreCubit<CompositeState, SuccessData>
     extends Cubit<CompositeState>
     with ApiStateMixin<CompositeState, SuccessData> {
-  CoreCubit(super.initialState, );
-  
+  CoreCubit(super.initialState);
+
   @override
   Future<void> close() {
     cancelRequest();
