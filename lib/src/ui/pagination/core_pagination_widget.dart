@@ -274,14 +274,22 @@ class _CorePaginationWidgetState<T extends Identifiable>
   @override
   void initState() {
     super.initState();
-    _cubit =
-        (widget.paginationCubit ??
-              CorePaginationCubit<T>(
-                paginationFunction: widget.paginationFunction!,
-                paginationStrategy: widget.paginationStrategy!,
-                reverse: widget.reverse,
-              ))
-          ..fetchInitialData();
+    if (widget.paginationCubit != null) {
+      _cubit = widget.paginationCubit!;
+    } else {
+      if (widget.paginationFunction == null ||
+          widget.paginationStrategy == null) {
+        throw FlutterError(
+          'Either paginationCubit or both paginationFunction and paginationStrategy must be provided.',
+        );
+      }
+      _cubit = CorePaginationCubit<T>(
+        paginationFunction: widget.paginationFunction!,
+        paginationStrategy: widget.paginationStrategy!,
+        reverse: widget.reverse,
+      );
+    }
+    _cubit.fetchInitialData();
   }
 
   @override
