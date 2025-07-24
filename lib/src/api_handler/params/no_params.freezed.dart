@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$NoParams {
 
-@JsonKey(includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
+@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
 /// Create a copy of NoParams
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +49,7 @@ abstract mixin class $NoParamsCopyWith<$Res>  {
   factory $NoParamsCopyWith(NoParams value, $Res Function(NoParams) _then) = _$NoParamsCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
 });
 
 
@@ -80,10 +80,10 @@ as CancelRequestAdapter?,
 @JsonSerializable()
 
 class _NoParams extends NoParams {
-  const _NoParams({@JsonKey(includeFromJson: false) this.cancelRequestAdapter}): super._();
+  const _NoParams({@JsonKey(includeToJson: false, includeFromJson: false) this.cancelRequestAdapter}): super._();
   factory _NoParams.fromJson(Map<String, dynamic> json) => _$NoParamsFromJson(json);
 
-@override@JsonKey(includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
+@override@JsonKey(includeToJson: false, includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
 
 /// Create a copy of NoParams
 /// with the given fields replaced by the non-null parameter values.
@@ -118,7 +118,7 @@ abstract mixin class _$NoParamsCopyWith<$Res> implements $NoParamsCopyWith<$Res>
   factory _$NoParamsCopyWith(_NoParams value, $Res Function(_NoParams) _then) = __$NoParamsCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
 });
 
 

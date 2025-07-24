@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SearchParams {
 
- String get query;@JsonKey(includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
+ String get query;@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
 /// Create a copy of SearchParams
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +49,7 @@ abstract mixin class $SearchParamsCopyWith<$Res>  {
   factory $SearchParamsCopyWith(SearchParams value, $Res Function(SearchParams) _then) = _$SearchParamsCopyWithImpl;
 @useResult
 $Res call({
- String query,@JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ String query,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
 });
 
 
@@ -81,11 +81,11 @@ as CancelRequestAdapter?,
 @JsonSerializable()
 
 class _SearchParams extends SearchParams {
-  const _SearchParams({required this.query, @JsonKey(includeFromJson: false) this.cancelRequestAdapter}): super._();
+  const _SearchParams({required this.query, @JsonKey(includeToJson: false, includeFromJson: false) this.cancelRequestAdapter}): super._();
   factory _SearchParams.fromJson(Map<String, dynamic> json) => _$SearchParamsFromJson(json);
 
 @override final  String query;
-@override@JsonKey(includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
+@override@JsonKey(includeToJson: false, includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
 
 /// Create a copy of SearchParams
 /// with the given fields replaced by the non-null parameter values.
@@ -120,7 +120,7 @@ abstract mixin class _$SearchParamsCopyWith<$Res> implements $SearchParamsCopyWi
   factory _$SearchParamsCopyWith(_SearchParams value, $Res Function(_SearchParams) _then) = __$SearchParamsCopyWithImpl;
 @override @useResult
 $Res call({
- String query,@JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ String query,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
 });
 
 

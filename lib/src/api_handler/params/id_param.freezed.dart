@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$IdParam {
 
- Id get id;@JsonKey(includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
+ Id get id;@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
 /// Create a copy of IdParam
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +49,7 @@ abstract mixin class $IdParamCopyWith<$Res>  {
   factory $IdParamCopyWith(IdParam value, $Res Function(IdParam) _then) = _$IdParamCopyWithImpl;
 @useResult
 $Res call({
- Id id,@JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ Id id,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
 });
 
 
@@ -81,11 +81,11 @@ as CancelRequestAdapter?,
 @JsonSerializable()
 
 class _IdParam extends IdParam {
-  const _IdParam({required this.id, @JsonKey(includeFromJson: false) this.cancelRequestAdapter}): super._();
+  const _IdParam({required this.id, @JsonKey(includeToJson: false, includeFromJson: false) this.cancelRequestAdapter}): super._();
   factory _IdParam.fromJson(Map<String, dynamic> json) => _$IdParamFromJson(json);
 
 @override final  Id id;
-@override@JsonKey(includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
+@override@JsonKey(includeToJson: false, includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
 
 /// Create a copy of IdParam
 /// with the given fields replaced by the non-null parameter values.
@@ -120,7 +120,7 @@ abstract mixin class _$IdParamCopyWith<$Res> implements $IdParamCopyWith<$Res> {
   factory _$IdParamCopyWith(_IdParam value, $Res Function(_IdParam) _then) = __$IdParamCopyWithImpl;
 @override @useResult
 $Res call({
- Id id,@JsonKey(includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ Id id,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
 });
 
 

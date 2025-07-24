@@ -20,10 +20,10 @@ Map<String, dynamic> _$SkipPagingStrategyParamsToJson(
 _PagePaginationParams _$PagePaginationParamsFromJson(
   Map<String, dynamic> json,
 ) => _PagePaginationParams(
-  batch: (json['batch'] as num).toInt(),
+  page: (json['page'] as num).toInt(),
   limit: (json['limit'] as num).toInt(),
 );
 
 Map<String, dynamic> _$PagePaginationParamsToJson(
   _PagePaginationParams instance,
-) => <String, dynamic>{'batch': instance.batch, 'limit': instance.limit};
+) => <String, dynamic>{'page': instance.page, 'limit': instance.limit};
