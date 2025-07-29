@@ -91,11 +91,9 @@ abstract class AuthInterceptor extends Interceptor {
   bool _shouldHandleError(DioException err) {
     final isAuthorized =
         err.requestOptions.extra['isAuthorized'] as bool? ?? false;
-    final isRetry = err.requestOptions.extra['isRetry'] as bool? ?? false;
 
     return err.response?.statusCode == 401 &&
         isAuthorized &&
-        !isRetry &&
         !err.requestOptions.path.contains('auth/refresh');
   }
 
@@ -107,19 +105,36 @@ abstract class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    // Get a fresh Dio instance.
-    final retryDio = getIt<Dio>();
-    err.requestOptions.extra['isRetry'] = true;
+    final requestOptions = err.requestOptions;
+    final retryDio = Dio(BaseOptions(baseUrl: err.requestOptions.baseUrl));
+
+    // Rebuild original request
 
     try {
-      // Re-execute the original request.
-      final response = await retryDio.fetch<Map<String, dynamic>>(
-        err.requestOptions,
+      final response = await retryDio.request<Map<String, dynamic>>(
+        requestOptions.path,
+        data: requestOptions.data,
+        queryParameters: requestOptions.queryParameters,
+        cancelToken: requestOptions.cancelToken,
+        onReceiveProgress: requestOptions.onReceiveProgress,
+        onSendProgress: requestOptions.onSendProgress,
+        options: Options(
+          method: requestOptions.method,
+          headers: requestOptions.headers,
+          responseType: requestOptions.responseType,
+          contentType: requestOptions.contentType,
+          extra: requestOptions.extra,
+          followRedirects: requestOptions.followRedirects,
+          maxRedirects: requestOptions.maxRedirects,
+          receiveDataWhenStatusError: requestOptions.receiveDataWhenStatusError,
+          validateStatus: requestOptions.validateStatus,
+          receiveTimeout: requestOptions.receiveTimeout,
+          sendTimeout: requestOptions.sendTimeout,
+        ),
       );
       handler.resolve(response);
-    } on DioException catch (e) {
-      // Reject if an error occurs during retry.
-      handler.reject(e);
+    } catch (e) {
+      handler.reject(e as DioException);
     }
   }
 
