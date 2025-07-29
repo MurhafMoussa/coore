@@ -91,8 +91,11 @@ abstract class AuthInterceptor extends Interceptor {
   bool _shouldHandleError(DioException err) {
     final isAuthorized =
         err.requestOptions.extra['isAuthorized'] as bool? ?? false;
+    final isRetry = err.requestOptions.extra['isRetry'] as bool? ?? false;
+
     return err.response?.statusCode == 401 &&
         isAuthorized &&
+        !isRetry &&
         !err.requestOptions.path.contains('auth/refresh');
   }
 
@@ -106,6 +109,8 @@ abstract class AuthInterceptor extends Interceptor {
   ) async {
     // Get a fresh Dio instance.
     final retryDio = getIt<Dio>();
+    err.requestOptions.extra['isRetry'] = true;
+
     try {
       // Re-execute the original request.
       final response = await retryDio.fetch<Map<String, dynamic>>(
@@ -178,8 +183,13 @@ abstract class AuthInterceptor extends Interceptor {
             // If refresh succeeded, retry the request.
             await retryRequest(err, pendingHandler);
           } else {
-            // Otherwise, reject the request.
-            pendingHandler.reject(err);
+            // Otherwise, reject the request with a more specific error.
+            final refreshFailedError = DioException(
+              requestOptions: err.requestOptions,
+              error: 'Token refresh failed: ${err.message ?? 'Unknown error'}',
+              response: err.response,
+            );
+            pendingHandler.reject(refreshFailedError);
           }
         }
       });
