@@ -312,4 +312,42 @@ class CorePaginationCubit<T extends Identifiable>
       );
     }
   }
+
+  /// Finds an item by its ID.
+  T? findById(String id) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      try {
+        return currentState.paginatedResponseModel.data
+            .firstWhere((element) => element.id == id);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// Checks if the list contains a specific item.
+  bool contains(T item) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      return currentState.paginatedResponseModel.data.any(
+        (element) => element.id == item.id,
+      );
+    }
+    return false;
+  }
+
+  /// Checks if the list contains all items from a given list.
+  bool containsAll(List<T> items) {
+    if (state is PaginationSucceeded<T>) {
+      final currentState = state as PaginationSucceeded<T>;
+      return items.every(
+        (item) => currentState.paginatedResponseModel.data.any(
+          (element) => element.id == item.id,
+        ),
+      );
+    }
+    return false;
+  }
 }
