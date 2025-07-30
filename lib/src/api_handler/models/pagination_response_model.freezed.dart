@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PaginationResponseModel<T,M extends MetaModel> {
 
- List<T> get data; M get meta;
+ List<T> get data; M? get meta;
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +49,7 @@ abstract mixin class $PaginationResponseModelCopyWith<T,M extends MetaModel,$Res
   factory $PaginationResponseModelCopyWith(PaginationResponseModel<T, M> value, $Res Function(PaginationResponseModel<T, M>) _then) = _$PaginationResponseModelCopyWithImpl;
 @useResult
 $Res call({
- List<T> data, M meta
+ List<T> data, M? meta
 });
 
 
@@ -66,11 +66,11 @@ class _$PaginationResponseModelCopyWithImpl<T,M extends MetaModel,$Res>
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? meta = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? meta = freezed,}) {
   return _then(_self.copyWith(
 data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as List<T>,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
-as M,
+as List<T>,meta: freezed == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as M?,
   ));
 }
 
@@ -81,7 +81,7 @@ as M,
 @JsonSerializable(genericArgumentFactories: true)
 
 class _PaginationResponseModel<T,M extends MetaModel> implements PaginationResponseModel<T, M> {
-  const _PaginationResponseModel({final  List<T> data = const [], this.meta = const DefaultMetaModel()}): _data = data;
+  const _PaginationResponseModel({final  List<T> data = const [], this.meta}): _data = data;
   factory _PaginationResponseModel.fromJson(Map<String, dynamic> json,T Function(Object?) fromJsonT,M Function(Object?) fromJsonM) => _$PaginationResponseModelFromJson(json,fromJsonT,fromJsonM);
 
  final  List<T> _data;
@@ -91,7 +91,7 @@ class _PaginationResponseModel<T,M extends MetaModel> implements PaginationRespo
   return EqualUnmodifiableListView(_data);
 }
 
-@override@JsonKey() final  M meta;
+@override final  M? meta;
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
@@ -126,7 +126,7 @@ abstract mixin class _$PaginationResponseModelCopyWith<T,M extends MetaModel,$Re
   factory _$PaginationResponseModelCopyWith(_PaginationResponseModel<T, M> value, $Res Function(_PaginationResponseModel<T, M>) _then) = __$PaginationResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- List<T> data, M meta
+ List<T> data, M? meta
 });
 
 
@@ -143,11 +143,11 @@ class __$PaginationResponseModelCopyWithImpl<T,M extends MetaModel,$Res>
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? meta = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? meta = freezed,}) {
   return _then(_PaginationResponseModel<T, M>(
 data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
-as List<T>,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
-as M,
+as List<T>,meta: freezed == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as M?,
   ));
 }
 
