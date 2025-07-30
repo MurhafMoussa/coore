@@ -6,10 +6,8 @@ part 'pagination_response_model.g.dart';
 @Freezed(genericArgumentFactories: true)
 abstract class PaginationResponseModel<T, M extends MetaModel>
     with _$PaginationResponseModel<T, M> {
-  const factory PaginationResponseModel({
-    @Default([]) List<T> data,
-    @Default(DefaultMetaModel()) M meta,
-  }) = _PaginationResponseModel<T, M>;
+  const factory PaginationResponseModel({@Default([]) List<T> data, M? meta}) =
+      _PaginationResponseModel<T, M>;
 
   /// The generated one — always requires both callbacks.
   factory PaginationResponseModel.fromJson(
@@ -27,14 +25,10 @@ abstract class PaginationResponseModel<T, M extends MetaModel>
     return PaginationResponseModel(
       data: (json['data'] as List? ?? []).map(fromJsonT).toList(),
       meta: json['meta'] == null || fromJsonM == null
-          ? const DefaultMetaModel() as M
+          ? null
           : fromJsonM(json['meta']!),
     );
   }
 }
 
 abstract class MetaModel {}
-
-class DefaultMetaModel implements MetaModel {
-  const DefaultMetaModel();
-}
