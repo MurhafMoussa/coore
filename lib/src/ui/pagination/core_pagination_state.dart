@@ -1,7 +1,8 @@
 part of 'core_pagination_cubit.dart';
 
 @freezed
-abstract class CorePaginationState<T> with _$CorePaginationState<T> {
+abstract class CorePaginationState<T extends Identifiable, M extends MetaModel>
+    with _$CorePaginationState<T, M> {
   const CorePaginationState._();
 
   const factory CorePaginationState.initial() = PaginationInitial;
@@ -9,22 +10,22 @@ abstract class CorePaginationState<T> with _$CorePaginationState<T> {
   const factory CorePaginationState.loading() = PaginationLoading;
 
   const factory CorePaginationState.succeeded({
-    required PaginationResponseModel<T> paginatedResponseModel,
+    required PaginationResponseModel<T, M> paginatedResponseModel,
     required bool hasReachedMax,
-  }) = PaginationSucceeded<T>;
+  }) = PaginationSucceeded<T, M>;
 
   const factory CorePaginationState.retryFailure({
     required Failure failure,
-    required PaginationResponseModel<T> paginatedResponseModel,
-  }) = PaginationRetryFailure<T>;
+    required PaginationResponseModel<T, M> paginatedResponseModel,
+  }) = PaginationRetryFailure<T, M>;
 
   const factory CorePaginationState.failed({
     required Failure failure,
-    required PaginationResponseModel<T> paginatedResponseModel,
+    required PaginationResponseModel<T, M> paginatedResponseModel,
     VoidCallback? retryFunction,
-  }) = PaginationFailed<T>;
+  }) = PaginationFailed<T, M>;
 
-  PaginationResponseModel<T> get paginatedResponseModel => switch (this) {
+  PaginationResponseModel<T, M> get paginatedResponseModel => switch (this) {
     PaginationSucceeded(:final paginatedResponseModel) =>
       paginatedResponseModel,
     PaginationFailed(:final paginatedResponseModel) => paginatedResponseModel,

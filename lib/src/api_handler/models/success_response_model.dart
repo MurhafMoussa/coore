@@ -112,43 +112,6 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
     }
   }
 
-  /// Extracts a paginated list of type [T] from the JSON response.
-  ///
-  /// If [dataKey] is provided, it further extracts nested data using that key.
-  /// final jsonResponse = {
-  ///   'data': {
-  ///     'products': [
-  ///       {'id': 1, 'name': 'Paginated Product 1'},
-  ///       {'id': 2, 'name': 'Paginated Product 2'},
-  ///     ],
-  ///
-  ///   }
-  /// };
-  /// final paginatedList = SuccessResponseModel.getPaginatedList&lt;Product&gt;(
-  ///   jsonResponse,
-  ///   (item) => item,
-  ///   dataKey:"products"
-  /// );
-  /// ``
-  static List<T> getPaginatedList<T>(
-    Map<String, dynamic> json,
-    T Function(Map<String, dynamic>) itemConverter, {
-    String wrapperKey = 'data',
-    String? dataKey,
-  }) {
-    try {
-      final pagination = _dataFieldExtractor<PaginationResponseModel<T>>(
-        json,
-        (data) => _parsePagination(data, itemConverter),
-        wrapperKey: wrapperKey,
-        dataKey: dataKey,
-      );
-      return pagination.data;
-    } catch (e) {
-      throw FormatException('Failed to parse paginated list: $e');
-    }
-  }
-
   /// Extracts a primitive value of type [T] from the JSON response.
   ///
   /// The [converter] function is used to convert the dynamic JSON value into [T].
@@ -185,29 +148,5 @@ abstract class SuccessResponseModel<T> with _$SuccessResponseModel<T> {
       }
       return converter(item);
     }).toList();
-  }
-
-  /// Private helper that parses a JSON map into a [PaginationResponseModel] of [T].
-  ///
-  /// Throws a [FormatException] if [data] is not a JSON map or if any item within
-  /// the pagination data is not a JSON map.
-  static PaginationResponseModel<T> _parsePagination<T>(
-    Object? data,
-    T Function(Map<String, dynamic>) converter,
-  ) {
-    if (data is! Map<String, dynamic>) {
-      throw FormatException(
-        'Expected pagination map but got ${data.runtimeType}',
-      );
-    }
-
-    return PaginationResponseModel<T>.fromJson(data, (item) {
-      if (item is! Map<String, dynamic>) {
-        throw FormatException(
-          'Pagination item is not a map: ${item.runtimeType}',
-        );
-      }
-      return converter(item);
-    });
   }
 }

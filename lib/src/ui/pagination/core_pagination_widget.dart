@@ -16,7 +16,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 /// 2. [sliversBuilder]: returns a list of [Sliver] widgets (e.g., [SliverList], [SliverGrid]).
 ///
 /// Exactly one of these builders must be non-null, otherwise an assertion error is thrown.
-class PaginationConfig<T extends Identifiable> extends InheritedWidget {
+class PaginationConfig<T extends Identifiable, M extends MetaModel>
+    extends InheritedWidget {
   /// Creates a pagination configuration. Supply either [scrollableBuilder] or [sliversBuilder].
   const PaginationConfig({
     super.key,
@@ -49,7 +50,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   /// Builder for classic ScrollView mode.
   final Widget Function(
     BuildContext context,
-    PaginationResponseModel<T> items,
+    PaginationResponseModel<T, M> items,
     ScrollController? controller,
   )?
   scrollableBuilder;
@@ -57,7 +58,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   /// Builder for Sliver mode.
   final List<Widget> Function(
     BuildContext context,
-    PaginationResponseModel<T> items,
+    PaginationResponseModel<T, M> items,
     ScrollController? controller,
   )?
   sliversBuilder;
@@ -67,7 +68,7 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   // ---------------------------------------------------------------------------------
 
   /// Function to fetch a page of data. [batch] is 1-based, [limit] is from strategy.
-  final UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+  final UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
     int batch,
     int limit,
   )?
@@ -142,15 +143,17 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
   final bool enableScrollToTop;
 
   /// Retrieves nearest [PaginationConfig] of type [T] from context.
-  static PaginationConfig<T> of<T extends Identifiable>(BuildContext context) {
+  static PaginationConfig<T, M> of<T extends Identifiable, M extends MetaModel>(
+    BuildContext context,
+  ) {
     final cfg = context
-        .dependOnInheritedWidgetOfExactType<PaginationConfig<T>>();
+        .dependOnInheritedWidgetOfExactType<PaginationConfig<T, M>>();
     assert(cfg != null, 'No PaginationConfig<$T> found in context');
     return cfg!;
   }
 
   @override
-  bool updateShouldNotify(covariant PaginationConfig<T> oldWidget) =>
+  bool updateShouldNotify(covariant PaginationConfig<T, M> oldWidget) =>
       this != oldWidget;
 }
 // =====================================================================================
@@ -159,14 +162,15 @@ class PaginationConfig<T extends Identifiable> extends InheritedWidget {
 
 /// A ready-to-use pagination widget that wires:
 ///  • [PaginationConfig] inheritance
-///  • [CorePaginationCubit] state management
+///  • [CorePaginationCubit] ,Mstate management
 ///  • Pull-to-refresh and load-more via [SmartRefresher]
 ///  • Skeleton loading or custom loader
 ///  • Error handling with retry
 ///  • Optional scroll-to-top FAB
 ///
 /// Supply either [scrollableBuilder] or [sliversBuilder]. All other parameters are optional.
-class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
+class CorePaginationWidget<T extends Identifiable, M extends MetaModel>
+    extends StatefulWidget {
   /// Creates a pagination wrapper. Exactly one builder must be provided.
   const CorePaginationWidget({
     super.key,
@@ -197,12 +201,12 @@ class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
          'Either paginationCubit or both paginationFunction and paginationStrategy must be provided',
        );
 
-  final CorePaginationCubit<T>? paginationCubit;
+  final CorePaginationCubit<T, M>? paginationCubit;
 
   /// Builder for classic ScrollView mode.
   final Widget Function(
     BuildContext,
-    PaginationResponseModel<T>,
+    PaginationResponseModel<T, M>,
     ScrollController?,
   )?
   scrollableBuilder;
@@ -210,13 +214,13 @@ class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
   /// Builder for Sliver mode.
   final List<Widget> Function(
     BuildContext,
-    PaginationResponseModel<T>,
+    PaginationResponseModel<T, M>,
     ScrollController?,
   )?
   sliversBuilder;
 
   /// Function to fetch data pages.
-  final UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+  final UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
     int batch,
     int limit,
   )?
@@ -263,13 +267,13 @@ class CorePaginationWidget<T extends Identifiable> extends StatefulWidget {
   final bool enableScrollToTop;
 
   @override
-  State<CorePaginationWidget<T>> createState() =>
-      _CorePaginationWidgetState<T>();
+  State<CorePaginationWidget<T, M>> createState() =>
+      _CorePaginationWidgetState<T, M>();
 }
 
-class _CorePaginationWidgetState<T extends Identifiable>
-    extends State<CorePaginationWidget<T>> {
-  late final CorePaginationCubit<T> _cubit;
+class _CorePaginationWidgetState<T extends Identifiable, M extends MetaModel>
+    extends State<CorePaginationWidget<T, M>> {
+  late final CorePaginationCubit<T, M> _cubit;
 
   @override
   void initState() {
@@ -283,7 +287,7 @@ class _CorePaginationWidgetState<T extends Identifiable>
           'Either paginationCubit or both paginationFunction and paginationStrategy must be provided.',
         );
       }
-      _cubit = CorePaginationCubit<T>(
+      _cubit = CorePaginationCubit<T, M>(
         paginationFunction: widget.paginationFunction!,
         paginationStrategy: widget.paginationStrategy!,
         reverse: widget.reverse,
@@ -293,7 +297,7 @@ class _CorePaginationWidgetState<T extends Identifiable>
   }
 
   @override
-  void didUpdateWidget(covariant CorePaginationWidget<T> old) {
+  void didUpdateWidget(covariant CorePaginationWidget<T, M> old) {
     super.didUpdateWidget(old);
 
     if (old.paginationFunction != widget.paginationFunction &&
@@ -310,7 +314,7 @@ class _CorePaginationWidgetState<T extends Identifiable>
 
   @override
   Widget build(BuildContext context) {
-    return PaginationConfig<T>(
+    return PaginationConfig<T, M>(
       scrollableBuilder: widget.scrollableBuilder,
       sliversBuilder: widget.sliversBuilder,
       paginationFunction: widget.paginationFunction,
@@ -329,9 +333,9 @@ class _CorePaginationWidgetState<T extends Identifiable>
       enableScrollToTop: widget.enableScrollToTop,
       child: Builder(
         builder: (context) {
-          return BlocProvider<CorePaginationCubit<T>>.value(
+          return BlocProvider<CorePaginationCubit<T, M>>.value(
             value: _cubit,
-            child: _PaginationContent<T>(),
+            child: _PaginationContent<T, M>(),
           );
         },
       ),
@@ -339,34 +343,36 @@ class _CorePaginationWidgetState<T extends Identifiable>
   }
 }
 
-class _PaginationContent<T extends Identifiable> extends StatelessWidget {
+class _PaginationContent<T extends Identifiable, M extends MetaModel>
+    extends StatelessWidget {
   const _PaginationContent();
 
   @override
   Widget build(BuildContext context) {
-    final config = PaginationConfig.of<T>(context);
-    return BlocBuilder<CorePaginationCubit<T>, CorePaginationState<T>>(
+    final config = PaginationConfig.of<T, M>(context);
+    return BlocBuilder<CorePaginationCubit<T, M>, CorePaginationState<T, M>>(
       builder: (context, state) {
         return config.enableScrollToTop
             ? CoreScrollableContentWithFab(
                 scrollableBuilder: (controller) =>
-                    _SmartRefresherWidget<T>(controller: controller),
+                    _SmartRefresherWidget<T, M>(controller: controller),
               )
-            : _SmartRefresherWidget<T>();
+            : _SmartRefresherWidget<T, M>();
       },
     );
   }
 }
 
-class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
+class _SmartRefresherWidget<T extends Identifiable, M extends MetaModel>
+    extends StatelessWidget {
   const _SmartRefresherWidget({this.controller});
 
   final ScrollController? controller;
 
   @override
   Widget build(BuildContext context) {
-    final config = PaginationConfig.of<T>(context);
-    final cubit = context.read<CorePaginationCubit<T>>();
+    final config = PaginationConfig.of<T, M>(context);
+    final cubit = context.read<CorePaginationCubit<T, M>>();
 
     return SmartRefresher(
       controller: cubit.refreshController,
@@ -383,17 +389,17 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
   }
 
   Widget _contentBuilder(BuildContext context) {
-    final state = context.watch<CorePaginationCubit<T>>().state;
+    final state = context.watch<CorePaginationCubit<T, M>>().state;
     return switch (state) {
-      PaginationSucceeded<T>(paginatedResponseModel: final items) =>
+      PaginationSucceeded<T, M>(paginatedResponseModel: final items) =>
         buildPaginated(context, items, controller),
-      PaginationFailed<T>(
+      PaginationFailed<T, M>(
         :final failure,
         paginatedResponseModel: final items,
         :final retryFunction,
       ) =>
         errorStateWidget(context, items, failure, retryFunction),
-      _ => _LoadingStateWidget<T>(scrollController: controller),
+      _ => _LoadingStateWidget<T, M>(scrollController: controller),
     };
   }
 
@@ -404,10 +410,10 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
   /// - Otherwise uses [scrollableBuilder].
   Widget buildPaginated(
     BuildContext ctx,
-    PaginationResponseModel<T> model,
+    PaginationResponseModel<T, M> model,
     ScrollController? ctrl,
   ) {
-    final cfg = PaginationConfig.of<T>(ctx);
+    final cfg = PaginationConfig.of<T, M>(ctx);
     if (model.data.isEmpty) {
       return cfg.emptyBuilder?.call(ctx) ?? const _EmptyState();
     }
@@ -425,11 +431,11 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
 
   Widget errorStateWidget(
     BuildContext context,
-    PaginationResponseModel<T> model,
+    PaginationResponseModel<T, M> model,
     Failure failure,
     VoidCallback? retryFunction,
   ) {
-    final config = PaginationConfig.of<T>(context);
+    final config = PaginationConfig.of<T, M>(context);
 
     if (config.errorBuilder != null) {
       return config.errorBuilder!(
@@ -451,19 +457,20 @@ class _SmartRefresherWidget<T extends Identifiable> extends StatelessWidget {
   }
 }
 
-class _LoadingStateWidget<T extends Identifiable> extends StatelessWidget {
+class _LoadingStateWidget<T extends Identifiable, M extends MetaModel>
+    extends StatelessWidget {
   const _LoadingStateWidget({super.key, this.scrollController});
 
   final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
-    final cfg = PaginationConfig.of<T>(context);
-    final cubit = context.read<CorePaginationCubit<T>>();
+    final cfg = PaginationConfig.of<T, M>(context);
+    final cubit = context.read<CorePaginationCubit<T, M>>();
     if (cfg.loadingBuilder != null) {
       return cfg.loadingBuilder!(context);
     }
-    final placeholders = PaginationResponseModel(
+    final placeholders = PaginationResponseModel<T, M>(
       data: List<T>.generate(
         cfg.skeletonItemCount ?? cubit.paginationStrategy.limit,
         (_) => cfg.emptyEntity!,

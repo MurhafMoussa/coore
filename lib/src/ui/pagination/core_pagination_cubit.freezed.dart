@@ -13,7 +13,7 @@ part of 'core_pagination_cubit.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$CorePaginationState<T> implements DiagnosticableTreeMixin {
+mixin _$CorePaginationState<T extends Identifiable,M extends MetaModel> implements DiagnosticableTreeMixin {
 
 
 
@@ -21,13 +21,13 @@ mixin _$CorePaginationState<T> implements DiagnosticableTreeMixin {
 @override
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
-    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>'))
+    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T, $M>'))
     ;
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CorePaginationState<T>);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CorePaginationState<T, M>);
 }
 
 
@@ -36,22 +36,22 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>()';
+  return 'CorePaginationState<$T, $M>()';
 }
 
 
 }
 
 /// @nodoc
-class $CorePaginationStateCopyWith<T,$Res>  {
-$CorePaginationStateCopyWith(CorePaginationState<T> _, $Res Function(CorePaginationState<T>) __);
+class $CorePaginationStateCopyWith<T extends Identifiable,M extends MetaModel,$Res>  {
+$CorePaginationStateCopyWith(CorePaginationState<T, M> _, $Res Function(CorePaginationState<T, M>) __);
 }
 
 
 /// @nodoc
 
 
-class PaginationInitial<T> extends CorePaginationState<T> with DiagnosticableTreeMixin {
+class PaginationInitial<T extends Identifiable,M extends MetaModel> extends CorePaginationState<T, M> with DiagnosticableTreeMixin {
   const PaginationInitial(): super._();
   
 
@@ -62,13 +62,13 @@ class PaginationInitial<T> extends CorePaginationState<T> with DiagnosticableTre
 @override
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
-    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>.initial'))
+    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T, $M>.initial'))
     ;
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationInitial<T>);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationInitial<T, M>);
 }
 
 
@@ -77,7 +77,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>.initial()';
+  return 'CorePaginationState<$T, $M>.initial()';
 }
 
 
@@ -89,7 +89,7 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class PaginationLoading<T> extends CorePaginationState<T> with DiagnosticableTreeMixin {
+class PaginationLoading<T extends Identifiable,M extends MetaModel> extends CorePaginationState<T, M> with DiagnosticableTreeMixin {
   const PaginationLoading(): super._();
   
 
@@ -100,13 +100,13 @@ class PaginationLoading<T> extends CorePaginationState<T> with DiagnosticableTre
 @override
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
-    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>.loading'))
+    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T, $M>.loading'))
     ;
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationLoading<T>);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationLoading<T, M>);
 }
 
 
@@ -115,7 +115,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>.loading()';
+  return 'CorePaginationState<$T, $M>.loading()';
 }
 
 
@@ -127,30 +127,30 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class PaginationSucceeded<T> extends CorePaginationState<T> with DiagnosticableTreeMixin {
+class PaginationSucceeded<T extends Identifiable,M extends MetaModel> extends CorePaginationState<T, M> with DiagnosticableTreeMixin {
   const PaginationSucceeded({required this.paginatedResponseModel, required this.hasReachedMax}): super._();
   
 
- final  PaginationResponseModel<T> paginatedResponseModel;
+ final  PaginationResponseModel<T, M> paginatedResponseModel;
  final  bool hasReachedMax;
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$PaginationSucceededCopyWith<T, PaginationSucceeded<T>> get copyWith => _$PaginationSucceededCopyWithImpl<T, PaginationSucceeded<T>>(this, _$identity);
+$PaginationSucceededCopyWith<T, M, PaginationSucceeded<T, M>> get copyWith => _$PaginationSucceededCopyWithImpl<T, M, PaginationSucceeded<T, M>>(this, _$identity);
 
 
 @override
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
-    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>.succeeded'))
+    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T, $M>.succeeded'))
     ..add(DiagnosticsProperty('paginatedResponseModel', paginatedResponseModel))..add(DiagnosticsProperty('hasReachedMax', hasReachedMax));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationSucceeded<T>&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationSucceeded<T, M>&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax));
 }
 
 
@@ -159,38 +159,38 @@ int get hashCode => Object.hash(runtimeType,paginatedResponseModel,hasReachedMax
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>.succeeded(paginatedResponseModel: $paginatedResponseModel, hasReachedMax: $hasReachedMax)';
+  return 'CorePaginationState<$T, $M>.succeeded(paginatedResponseModel: $paginatedResponseModel, hasReachedMax: $hasReachedMax)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $PaginationSucceededCopyWith<T,$Res> implements $CorePaginationStateCopyWith<T, $Res> {
-  factory $PaginationSucceededCopyWith(PaginationSucceeded<T> value, $Res Function(PaginationSucceeded<T>) _then) = _$PaginationSucceededCopyWithImpl;
+abstract mixin class $PaginationSucceededCopyWith<T extends Identifiable,M extends MetaModel,$Res> implements $CorePaginationStateCopyWith<T, M, $Res> {
+  factory $PaginationSucceededCopyWith(PaginationSucceeded<T, M> value, $Res Function(PaginationSucceeded<T, M>) _then) = _$PaginationSucceededCopyWithImpl;
 @useResult
 $Res call({
- PaginationResponseModel<T> paginatedResponseModel, bool hasReachedMax
+ PaginationResponseModel<T, M> paginatedResponseModel, bool hasReachedMax
 });
 
 
-$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel;
+$PaginationResponseModelCopyWith<T, M, $Res> get paginatedResponseModel;
 
 }
 /// @nodoc
-class _$PaginationSucceededCopyWithImpl<T,$Res>
-    implements $PaginationSucceededCopyWith<T, $Res> {
+class _$PaginationSucceededCopyWithImpl<T extends Identifiable,M extends MetaModel,$Res>
+    implements $PaginationSucceededCopyWith<T, M, $Res> {
   _$PaginationSucceededCopyWithImpl(this._self, this._then);
 
-  final PaginationSucceeded<T> _self;
-  final $Res Function(PaginationSucceeded<T>) _then;
+  final PaginationSucceeded<T, M> _self;
+  final $Res Function(PaginationSucceeded<T, M>) _then;
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? paginatedResponseModel = null,Object? hasReachedMax = null,}) {
-  return _then(PaginationSucceeded<T>(
+  return _then(PaginationSucceeded<T, M>(
 paginatedResponseModel: null == paginatedResponseModel ? _self.paginatedResponseModel : paginatedResponseModel // ignore: cast_nullable_to_non_nullable
-as PaginationResponseModel<T>,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
+as PaginationResponseModel<T, M>,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -199,9 +199,9 @@ as bool,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel {
+$PaginationResponseModelCopyWith<T, M, $Res> get paginatedResponseModel {
   
-  return $PaginationResponseModelCopyWith<T, $Res>(_self.paginatedResponseModel, (value) {
+  return $PaginationResponseModelCopyWith<T, M, $Res>(_self.paginatedResponseModel, (value) {
     return _then(_self.copyWith(paginatedResponseModel: value));
   });
 }
@@ -210,30 +210,30 @@ $PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel {
 /// @nodoc
 
 
-class PaginationRetryFailure<T> extends CorePaginationState<T> with DiagnosticableTreeMixin {
+class PaginationRetryFailure<T extends Identifiable,M extends MetaModel> extends CorePaginationState<T, M> with DiagnosticableTreeMixin {
   const PaginationRetryFailure({required this.failure, required this.paginatedResponseModel}): super._();
   
 
  final  Failure failure;
- final  PaginationResponseModel<T> paginatedResponseModel;
+ final  PaginationResponseModel<T, M> paginatedResponseModel;
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$PaginationRetryFailureCopyWith<T, PaginationRetryFailure<T>> get copyWith => _$PaginationRetryFailureCopyWithImpl<T, PaginationRetryFailure<T>>(this, _$identity);
+$PaginationRetryFailureCopyWith<T, M, PaginationRetryFailure<T, M>> get copyWith => _$PaginationRetryFailureCopyWithImpl<T, M, PaginationRetryFailure<T, M>>(this, _$identity);
 
 
 @override
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
-    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>.retryFailure'))
+    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T, $M>.retryFailure'))
     ..add(DiagnosticsProperty('failure', failure))..add(DiagnosticsProperty('paginatedResponseModel', paginatedResponseModel));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationRetryFailure<T>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationRetryFailure<T, M>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel));
 }
 
 
@@ -242,39 +242,39 @@ int get hashCode => Object.hash(runtimeType,failure,paginatedResponseModel);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>.retryFailure(failure: $failure, paginatedResponseModel: $paginatedResponseModel)';
+  return 'CorePaginationState<$T, $M>.retryFailure(failure: $failure, paginatedResponseModel: $paginatedResponseModel)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $PaginationRetryFailureCopyWith<T,$Res> implements $CorePaginationStateCopyWith<T, $Res> {
-  factory $PaginationRetryFailureCopyWith(PaginationRetryFailure<T> value, $Res Function(PaginationRetryFailure<T>) _then) = _$PaginationRetryFailureCopyWithImpl;
+abstract mixin class $PaginationRetryFailureCopyWith<T extends Identifiable,M extends MetaModel,$Res> implements $CorePaginationStateCopyWith<T, M, $Res> {
+  factory $PaginationRetryFailureCopyWith(PaginationRetryFailure<T, M> value, $Res Function(PaginationRetryFailure<T, M>) _then) = _$PaginationRetryFailureCopyWithImpl;
 @useResult
 $Res call({
- Failure failure, PaginationResponseModel<T> paginatedResponseModel
+ Failure failure, PaginationResponseModel<T, M> paginatedResponseModel
 });
 
 
-$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel;
+$PaginationResponseModelCopyWith<T, M, $Res> get paginatedResponseModel;
 
 }
 /// @nodoc
-class _$PaginationRetryFailureCopyWithImpl<T,$Res>
-    implements $PaginationRetryFailureCopyWith<T, $Res> {
+class _$PaginationRetryFailureCopyWithImpl<T extends Identifiable,M extends MetaModel,$Res>
+    implements $PaginationRetryFailureCopyWith<T, M, $Res> {
   _$PaginationRetryFailureCopyWithImpl(this._self, this._then);
 
-  final PaginationRetryFailure<T> _self;
-  final $Res Function(PaginationRetryFailure<T>) _then;
+  final PaginationRetryFailure<T, M> _self;
+  final $Res Function(PaginationRetryFailure<T, M>) _then;
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? failure = null,Object? paginatedResponseModel = null,}) {
-  return _then(PaginationRetryFailure<T>(
+  return _then(PaginationRetryFailure<T, M>(
 failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as Failure,paginatedResponseModel: null == paginatedResponseModel ? _self.paginatedResponseModel : paginatedResponseModel // ignore: cast_nullable_to_non_nullable
-as PaginationResponseModel<T>,
+as PaginationResponseModel<T, M>,
   ));
 }
 
@@ -282,9 +282,9 @@ as PaginationResponseModel<T>,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel {
+$PaginationResponseModelCopyWith<T, M, $Res> get paginatedResponseModel {
   
-  return $PaginationResponseModelCopyWith<T, $Res>(_self.paginatedResponseModel, (value) {
+  return $PaginationResponseModelCopyWith<T, M, $Res>(_self.paginatedResponseModel, (value) {
     return _then(_self.copyWith(paginatedResponseModel: value));
   });
 }
@@ -293,31 +293,31 @@ $PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel {
 /// @nodoc
 
 
-class PaginationFailed<T> extends CorePaginationState<T> with DiagnosticableTreeMixin {
+class PaginationFailed<T extends Identifiable,M extends MetaModel> extends CorePaginationState<T, M> with DiagnosticableTreeMixin {
   const PaginationFailed({required this.failure, required this.paginatedResponseModel, this.retryFunction}): super._();
   
 
  final  Failure failure;
- final  PaginationResponseModel<T> paginatedResponseModel;
+ final  PaginationResponseModel<T, M> paginatedResponseModel;
  final  VoidCallback? retryFunction;
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$PaginationFailedCopyWith<T, PaginationFailed<T>> get copyWith => _$PaginationFailedCopyWithImpl<T, PaginationFailed<T>>(this, _$identity);
+$PaginationFailedCopyWith<T, M, PaginationFailed<T, M>> get copyWith => _$PaginationFailedCopyWithImpl<T, M, PaginationFailed<T, M>>(this, _$identity);
 
 
 @override
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
-    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T>.failed'))
+    ..add(DiagnosticsProperty('type', 'CorePaginationState<$T, $M>.failed'))
     ..add(DiagnosticsProperty('failure', failure))..add(DiagnosticsProperty('paginatedResponseModel', paginatedResponseModel))..add(DiagnosticsProperty('retryFunction', retryFunction));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationFailed<T>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel)&&(identical(other.retryFunction, retryFunction) || other.retryFunction == retryFunction));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PaginationFailed<T, M>&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.paginatedResponseModel, paginatedResponseModel) || other.paginatedResponseModel == paginatedResponseModel)&&(identical(other.retryFunction, retryFunction) || other.retryFunction == retryFunction));
 }
 
 
@@ -326,39 +326,39 @@ int get hashCode => Object.hash(runtimeType,failure,paginatedResponseModel,retry
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'CorePaginationState<$T>.failed(failure: $failure, paginatedResponseModel: $paginatedResponseModel, retryFunction: $retryFunction)';
+  return 'CorePaginationState<$T, $M>.failed(failure: $failure, paginatedResponseModel: $paginatedResponseModel, retryFunction: $retryFunction)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $PaginationFailedCopyWith<T,$Res> implements $CorePaginationStateCopyWith<T, $Res> {
-  factory $PaginationFailedCopyWith(PaginationFailed<T> value, $Res Function(PaginationFailed<T>) _then) = _$PaginationFailedCopyWithImpl;
+abstract mixin class $PaginationFailedCopyWith<T extends Identifiable,M extends MetaModel,$Res> implements $CorePaginationStateCopyWith<T, M, $Res> {
+  factory $PaginationFailedCopyWith(PaginationFailed<T, M> value, $Res Function(PaginationFailed<T, M>) _then) = _$PaginationFailedCopyWithImpl;
 @useResult
 $Res call({
- Failure failure, PaginationResponseModel<T> paginatedResponseModel, VoidCallback? retryFunction
+ Failure failure, PaginationResponseModel<T, M> paginatedResponseModel, VoidCallback? retryFunction
 });
 
 
-$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel;
+$PaginationResponseModelCopyWith<T, M, $Res> get paginatedResponseModel;
 
 }
 /// @nodoc
-class _$PaginationFailedCopyWithImpl<T,$Res>
-    implements $PaginationFailedCopyWith<T, $Res> {
+class _$PaginationFailedCopyWithImpl<T extends Identifiable,M extends MetaModel,$Res>
+    implements $PaginationFailedCopyWith<T, M, $Res> {
   _$PaginationFailedCopyWithImpl(this._self, this._then);
 
-  final PaginationFailed<T> _self;
-  final $Res Function(PaginationFailed<T>) _then;
+  final PaginationFailed<T, M> _self;
+  final $Res Function(PaginationFailed<T, M>) _then;
 
 /// Create a copy of CorePaginationState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? failure = null,Object? paginatedResponseModel = null,Object? retryFunction = freezed,}) {
-  return _then(PaginationFailed<T>(
+  return _then(PaginationFailed<T, M>(
 failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as Failure,paginatedResponseModel: null == paginatedResponseModel ? _self.paginatedResponseModel : paginatedResponseModel // ignore: cast_nullable_to_non_nullable
-as PaginationResponseModel<T>,retryFunction: freezed == retryFunction ? _self.retryFunction : retryFunction // ignore: cast_nullable_to_non_nullable
+as PaginationResponseModel<T, M>,retryFunction: freezed == retryFunction ? _self.retryFunction : retryFunction // ignore: cast_nullable_to_non_nullable
 as VoidCallback?,
   ));
 }
@@ -367,9 +367,9 @@ as VoidCallback?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$PaginationResponseModelCopyWith<T, $Res> get paginatedResponseModel {
+$PaginationResponseModelCopyWith<T, M, $Res> get paginatedResponseModel {
   
-  return $PaginationResponseModelCopyWith<T, $Res>(_self.paginatedResponseModel, (value) {
+  return $PaginationResponseModelCopyWith<T, M, $Res>(_self.paginatedResponseModel, (value) {
     return _then(_self.copyWith(paginatedResponseModel: value));
   });
 }

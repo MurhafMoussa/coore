@@ -16,12 +16,12 @@ part 'core_pagination_state.dart';
 /// - Pagination strategy (page/skip/cursor)
 /// - Error handling with retry capabilities
 ///
-class CorePaginationCubit<T extends Identifiable>
-    extends Cubit<CorePaginationState<T>> {
+class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
+    extends Cubit<CorePaginationState<T, M>> {
   /// {@macro core_pagination_cubit}
   CorePaginationCubit({
     /// Async function that fetches paginated data from usecase
-    required UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+    required UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
       int,
       int,
     )
@@ -33,7 +33,7 @@ class CorePaginationCubit<T extends Identifiable>
     /// Reverse order loading (for chat-like timelines)
     this.reverse = false,
   }) : _paginationFunction = paginationFunction,
-       super(CorePaginationState<T>.loading()) {
+       super(CorePaginationState<T, M>.loading()) {
     _refreshController = RefreshController();
     _paginationFunction = paginationFunction;
   }
@@ -41,7 +41,7 @@ class CorePaginationCubit<T extends Identifiable>
   /// The data fetching function signature:
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
-  UseCaseFutureResponse<PaginationResponseModel<T>> Function(int, int)
+  UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(int, int)
   _paginationFunction;
 
   /// Active pagination strategy implementation
@@ -120,7 +120,7 @@ class CorePaginationCubit<T extends Identifiable>
   /// - Determines pagination completion
   /// - Updates refresh controller
   void _handleSuccess(
-    PaginationResponseModel<T> paginatedResponseModel,
+    PaginationResponseModel<T, M> paginatedResponseModel,
     bool isInitial,
   ) {
     final hasReachedMax =
@@ -172,7 +172,7 @@ class CorePaginationCubit<T extends Identifiable>
   }
 
   void updatePaginationFunction(
-    UseCaseFutureResponse<PaginationResponseModel<T>> Function(
+    UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
       int batch,
       int limit,
     )
@@ -183,8 +183,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Adds an item to the end of the list.
   void addLast(T item) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..add(item);
       emit(
@@ -200,8 +200,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Adds an item to the beginning of the list.
   void addFirst(T item) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..insert(0, item);
       emit(
@@ -217,8 +217,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Updates an existing item in the list.
   void update(T item) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(
         currentState.paginatedResponseModel.data,
       );
@@ -238,8 +238,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Deletes an item from the list by its ID.
   void delete(String id) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..removeWhere((element) => element.id == id);
       emit(
@@ -255,8 +255,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Adds a list of items to the end of the list.
   void bulkAdd(List<T> items) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..addAll(items);
       emit(
@@ -272,8 +272,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Updates multiple items in the list.
   void bulkUpdate(List<T> items) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(
         currentState.paginatedResponseModel.data,
       );
@@ -298,8 +298,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Deletes multiple items from the list by their IDs.
   void bulkDelete(List<String> ids) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..removeWhere((element) => ids.contains(element.id));
       emit(
@@ -315,11 +315,12 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Finds an item by its ID.
   T? findById(String id) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       try {
-        return currentState.paginatedResponseModel.data
-            .firstWhere((element) => element.id == id);
+        return currentState.paginatedResponseModel.data.firstWhere(
+          (element) => element.id == id,
+        );
       } catch (e) {
         return null;
       }
@@ -329,8 +330,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Checks if the list contains a specific item.
   bool contains(T item) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       return currentState.paginatedResponseModel.data.any(
         (element) => element.id == item.id,
       );
@@ -340,8 +341,8 @@ class CorePaginationCubit<T extends Identifiable>
 
   /// Checks if the list contains all items from a given list.
   bool containsAll(List<T> items) {
-    if (state is PaginationSucceeded<T>) {
-      final currentState = state as PaginationSucceeded<T>;
+    if (state is PaginationSucceeded<T, M>) {
+      final currentState = state as PaginationSucceeded<T, M>;
       return items.every(
         (item) => currentState.paginatedResponseModel.data.any(
           (element) => element.id == item.id,

@@ -6,35 +6,31 @@ part of 'pagination_response_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_PaginationResponseModel<T> _$PaginationResponseModelFromJson<T>(
+_PaginationResponseModel<T, M>
+_$PaginationResponseModelFromJson<T, M extends MetaModel>(
   Map<String, dynamic> json,
   T Function(Object? json) fromJsonT,
-) => _PaginationResponseModel<T>(
+  M Function(Object? json) fromJsonM,
+) => _PaginationResponseModel<T, M>(
   data: (json['data'] as List<dynamic>?)?.map(fromJsonT).toList() ?? const [],
-  meta: json['meta'] == null
-      ? const MetaModel()
-      : MetaModel.fromJson(json['meta'] as Map<String, dynamic>),
+  meta: _$nullableGenericFromJson(json['meta'], fromJsonM),
 );
 
-Map<String, dynamic> _$PaginationResponseModelToJson<T>(
-  _PaginationResponseModel<T> instance,
+Map<String, dynamic> _$PaginationResponseModelToJson<T, M extends MetaModel>(
+  _PaginationResponseModel<T, M> instance,
   Object? Function(T value) toJsonT,
+  Object? Function(M value) toJsonM,
 ) => <String, dynamic>{
   'data': instance.data.map(toJsonT).toList(),
-  'meta': instance.meta,
+  'meta': _$nullableGenericToJson(instance.meta, toJsonM),
 };
 
-_MetaModel _$MetaModelFromJson(Map<String, dynamic> json) => _MetaModel(
-  page: (json['page'] as num?)?.toInt() ?? 0,
-  limit: (json['limit'] as num?)?.toInt() ?? 20,
-  total: (json['total'] as num?)?.toInt() ?? 0,
-  totalPages: (json['totalPages'] as num?)?.toInt() ?? 0,
-);
+T? _$nullableGenericFromJson<T>(
+  Object? input,
+  T Function(Object? json) fromJson,
+) => input == null ? null : fromJson(input);
 
-Map<String, dynamic> _$MetaModelToJson(_MetaModel instance) =>
-    <String, dynamic>{
-      'page': instance.page,
-      'limit': instance.limit,
-      'total': instance.total,
-      'totalPages': instance.totalPages,
-    };
+Object? _$nullableGenericToJson<T>(
+  T? input,
+  Object? Function(T value) toJson,
+) => input == null ? null : toJson(input);
