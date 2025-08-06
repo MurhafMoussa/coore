@@ -78,6 +78,42 @@ abstract class AuthInterceptor extends Interceptor {
     }
   }
 
+  Future<Never> _clearTokensAndThrowException({
+    required DioException err,
+    required Object exception,
+  }) async {
+    await _tokenManager.clearTokens();
+
+    // This new logic inspects the error 'e' from the refresh call
+    Map<String, dynamic>? responseData;
+    int statusCode = 401;
+
+    if (exception is DioException && exception.response?.data != null) {
+      // If the refresh call failed with a specific response from the backend, use it
+      statusCode = exception.response!.statusCode ?? 401;
+    } else {
+      // Otherwise, fall back to a generic message
+      responseData = {
+        'error': {
+          'status': 401,
+          'message': 'Token refresh failed: ${exception.toString()}',
+        },
+      };
+    }
+
+    // Now, throw an exception that contains the real backend error message
+    throw DioException.badResponse(
+      statusCode: statusCode,
+      requestOptions: err.requestOptions,
+      response: Response(
+        requestOptions: err.requestOptions,
+        statusCode: statusCode,
+        data: responseData,
+      ),
+    );
+    // --- END OF FIX ---
+  }
+
   Future<void> _queueAndRefresh(
     DioException err,
     ErrorInterceptorHandler handler,
@@ -98,7 +134,7 @@ abstract class AuthInterceptor extends Interceptor {
           if (success) {
             await _retry(entry.key, entry.value);
           } else {
-            entry.value.reject(_makeRefreshFailure(entry.key));
+            entry.value.reject(_makeRefreshFailure(entry.key, err));
           }
         }
       });
@@ -119,16 +155,22 @@ abstract class AuthInterceptor extends Interceptor {
     }
   }
 
-  DioException _makeRefreshFailure(RequestOptions opts) {
+  DioException _makeRefreshFailure(RequestOptions opts, DioException err) {
+    final statusCode = err.response?.statusCode ?? 401;
     return DioException.badResponse(
-      statusCode: 401,
+      statusCode: statusCode,
       requestOptions: opts,
       response: Response(
         requestOptions: opts,
-        statusCode: 401,
-        data: {
-          'error': {'status': 401, 'message': 'Token refresh failed'},
-        },
+        statusCode: statusCode,
+        data:
+            err.response?.data ??
+            {
+              'error': {
+                'status': statusCode,
+                'message': 'Token refresh failed',
+              },
+            },
       ),
     );
   }
@@ -166,19 +208,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
         return true;
       });
     } catch (e) {
-      await _tokenManager.clearTokens();
-      // Wrap *any* error as a badResponse (401)
-      throw DioException.badResponse(
-        statusCode: 401,
-        requestOptions: err.requestOptions,
-        response: Response(
-          requestOptions: err.requestOptions,
-          statusCode: 401,
-          data: {
-            'error': {'status': 401, 'message': 'Auth setup failed'},
-          },
-        ),
-      );
+      await _clearTokensAndThrowException(err: err, exception: e);
     }
   }
 }
@@ -213,19 +243,7 @@ class CookieAuthInterceptor extends AuthInterceptor {
         return true;
       });
     } catch (e) {
-      await _tokenManager.clearTokens();
-      // Same uniform badResponse wrapper
-      throw DioException.badResponse(
-        statusCode: 401,
-        requestOptions: err.requestOptions,
-        response: Response(
-          requestOptions: err.requestOptions,
-          statusCode: 401,
-          data: {
-            'error': {'status': 401, 'message': 'Auth setup failed'},
-          },
-        ),
-      );
+      await _clearTokensAndThrowException(err: err, exception: e);
     }
   }
 }
