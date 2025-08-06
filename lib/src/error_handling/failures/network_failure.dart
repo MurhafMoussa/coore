@@ -1,3 +1,4 @@
+import 'package:coore/src/api_handler/api_handler.dart';
 import 'package:coore/src/error_handling/failures/failure.dart';
 
 abstract class NetworkFailure extends Failure {
@@ -54,8 +55,14 @@ class PayloadTooLargeFailure extends NetworkFailure {
 
 /// 422 Validation Failure: When the user submits a request with invalid data.
 class ValidationFailure extends NetworkFailure {
+  final List<ErrorDetail> errors;
+
   /// This is used when the server cannot process the entity due to semantic errors in the request.
-  const ValidationFailure(super.message, {super.stackTrace});
+  const ValidationFailure({
+    required String message,
+    required this.errors,
+    StackTrace? stackTrace,
+  }) : super(message, stackTrace: stackTrace);
 }
 
 /// 429 Too Many Requests Failure: The user has sent too many requests in a given amount of time.

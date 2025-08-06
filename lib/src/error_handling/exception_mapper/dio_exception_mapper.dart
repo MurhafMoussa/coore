@@ -4,60 +4,64 @@ import 'package:coore/src/error_handling/failures/network_failure.dart';
 import 'package:dio/dio.dart';
 
 class DioNetworkExceptionMapper implements NetworkExceptionMapper {
-  final Map<int, NetworkFailure Function(Error, StackTrace?)>
+  final Map<int, NetworkFailure Function(ErrorModel, StackTrace?)>
   _codeToFailureMap = {
-    400: (Error error, StackTrace? stackTrace) =>
+    400: (ErrorModel error, StackTrace? stackTrace) =>
         BadRequestFailure(error.message, stackTrace: stackTrace),
-    401: (Error error, StackTrace? stackTrace) =>
+    401: (ErrorModel error, StackTrace? stackTrace) =>
         UnauthorizedRequestFailure(error.message, stackTrace: stackTrace),
 
-    403: (Error error, StackTrace? stackTrace) =>
+    403: (ErrorModel error, StackTrace? stackTrace) =>
         ForbiddenFailure(error.message, stackTrace: stackTrace),
 
-    404: (Error error, StackTrace? stackTrace) =>
+    404: (ErrorModel error, StackTrace? stackTrace) =>
         NotFoundFailure(error.message, stackTrace: stackTrace),
 
-    405: (Error error, StackTrace? stackTrace) =>
+    405: (ErrorModel error, StackTrace? stackTrace) =>
         MethodNotAllowedFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    406: (Error error, StackTrace? stackTrace) =>
+    406: (ErrorModel error, StackTrace? stackTrace) =>
         NotAcceptableFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    409: (Error error, StackTrace? stackTrace) =>
+    409: (ErrorModel error, StackTrace? stackTrace) =>
         ConflictFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    413: (Error error, StackTrace? stackTrace) =>
+    413: (ErrorModel error, StackTrace? stackTrace) =>
         PayloadTooLargeFailure(_defaultErrorMessage, stackTrace: stackTrace),
-    422: (Error error, StackTrace? stackTrace) =>
-        ValidationFailure(error.message, stackTrace: stackTrace),
+    422: (ErrorModel error, StackTrace? stackTrace) => ValidationFailure(
+      errors: error.details ?? [],
+      message: error.message,
+      stackTrace: stackTrace,
+    ),
 
-    429: (Error error, StackTrace? stackTrace) =>
+    429: (ErrorModel error, StackTrace? stackTrace) =>
         TooManyRequestsFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    418: (Error error, StackTrace? stackTrace) =>
+    418: (ErrorModel error, StackTrace? stackTrace) =>
         TeapotFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    451: (Error error, StackTrace? stackTrace) =>
+    451: (ErrorModel error, StackTrace? stackTrace) =>
         UnavailableForLegalReasonsFailure(
           error.message,
           stackTrace: stackTrace,
         ),
 
-    500: (Error error, StackTrace? stackTrace) => InternalServerErrorFailure(
-      _defaultErrorMessage,
-      stackTrace: stackTrace,
-    ),
+    500: (ErrorModel error, StackTrace? stackTrace) =>
+        InternalServerErrorFailure(
+          _defaultErrorMessage,
+          stackTrace: stackTrace,
+        ),
 
-    502: (Error error, StackTrace? stackTrace) =>
+    502: (ErrorModel error, StackTrace? stackTrace) =>
         BadGatewayFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    503: (Error error, StackTrace? stackTrace) =>
+    503: (ErrorModel error, StackTrace? stackTrace) =>
         ServiceUnavailableFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    504: (Error error, StackTrace? stackTrace) =>
+    504: (ErrorModel error, StackTrace? stackTrace) =>
         GatewayTimeoutFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    505: (Error error, StackTrace? stackTrace) =>
+    505: (ErrorModel error, StackTrace? stackTrace) =>
         HttpVersionNotSupportedFailure(
           _defaultErrorMessage,
           stackTrace: stackTrace,

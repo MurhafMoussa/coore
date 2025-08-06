@@ -29,7 +29,7 @@ abstract class CorePaginationState<T extends Identifiable, M extends MetaModel>
     PaginationSucceeded(:final paginatedResponseModel) =>
       paginatedResponseModel,
     PaginationFailed(:final paginatedResponseModel) => paginatedResponseModel,
-    _ => PaginationResponseModel(),
+    _ => const PaginationResponseModel(),
   };
 
   bool get hasReachedMax => switch (this) {

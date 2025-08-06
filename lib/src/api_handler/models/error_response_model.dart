@@ -5,7 +5,7 @@ part 'error_response_model.g.dart';
 
 @freezed
 abstract class ErrorResponseModel with _$ErrorResponseModel {
-  const factory ErrorResponseModel({required Error error}) =
+  const factory ErrorResponseModel({required ErrorModel error}) =
       _ErrorResponseModel;
 
   factory ErrorResponseModel.fromJson(Map<String, dynamic> json) =>
@@ -13,20 +13,22 @@ abstract class ErrorResponseModel with _$ErrorResponseModel {
 }
 
 @freezed
-abstract class Error with _$Error {
-  const factory Error({
+abstract class ErrorModel with _$ErrorModel {
+  const factory ErrorModel({
     required int status,
     required String message,
-    List<Detail>? details,
-  }) = _Error;
+    List<ErrorDetail>? details,
+  }) = _ErrorModel;
 
-  factory Error.fromJson(Map<String, dynamic> json) => _$ErrorFromJson(json);
+  factory ErrorModel.fromJson(Map<String, dynamic> json) =>
+      _$ErrorModelFromJson(json);
 }
 
 @freezed
-abstract class Detail with _$Detail {
-  const factory Detail({required String field, required String message}) =
-      _Detail;
+abstract class ErrorDetail with _$ErrorDetail {
+  const factory ErrorDetail({required String field, required String message}) =
+      _ErrorDetail;
 
-  factory Detail.fromJson(Map<String, dynamic> json) => _$DetailFromJson(json);
+  factory ErrorDetail.fromJson(Map<String, dynamic> json) =>
+      _$ErrorDetailFromJson(json);
 }

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ErrorResponseModel {
 
- Error get error;
+ ErrorModel get error;
 /// Create a copy of ErrorResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,11 +49,11 @@ abstract mixin class $ErrorResponseModelCopyWith<$Res>  {
   factory $ErrorResponseModelCopyWith(ErrorResponseModel value, $Res Function(ErrorResponseModel) _then) = _$ErrorResponseModelCopyWithImpl;
 @useResult
 $Res call({
- Error error
+ ErrorModel error
 });
 
 
-$ErrorCopyWith<$Res> get error;
+$ErrorModelCopyWith<$Res> get error;
 
 }
 /// @nodoc
@@ -69,16 +69,16 @@ class _$ErrorResponseModelCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? error = null,}) {
   return _then(_self.copyWith(
 error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
-as Error,
+as ErrorModel,
   ));
 }
 /// Create a copy of ErrorResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$ErrorCopyWith<$Res> get error {
+$ErrorModelCopyWith<$Res> get error {
   
-  return $ErrorCopyWith<$Res>(_self.error, (value) {
+  return $ErrorModelCopyWith<$Res>(_self.error, (value) {
     return _then(_self.copyWith(error: value));
   });
 }
@@ -92,7 +92,7 @@ class _ErrorResponseModel implements ErrorResponseModel {
   const _ErrorResponseModel({required this.error});
   factory _ErrorResponseModel.fromJson(Map<String, dynamic> json) => _$ErrorResponseModelFromJson(json);
 
-@override final  Error error;
+@override final  ErrorModel error;
 
 /// Create a copy of ErrorResponseModel
 /// with the given fields replaced by the non-null parameter values.
@@ -127,11 +127,11 @@ abstract mixin class _$ErrorResponseModelCopyWith<$Res> implements $ErrorRespons
   factory _$ErrorResponseModelCopyWith(_ErrorResponseModel value, $Res Function(_ErrorResponseModel) _then) = __$ErrorResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- Error error
+ ErrorModel error
 });
 
 
-@override $ErrorCopyWith<$Res> get error;
+@override $ErrorModelCopyWith<$Res> get error;
 
 }
 /// @nodoc
@@ -147,7 +147,7 @@ class __$ErrorResponseModelCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? error = null,}) {
   return _then(_ErrorResponseModel(
 error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
-as Error,
+as ErrorModel,
   ));
 }
 
@@ -155,9 +155,9 @@ as Error,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$ErrorCopyWith<$Res> get error {
+$ErrorModelCopyWith<$Res> get error {
   
-  return $ErrorCopyWith<$Res>(_self.error, (value) {
+  return $ErrorModelCopyWith<$Res>(_self.error, (value) {
     return _then(_self.copyWith(error: value));
   });
 }
@@ -165,22 +165,22 @@ $ErrorCopyWith<$Res> get error {
 
 
 /// @nodoc
-mixin _$Error {
+mixin _$ErrorModel {
 
- int get status; String get message; List<Detail>? get details;
-/// Create a copy of Error
+ int get status; String get message; List<ErrorDetail>? get details;
+/// Create a copy of ErrorModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$ErrorCopyWith<Error> get copyWith => _$ErrorCopyWithImpl<Error>(this as Error, _$identity);
+$ErrorModelCopyWith<ErrorModel> get copyWith => _$ErrorModelCopyWithImpl<ErrorModel>(this as ErrorModel, _$identity);
 
-  /// Serializes this Error to a JSON map.
+  /// Serializes this ErrorModel to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Error&&(identical(other.status, status) || other.status == status)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.details, details));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ErrorModel&&(identical(other.status, status) || other.status == status)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.details, details));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -189,18 +189,18 @@ int get hashCode => Object.hash(runtimeType,status,message,const DeepCollectionE
 
 @override
 String toString() {
-  return 'Error(status: $status, message: $message, details: $details)';
+  return 'ErrorModel(status: $status, message: $message, details: $details)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $ErrorCopyWith<$Res>  {
-  factory $ErrorCopyWith(Error value, $Res Function(Error) _then) = _$ErrorCopyWithImpl;
+abstract mixin class $ErrorModelCopyWith<$Res>  {
+  factory $ErrorModelCopyWith(ErrorModel value, $Res Function(ErrorModel) _then) = _$ErrorModelCopyWithImpl;
 @useResult
 $Res call({
- int status, String message, List<Detail>? details
+ int status, String message, List<ErrorDetail>? details
 });
 
 
@@ -208,21 +208,21 @@ $Res call({
 
 }
 /// @nodoc
-class _$ErrorCopyWithImpl<$Res>
-    implements $ErrorCopyWith<$Res> {
-  _$ErrorCopyWithImpl(this._self, this._then);
+class _$ErrorModelCopyWithImpl<$Res>
+    implements $ErrorModelCopyWith<$Res> {
+  _$ErrorModelCopyWithImpl(this._self, this._then);
 
-  final Error _self;
-  final $Res Function(Error) _then;
+  final ErrorModel _self;
+  final $Res Function(ErrorModel) _then;
 
-/// Create a copy of Error
+/// Create a copy of ErrorModel
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? message = null,Object? details = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as int,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,details: freezed == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
-as List<Detail>?,
+as List<ErrorDetail>?,
   ));
 }
 
@@ -232,14 +232,14 @@ as List<Detail>?,
 /// @nodoc
 @JsonSerializable()
 
-class _Error implements Error {
-  const _Error({required this.status, required this.message, final  List<Detail>? details}): _details = details;
-  factory _Error.fromJson(Map<String, dynamic> json) => _$ErrorFromJson(json);
+class _ErrorModel implements ErrorModel {
+  const _ErrorModel({required this.status, required this.message, final  List<ErrorDetail>? details}): _details = details;
+  factory _ErrorModel.fromJson(Map<String, dynamic> json) => _$ErrorModelFromJson(json);
 
 @override final  int status;
 @override final  String message;
- final  List<Detail>? _details;
-@override List<Detail>? get details {
+ final  List<ErrorDetail>? _details;
+@override List<ErrorDetail>? get details {
   final value = _details;
   if (value == null) return null;
   if (_details is EqualUnmodifiableListView) return _details;
@@ -248,20 +248,20 @@ class _Error implements Error {
 }
 
 
-/// Create a copy of Error
+/// Create a copy of ErrorModel
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$ErrorCopyWith<_Error> get copyWith => __$ErrorCopyWithImpl<_Error>(this, _$identity);
+_$ErrorModelCopyWith<_ErrorModel> get copyWith => __$ErrorModelCopyWithImpl<_ErrorModel>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$ErrorToJson(this, );
+  return _$ErrorModelToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Error&&(identical(other.status, status) || other.status == status)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._details, _details));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ErrorModel&&(identical(other.status, status) || other.status == status)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._details, _details));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -270,18 +270,18 @@ int get hashCode => Object.hash(runtimeType,status,message,const DeepCollectionE
 
 @override
 String toString() {
-  return 'Error(status: $status, message: $message, details: $details)';
+  return 'ErrorModel(status: $status, message: $message, details: $details)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$ErrorCopyWith<$Res> implements $ErrorCopyWith<$Res> {
-  factory _$ErrorCopyWith(_Error value, $Res Function(_Error) _then) = __$ErrorCopyWithImpl;
+abstract mixin class _$ErrorModelCopyWith<$Res> implements $ErrorModelCopyWith<$Res> {
+  factory _$ErrorModelCopyWith(_ErrorModel value, $Res Function(_ErrorModel) _then) = __$ErrorModelCopyWithImpl;
 @override @useResult
 $Res call({
- int status, String message, List<Detail>? details
+ int status, String message, List<ErrorDetail>? details
 });
 
 
@@ -289,21 +289,21 @@ $Res call({
 
 }
 /// @nodoc
-class __$ErrorCopyWithImpl<$Res>
-    implements _$ErrorCopyWith<$Res> {
-  __$ErrorCopyWithImpl(this._self, this._then);
+class __$ErrorModelCopyWithImpl<$Res>
+    implements _$ErrorModelCopyWith<$Res> {
+  __$ErrorModelCopyWithImpl(this._self, this._then);
 
-  final _Error _self;
-  final $Res Function(_Error) _then;
+  final _ErrorModel _self;
+  final $Res Function(_ErrorModel) _then;
 
-/// Create a copy of Error
+/// Create a copy of ErrorModel
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? message = null,Object? details = freezed,}) {
-  return _then(_Error(
+  return _then(_ErrorModel(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as int,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,details: freezed == details ? _self._details : details // ignore: cast_nullable_to_non_nullable
-as List<Detail>?,
+as List<ErrorDetail>?,
   ));
 }
 
@@ -312,22 +312,22 @@ as List<Detail>?,
 
 
 /// @nodoc
-mixin _$Detail {
+mixin _$ErrorDetail {
 
  String get field; String get message;
-/// Create a copy of Detail
+/// Create a copy of ErrorDetail
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$DetailCopyWith<Detail> get copyWith => _$DetailCopyWithImpl<Detail>(this as Detail, _$identity);
+$ErrorDetailCopyWith<ErrorDetail> get copyWith => _$ErrorDetailCopyWithImpl<ErrorDetail>(this as ErrorDetail, _$identity);
 
-  /// Serializes this Detail to a JSON map.
+  /// Serializes this ErrorDetail to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Detail&&(identical(other.field, field) || other.field == field)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ErrorDetail&&(identical(other.field, field) || other.field == field)&&(identical(other.message, message) || other.message == message));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -336,15 +336,15 @@ int get hashCode => Object.hash(runtimeType,field,message);
 
 @override
 String toString() {
-  return 'Detail(field: $field, message: $message)';
+  return 'ErrorDetail(field: $field, message: $message)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $DetailCopyWith<$Res>  {
-  factory $DetailCopyWith(Detail value, $Res Function(Detail) _then) = _$DetailCopyWithImpl;
+abstract mixin class $ErrorDetailCopyWith<$Res>  {
+  factory $ErrorDetailCopyWith(ErrorDetail value, $Res Function(ErrorDetail) _then) = _$ErrorDetailCopyWithImpl;
 @useResult
 $Res call({
  String field, String message
@@ -355,14 +355,14 @@ $Res call({
 
 }
 /// @nodoc
-class _$DetailCopyWithImpl<$Res>
-    implements $DetailCopyWith<$Res> {
-  _$DetailCopyWithImpl(this._self, this._then);
+class _$ErrorDetailCopyWithImpl<$Res>
+    implements $ErrorDetailCopyWith<$Res> {
+  _$ErrorDetailCopyWithImpl(this._self, this._then);
 
-  final Detail _self;
-  final $Res Function(Detail) _then;
+  final ErrorDetail _self;
+  final $Res Function(ErrorDetail) _then;
 
-/// Create a copy of Detail
+/// Create a copy of ErrorDetail
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? field = null,Object? message = null,}) {
   return _then(_self.copyWith(
@@ -378,27 +378,27 @@ as String,
 /// @nodoc
 @JsonSerializable()
 
-class _Detail implements Detail {
-  const _Detail({required this.field, required this.message});
-  factory _Detail.fromJson(Map<String, dynamic> json) => _$DetailFromJson(json);
+class _ErrorDetail implements ErrorDetail {
+  const _ErrorDetail({required this.field, required this.message});
+  factory _ErrorDetail.fromJson(Map<String, dynamic> json) => _$ErrorDetailFromJson(json);
 
 @override final  String field;
 @override final  String message;
 
-/// Create a copy of Detail
+/// Create a copy of ErrorDetail
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$DetailCopyWith<_Detail> get copyWith => __$DetailCopyWithImpl<_Detail>(this, _$identity);
+_$ErrorDetailCopyWith<_ErrorDetail> get copyWith => __$ErrorDetailCopyWithImpl<_ErrorDetail>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$DetailToJson(this, );
+  return _$ErrorDetailToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Detail&&(identical(other.field, field) || other.field == field)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ErrorDetail&&(identical(other.field, field) || other.field == field)&&(identical(other.message, message) || other.message == message));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -407,15 +407,15 @@ int get hashCode => Object.hash(runtimeType,field,message);
 
 @override
 String toString() {
-  return 'Detail(field: $field, message: $message)';
+  return 'ErrorDetail(field: $field, message: $message)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$DetailCopyWith<$Res> implements $DetailCopyWith<$Res> {
-  factory _$DetailCopyWith(_Detail value, $Res Function(_Detail) _then) = __$DetailCopyWithImpl;
+abstract mixin class _$ErrorDetailCopyWith<$Res> implements $ErrorDetailCopyWith<$Res> {
+  factory _$ErrorDetailCopyWith(_ErrorDetail value, $Res Function(_ErrorDetail) _then) = __$ErrorDetailCopyWithImpl;
 @override @useResult
 $Res call({
  String field, String message
@@ -426,17 +426,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$DetailCopyWithImpl<$Res>
-    implements _$DetailCopyWith<$Res> {
-  __$DetailCopyWithImpl(this._self, this._then);
+class __$ErrorDetailCopyWithImpl<$Res>
+    implements _$ErrorDetailCopyWith<$Res> {
+  __$ErrorDetailCopyWithImpl(this._self, this._then);
 
-  final _Detail _self;
-  final $Res Function(_Detail) _then;
+  final _ErrorDetail _self;
+  final $Res Function(_ErrorDetail) _then;
 
-/// Create a copy of Detail
+/// Create a copy of ErrorDetail
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? field = null,Object? message = null,}) {
-  return _then(_Detail(
+  return _then(_ErrorDetail(
 field: null == field ? _self.field : field // ignore: cast_nullable_to_non_nullable
 as String,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,

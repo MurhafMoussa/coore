@@ -1,7 +1,6 @@
 // api_state_mixin.dart
 
 import 'package:coore/lib.dart';
-import 'package:coore/src/api_handler/params/cancelable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A generic mixin for BLoCs/Cubits that manage composite state objects containing an API state.
