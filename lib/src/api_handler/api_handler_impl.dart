@@ -57,7 +57,6 @@ class DioApiHandler implements ApiHandlerInterface {
       final response = await dioMethod();
       return right(response.data as Map<String, dynamic>);
     } catch (error, stackTrace) {
-      getIt<CoreLogger>().error('Network exception', error, stackTrace);
       if (error is DioException) {
         return left(_exceptionMapper.mapException(error, stackTrace));
       }

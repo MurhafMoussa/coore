@@ -116,50 +116,46 @@ Dio _createDio(
   Directory directory, {
   bool shouldLog = false,
 }) {
-  final interceptors = <Interceptor>[];
-  late final AuthInterceptor authInterceptor;
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: entity.baseUrl,
+      connectTimeout: entity.connectTimeout,
+      // ... other base options ...
+    ),
+  );
 
+  if (shouldLog) {
+    dio.interceptors.add(
+      LoggingInterceptor(logger: getIt(), maxBodyLength: 10000),
+    );
+  }
+
+  if (entity.enableCache) {
+    dio.interceptors.add(
+      CachingInterceptor(
+        cacheStore: MemoryCacheStore(),
+        defaultCacheDuration: entity.cacheDuration,
+      ),
+    );
+  }
+
+  late final AuthInterceptor authInterceptor;
   switch (entity.authInterceptorType) {
     case AuthInterceptorType.tokenBased:
-      {
-        authInterceptor = TokenAuthInterceptor(getIt());
-      }
-
+      authInterceptor = TokenAuthInterceptor(getIt());
+      break;
     case AuthInterceptorType.cookieBased:
-      {
-        final String appDocPath = directory.path;
-        final jar = PersistCookieJar(
-          ignoreExpires: true,
-          storage: FileStorage('$appDocPath/.cookies/'),
-        );
-        authInterceptor = CookieAuthInterceptor(getIt());
-        interceptors.add(CookieManager(jar));
-      }
+      final String appDocPath = directory.path;
+      final jar = PersistCookieJar(
+        ignoreExpires: true,
+        storage: FileStorage('$appDocPath/.cookies/'),
+      );
+      dio.interceptors.add(CookieManager(jar));
+      authInterceptor = CookieAuthInterceptor(getIt());
+      break;
   }
-  interceptors.add(authInterceptor);
-  return Dio(
-      BaseOptions(
-        baseUrl: entity.baseUrl,
-        connectTimeout: entity.connectTimeout,
-        contentType: entity.defaultContentType,
-        followRedirects: interceptors.first is TokenAuthInterceptor
-            ? entity.followRedirects
-            : false,
-        maxRedirects: entity.maxRedirects,
-        queryParameters: entity.defaultQueryParams,
-        sendTimeout: entity.sendTimeout,
-        receiveTimeout: entity.receiveTimeout,
-        headers: entity.staticHeaders,
-      ),
-    )
-    ..interceptors.addAll([
-      if (entity.enableCache)
-        CachingInterceptor(
-          cacheStore: MemoryCacheStore(),
-          defaultCacheDuration: entity.cacheDuration,
-        ),
-      ...interceptors,
-      ...entity.interceptors,
-      if (shouldLog) LoggingInterceptor(logger: getIt(), maxBodyLength: 10000),
-    ]);
+
+  dio.interceptors.addAll([...entity.interceptors, authInterceptor]);
+
+  return dio;
 }
