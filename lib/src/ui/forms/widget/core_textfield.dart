@@ -6,6 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+typedef VisibilityToggleBuilder =
+    Widget Function(
+      BuildContext context,
+      bool isObscured,
+      VoidCallback toggle,
+      ValueChanged<bool> setObscured,
+    );
+
 /// An enterprise-level text field widget that integrates with the [CoreFormCubit]
 /// for state management. This widget builds upon [TextFormField] from the
 /// flutter_form_builder package and exposes a wide range of customization options
@@ -142,6 +150,9 @@ class CoreTextField extends StatefulWidget {
     this.transformValue,
     this.formatText,
     this.autofocus = false,
+    this.visibilityToggleBuilder,
+    this.visibilityIconBuilder,
+    this.onVisibilityChanged,
   }) : assert(
          !expands || (maxLines == null && minLines == null),
          'When expands is true, maxLines and minLines must both be null.',
@@ -171,6 +182,9 @@ class CoreTextField extends StatefulWidget {
 
   /// Visual decoration for the text field.
   final InputDecoration? decoration;
+
+  /// Custom builder for changing the state and icon of the visibility
+  final VisibilityToggleBuilder? visibilityToggleBuilder;
 
   /// The type of keyboard to be displayed.
   final TextInputType? keyboardType;
@@ -209,6 +223,16 @@ class CoreTextField extends StatefulWidget {
 
   /// Vertical alignment of the text within the field.
   final TextAlignVertical? textAlignVertical;
+
+  /// Build a custom visibility icon. Receives the [context] and whether
+  /// the field is currently obscured.
+  final Widget Function(BuildContext context, bool isObscured)?
+  visibilityIconBuilder;
+
+  /// Called after the visibility state changes. Receives [context] and the
+  /// new obscured state.
+  final void Function(BuildContext context, bool isObscured)?
+  onVisibilityChanged;
 
   /// Controls the capitalization of the text.
   final TextCapitalization textCapitalization;
@@ -408,6 +432,21 @@ class _CoreTextFieldState extends State<CoreTextField> {
     _focusNode = widget.focusNode ?? FocusNode();
   }
 
+  void _notifyVisibilityChanged() {
+    widget.onVisibilityChanged?.call(context, obscureText);
+  }
+
+  void _toggleObscure() {
+    setState(() => obscureText = !obscureText);
+    _notifyVisibilityChanged();
+  }
+
+  void _setObscure(bool value) {
+    if (obscureText == value) return;
+    setState(() => obscureText = value);
+    _notifyVisibilityChanged();
+  }
+
   @override
   void dispose() {
     _debounceTimer?.cancel();
@@ -573,13 +612,23 @@ class _CoreTextFieldState extends State<CoreTextField> {
     );
   }
 
-  IconButton _buildVisibilityIcon() {
-    return IconButton(
-      icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
-      onPressed: () => setState(() {
-        obscureText = !obscureText;
-      }),
-    );
+  Widget _buildVisibilityToggle(BuildContext context) {
+    // If you provide a full replacement, use it:
+    if (widget.visibilityToggleBuilder != null) {
+      return widget.visibilityToggleBuilder!(
+        context,
+        obscureText,
+        _toggleObscure,
+        _setObscure,
+      );
+    }
+
+    // Otherwise fall back to the icon-only builder / default IconButton:
+    final icon =
+        widget.visibilityIconBuilder?.call(context, obscureText) ??
+        Icon(obscureText ? Icons.visibility_off : Icons.visibility);
+
+    return IconButton(icon: icon, onPressed: _toggleObscure);
   }
 
   Widget? _buildPrefixIcons() {
@@ -589,7 +638,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
     }
 
     if (widget.obscureText) {
-      prefixWidgets.add(_buildVisibilityIcon());
+      prefixWidgets.add(_buildVisibilityToggle(context));
     }
 
     // If we have more than one widget, wrap them in a Row.
