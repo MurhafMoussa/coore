@@ -113,12 +113,7 @@ class LoggingInterceptor extends Interceptor {
 
     if (err.response != null) {
       buffer.writeln('Status Code: ${err.response?.statusCode}');
-    }
-
-    if (err.error != null) {
-      buffer
-        ..writeln('Error Details:')
-        ..writeln(err.response?.data);
+      buffer.writeln('Error Body: ${err.response?.data}');
     }
 
     buffer
