@@ -58,6 +58,7 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
         secureStorageEnabled: coreEntity.enableSecureStorage,
       ),
     )
+    ..registerLazySingleton<CacheStore>(() => MemCacheStore())
     ..registerLazySingleton(
       () => _createDio(
         coreEntity.networkConfigEntity,
@@ -132,14 +133,14 @@ Dio _createDio(
   if (entity.enableCache) {
     final cacheOptions = CacheOptions(
       // A store is required for caching. We'll use MemCacheStore for in-memory caching.
-      store: MemCacheStore(),
+      store: getIt<CacheStore>(),
 
       // The default policy. We'll set it to "do not cache" by default.
       // We will override this on a per-request basis.
       policy: CachePolicy.noCache,
 
       // Default max duration for cache entries.
-      maxStale: const Duration(minutes: 30),
+      maxStale: entity.cacheDuration,
     );
     dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
   }

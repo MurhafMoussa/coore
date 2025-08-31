@@ -35,7 +35,7 @@ class DioApiHandler implements ApiHandlerInterface {
       extra.addAll(
         CacheOptions(
           policy: CachePolicy.forceCache,
-          store: MemCacheStore(),
+          store: getIt<CacheStore>(),
         ).toExtra(),
       );
     }
