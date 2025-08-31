@@ -17,7 +17,7 @@ class CoreFormCubit extends Cubit<CoreFormState> {
     _touchedFields = {};
     final values = <String, Object?>{};
     final fieldTypes = <String, Type>{};
-
+    _fields = fields;
     // Initialize validators, field types, and mark fields as untouched
     for (final field in fields) {
       values[field.name] = field.initialValue;
@@ -37,7 +37,7 @@ class CoreFormCubit extends Cubit<CoreFormState> {
       ),
     );
   }
-
+  late final List<TypedFormField> _fields;
   late final Map<String, Validator> _validators;
   late final Map<String, bool> _touchedFields;
 
@@ -99,6 +99,38 @@ class CoreFormCubit extends Cubit<CoreFormState> {
         isValid: overallValid,
       ),
     );
+  }
+
+  /// Call this when you need to change the validation rules for a field based on
+  /// other state in your application (e.g., making a field required based on a checkbox).
+  void updateFieldValidators<T>({
+    required String name,
+    required List<Validator<T>> validators,
+    required BuildContext context,
+  }) {
+    final fieldIndex = _fields.indexWhere((field) => field.name == name);
+
+    if (fieldIndex == -1) {
+      throw ArgumentError('Field "$name" does not exist in the form');
+    }
+
+    // 1. Update the stored field definition using copyWith.
+    // We cast the dynamic field to its specific type to ensure type safety.
+    final oldField = _fields[fieldIndex];
+    final newField = (oldField as TypedFormField<T>).copyWith(
+      validators: validators,
+    );
+    _fields[fieldIndex] = newField;
+
+    // 2. Re-create the composite validator and update the internal map.
+    _validators[name] = newField.createValidator();
+
+    // 3. Re-validate all fields with the new rules to update errors and form validity.
+    final newErrors = _validateFields(state.values, context);
+    final newIsValid = _computeOverallValidity(state.values, context);
+
+    // 4. Emit the new state with updated errors and validity.
+    emit(state.copyWith(errors: newErrors, isValid: newIsValid));
   }
 
   /// Validates a single field with its validator
