@@ -4,9 +4,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:coore/src/api_handler/api_handler_impl.dart';
 import 'package:coore/src/api_handler/api_handler_interface.dart';
 import 'package:coore/src/api_handler/auth_token_manager.dart';
-import 'package:coore/src/api_handler/base_cache_store/mem_cache_store.dart';
 import 'package:coore/src/api_handler/interceptors/auth_interceptor.dart';
-import 'package:coore/src/api_handler/interceptors/caching_interceptor.dart';
 import 'package:coore/src/api_handler/interceptors/logging_interceptor.dart';
 import 'package:coore/src/config/entities/core_config_entity.dart';
 import 'package:coore/src/config/entities/network_config_entity.dart';
@@ -24,6 +22,7 @@ import 'package:coore/src/network_status/service/network_status_imp.dart';
 import 'package:coore/src/network_status/service/network_status_interface.dart';
 import 'package:coore/src/theme/cubit/theme_cubit.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -131,12 +130,18 @@ Dio _createDio(
   }
 
   if (entity.enableCache) {
-    dio.interceptors.add(
-      CachingInterceptor(
-        cacheStore: MemoryCacheStore(),
-        defaultCacheDuration: entity.cacheDuration,
-      ),
+    final cacheOptions = CacheOptions(
+      // A store is required for caching. We'll use MemCacheStore for in-memory caching.
+      store: MemCacheStore(),
+
+      // The default policy. We'll set it to "do not cache" by default.
+      // We will override this on a per-request basis.
+      policy: CachePolicy.noCache,
+
+      // Default max duration for cache entries.
+      maxStale: const Duration(minutes: 30),
     );
+    dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
   }
 
   late final AuthInterceptor authInterceptor;

@@ -1,5 +1,6 @@
 import 'package:coore/lib.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:fpdart/fpdart.dart';
 
 /// An API handler implementation using Dio.
@@ -20,23 +21,27 @@ class DioApiHandler implements ApiHandlerInterface {
   final Dio _dio;
   final NetworkExceptionMapper _exceptionMapper;
 
-  /// Builds Dio [Options] with extra headers based on [isAuthorized] and [shouldCache].
-  ///
-  /// If [isAuthorized] is true, an "Authorization" header is added (in production,
-  /// replace with a real token). If [shouldCache] is true, a "Cache-Control" header
-  /// is added. The headers are stored in the [extra] field of the options.
+  /// Builds Dio [Options] with authorization and optional caching.
   Options _buildOptions({
     required bool isAuthorized,
-    bool shouldCache = false,
+    bool shouldCache = false, // The forceRefresh parameter is removed
     bool isFormData = false,
   }) {
-    final headers = <String, dynamic>{
-      'isAuthorized': isAuthorized,
-      'shouldCache': shouldCache,
-    };
+    final extra = <String, dynamic>{'isAuthorized': isAuthorized};
+
+    // If shouldCache is true, add the cache policy to the extra map.
+    // The interceptor will pick this up.
+    if (shouldCache) {
+      extra.addAll(
+        CacheOptions(
+          policy: CachePolicy.forceCache,
+          store: MemCacheStore(),
+        ).toExtra(),
+      );
+    }
 
     return Options(
-      extra: headers,
+      extra: extra,
       contentType: isFormData
           ? Headers.multipartFormDataContentType
           : Headers.jsonContentType,
