@@ -24,7 +24,7 @@ class NetworkStatusImp implements NetworkStatusInterface {
 
   @override
   Future<bool> get isConnected async =>
-      _latestStatus == ConnectionStatus.connected;
+      _internetConnection.hasInternetAccess;
 
   Future<void> _init() async {
     _subscription =
