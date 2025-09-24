@@ -17,10 +17,9 @@ Map<String, dynamic> _$ErrorResponseModelToJson(_ErrorResponseModel instance) =>
 _ErrorModel _$ErrorModelFromJson(Map<String, dynamic> json) => _ErrorModel(
   status: (json['status'] as num).toInt(),
   message: json['message'] as String,
-  details:
-      (json['details'] as List<dynamic>?)
-          ?.map((e) => ErrorDetail.fromJson(e as Map<String, dynamic>))
-          .toList(),
+  details: (json['details'] as List<dynamic>?)
+      ?.map((e) => ErrorDetail.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$ErrorModelToJson(_ErrorModel instance) =>
