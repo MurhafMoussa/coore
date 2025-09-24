@@ -1,4 +1,6 @@
-part of 'core_form_cubit.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'core_form_state.freezed.dart';
 
 @freezed
 abstract class CoreFormState with _$CoreFormState {
@@ -46,4 +48,19 @@ abstract class CoreFormState with _$CoreFormState {
   /// Check if a field has an error
   @useResult
   bool hasError(String fieldName) => errors.containsKey(fieldName);
+}
+
+/// Enum representing the available form validation strategies
+enum ValidationType {
+  /// Validation occurs only upon form submission
+  onSubmit,
+
+  /// All fields are validated whenever any field is updated
+  allFields,
+
+  /// Only the field currently being edited is validated
+  fieldsBeingEdited,
+
+  /// Validation is disabled
+  disabled,
 }

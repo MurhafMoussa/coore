@@ -1,10 +1,9 @@
-import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:coore/lib.dart';
+import 'package:coore/src/ui/forms/widget/field_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 typedef VisibilityToggleBuilder =
     Widget Function(
@@ -407,18 +406,13 @@ class CoreTextField extends StatefulWidget {
 
 class _CoreTextFieldState extends State<CoreTextField> {
   bool obscureText = false;
-  Timer? _debounceTimer;
   late final TextEditingController textEditingController;
   late final FocusNode _focusNode;
+  void Function(String?)? _currentUpdateValue;
 
   @override
   void initState() {
     super.initState();
-
-    if (!ValueTester.isNull(widget.initialText)) {
-      _updateCubit(widget.initialText);
-    }
-
     obscureText = widget.obscureText;
 
     // Apply format if provided
@@ -449,8 +443,6 @@ class _CoreTextFieldState extends State<CoreTextField> {
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
-
     // Only dispose the focus node if we created it
     if (widget.focusNode == null) {
       _focusNode.dispose();
@@ -460,34 +452,24 @@ class _CoreTextFieldState extends State<CoreTextField> {
     super.dispose();
   }
 
-  void _updateCubit(String? text) {
-    if (widget.debounceTime != null) {
-      _debounceTimer?.cancel();
-      _debounceTimer = Timer(widget.debounceTime!, () {
-        _updateFormState(text);
-      });
-    } else {
-      _updateFormState(text);
-    }
-  }
-
-  void _updateFormState(String? text) {
-    final transformedText = text != null && widget.transformValue != null
-        ? widget.transformValue!(text)
-        : text;
-
-    context.read<CoreFormCubit>().updateField(
-      widget.name,
-      transformedText,
-      context,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CoreFormCubit, CoreFormState>(
-      builder: (context, state) {
-        final errorText = state.errors[widget.name];
+    return FieldWrapper<String>(
+      fieldName: widget.name,
+      initialValue: widget.initialText,
+      debounceTime: widget.debounceTime,
+      transformValue: widget.transformValue,
+      builder: (context, value, error, hasError, updateValue) {
+        // Store the updateValue callback for use in helper methods
+        _currentUpdateValue = updateValue;
+
+        // Update controller text if value changed from form state
+        if (textEditingController.text != (value ?? '')) {
+          final formattedValue = widget.formatText != null && value != null
+              ? widget.formatText!(value)
+              : value ?? '';
+          textEditingController.text = formattedValue;
+        }
 
         // Build label text with required indicator if needed
         Widget? labelWidget;
@@ -523,32 +505,33 @@ class _CoreTextFieldState extends State<CoreTextField> {
             (widget.decoration ?? const InputDecoration()).copyWith(
               suffixIcon: widget.switchBetweenPrefixAndSuffix
                   ? _buildPrefixIcons()
-                  : _buildSuffixIcons(state),
+                  : _buildSuffixIcons(value),
               prefixIcon: widget.switchBetweenPrefixAndSuffix
-                  ? _buildSuffixIcons(state)
+                  ? _buildSuffixIcons(value)
                   : _buildPrefixIcons(),
               labelText: widget.showRequiredStar ? null : widget.labelText,
               label: labelWidget,
               hintText: widget.hintText,
               prefix: widget.prefixWidget,
               suffix: widget.suffixWidget,
-              errorText: widget.errorBuilder == null ? errorText : null,
-              error: widget.errorBuilder != null && errorText != null
-                  ? widget.errorBuilder!(context, errorText)
+              errorText: widget.errorBuilder == null ? error : null,
+              error: widget.errorBuilder != null && hasError
+                  ? widget.errorBuilder!(context, error)
                   : null,
             );
+
         return TextFormField(
           controller: textEditingController,
           obscureText: obscureText,
           obscuringCharacter: widget.obscuringCharacter,
           decoration: effectiveDecoration,
           inputFormatters: widget.inputFormatters,
-          onChanged: _updateCubit,
-          onFieldSubmitted: (value) {
-            _updateCubit(value);
-            widget.onSubmitted?.call(value);
+          onChanged: updateValue,
+          onFieldSubmitted: (fieldValue) {
+            updateValue(fieldValue);
+            widget.onSubmitted?.call(fieldValue);
           },
-          onSaved: _updateCubit,
+          onSaved: updateValue,
           onTap: widget.onTap,
           onTapOutside: widget.onTapOutside,
           onEditingComplete: widget.onEditingComplete,
@@ -564,9 +547,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
           minLines: widget.minLines,
           maxLength: widget.maxLength,
           maxLengthEnforcement: widget.maxLengthEnforcement,
-          autovalidateMode: state.validationType == ValidationType.disabled
-              ? AutovalidateMode.disabled
-              : widget.autovalidateMode,
+          autovalidateMode: widget.autovalidateMode,
           enableSuggestions: widget.enableSuggestions,
           showCursor: widget.showCursor,
           textAlignVertical: widget.textAlignVertical,
@@ -602,12 +583,12 @@ class _CoreTextFieldState extends State<CoreTextField> {
     );
   }
 
-  IconButton _buildClearIcon() {
+  Widget _buildClearIcon() {
     return IconButton(
       icon: widget.customClearIcon ?? const Icon(Icons.clear),
       onPressed: () {
         textEditingController.clear();
-        _updateCubit('');
+        _currentUpdateValue?.call('');
       },
     );
   }
@@ -652,11 +633,10 @@ class _CoreTextFieldState extends State<CoreTextField> {
     return finalPrefix;
   }
 
-  Widget? _buildSuffixIcons(CoreFormState state) {
+  Widget? _buildSuffixIcons(String? currentValue) {
     final List<Widget> suffixWidgets = [];
 
-    if (widget.enableClear &&
-        !ValueTester.isNullOrBlank(state.values[widget.name])) {
+    if (widget.enableClear && !ValueTester.isNullOrBlank(currentValue)) {
       suffixWidgets.add(_buildClearIcon());
     }
 

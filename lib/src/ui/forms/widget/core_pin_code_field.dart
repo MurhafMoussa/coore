@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:coore/lib.dart';
+import 'package:coore/src/ui/forms/widget/field_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pinput/pinput.dart';
 
 /// An enterprise-level pin code input widget that integrates with the [CoreFormCubit]
@@ -277,7 +275,6 @@ class CorePinCodeField extends StatefulWidget {
 }
 
 class _CorePinCodeFieldState extends State<CorePinCodeField> {
-  Timer? _debounceTimer;
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
 
@@ -287,15 +284,10 @@ class _CorePinCodeFieldState extends State<CorePinCodeField> {
     _controller =
         widget.controller ?? TextEditingController(text: widget.initialValue);
     _focusNode = widget.focusNode ?? FocusNode();
-
-    if (!ValueTester.isBlank(_controller.text)) {
-      _updateCubit(_controller.text);
-    }
   }
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
     if (widget.focusNode == null) {
       _focusNode.dispose();
     }
@@ -305,52 +297,35 @@ class _CorePinCodeFieldState extends State<CorePinCodeField> {
     super.dispose();
   }
 
-  void _updateCubit(String? text) {
-    widget.onChanged?.call(text ?? '');
-    if (widget.debounceTime != null) {
-      _debounceTimer?.cancel();
-      _debounceTimer = Timer(widget.debounceTime!, () {
-        _updateFormState(text);
-      });
-    } else {
-      _updateFormState(text);
-    }
-  }
-
-  void _updateFormState(String? text) {
-    final transformedText = text != null && widget.transformValue != null
-        ? widget.transformValue!(text)
-        : text;
-    context.read<CoreFormCubit>().updateField(
-      widget.name,
-      transformedText,
-      context,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return FieldWrapper<String>(
+      fieldName: widget.name,
+      initialValue: widget.initialValue,
+      debounceTime: widget.debounceTime,
+      transformValue: widget.transformValue,
+      builder: (context, value, error, hasError, updateValue) {
+        // Sync controller with form value
+        if (_controller.text != (value ?? '')) {
+          _controller.text = value ?? '';
+        }
 
-    final defaultPinTheme =
-        widget.defaultPinTheme ??
-        widget.pinTheme ??
-        PinTheme(
-          width: 56,
-          height: 56,
-          textStyle: theme.textTheme.titleLarge,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: theme.colorScheme.onSurface.withAlpha(80),
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-        );
+        final theme = Theme.of(context);
 
-    return BlocBuilder<CoreFormCubit, CoreFormState>(
-      builder: (context, state) {
-        final errorText = state.errors[widget.name];
-        final hasError = !ValueTester.isBlank(errorText);
+        final defaultPinTheme =
+            widget.defaultPinTheme ??
+            widget.pinTheme ??
+            PinTheme(
+              width: 56,
+              height: 56,
+              textStyle: theme.textTheme.titleLarge,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: theme.colorScheme.onSurface.withAlpha(80),
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            );
 
         return Pinput(
           length: widget.length,
@@ -364,13 +339,16 @@ class _CorePinCodeFieldState extends State<CorePinCodeField> {
           obscuringWidget: widget.obscuringWidget,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
-          onChanged: _updateCubit,
+          onChanged: (text) {
+            widget.onChanged?.call(text);
+            updateValue(text); // Use FieldWrapper's updateValue
+          },
           onCompleted: (pin) {
-            // No need to call _updateCubit here as onChanged is already called
+            // No need to call updateValue here as onChanged is already called
             widget.onCompleted?.call(pin);
           },
           onSubmitted: (value) {
-            _updateCubit(value);
+            updateValue(value); // Use FieldWrapper's updateValue
             widget.onSubmitted?.call(value);
           },
           onTap: widget.onTap,
@@ -383,7 +361,7 @@ class _CorePinCodeFieldState extends State<CorePinCodeField> {
           cursor: widget.cursor,
           separatorBuilder: widget.separatorBuilder,
           forceErrorState: hasError,
-          errorText: widget.errorBuilder == null ? errorText : null,
+          errorText: widget.errorBuilder == null ? error : null,
           errorTextStyle: widget.errorTextStyle,
           errorBuilder: widget.errorBuilder != null && hasError
               ? (error, _) => widget.errorBuilder!(context, error)
