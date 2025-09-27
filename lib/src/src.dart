@@ -13,6 +13,7 @@ export 'local_storage/local_storage.dart';
 export 'localization/localization.dart';
 export 'navigation/navigation.dart';
 export 'network_status/network_status.dart';
+export 'platform/platform.dart';
 export 'state_management/state_management.dart';
 export 'theme/theme.dart';
 export 'typedefs/typedefs.dart';

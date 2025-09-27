@@ -20,7 +20,10 @@ import 'package:coore/src/localization/cubit/localization_cubit.dart';
 import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
 import 'package:coore/src/network_status/service/network_status_imp.dart';
 import 'package:coore/src/network_status/service/network_status_interface.dart';
+import 'package:coore/src/platform/service/platform_service_impl.dart';
+import 'package:coore/src/platform/service/platform_service_interface.dart';
 import 'package:coore/src/theme/cubit/theme_cubit.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -29,6 +32,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:logger/logger.dart' as logger;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 final getIt = GetIt.instance;
@@ -36,8 +40,9 @@ final getIt = GetIt.instance;
 Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
   final directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
-
   getIt
+    ..registerLazySingletonAsync(() => DeviceInfoPlugin().deviceInfo)
+    ..registerLazySingletonAsync(() => PackageInfo.fromPlatform())
     ..registerLazySingleton(
       () => logger.Logger(
         filter: logger.DevelopmentFilter(),
@@ -97,8 +102,15 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
         usecase: getIt(),
         themeConfigEntity: coreEntity.themeConfigEntity,
       ),
+    )
+    ..registerLazySingleton<PlatformServiceInterface>(
+      () => PlatformServiceImpl(getIt(), getIt()),
     );
 }
+
+/// Get the platform service instance
+PlatformServiceInterface get platformService =>
+    getIt<PlatformServiceInterface>();
 
 FlutterSecureStorage _createFlutterSecureStorage() {
   const iosOptions = IOSOptions(
