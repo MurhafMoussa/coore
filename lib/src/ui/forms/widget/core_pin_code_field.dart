@@ -1,8 +1,7 @@
-import 'package:coore/lib.dart';
-import 'package:coore/src/ui/forms/widget/field_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pinput/pinput.dart';
+import 'package:typed_form_fields/typed_form_fields.dart';
 
 /// An enterprise-level pin code input widget that integrates with the [CoreFormCubit]
 /// for state management. This widget builds upon the `pinput` package, exposing

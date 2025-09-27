@@ -1,9 +1,9 @@
 import 'dart:ui' as ui;
 
 import 'package:coore/lib.dart';
-import 'package:coore/src/ui/forms/widget/field_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:typed_form_fields/typed_form_fields.dart';
 
 typedef VisibilityToggleBuilder =
     Widget Function(
