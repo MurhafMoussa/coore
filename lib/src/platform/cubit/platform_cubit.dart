@@ -4,6 +4,7 @@ import 'package:coore/src/platform/service/platform_service_interface.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Cubit for managing platform and device information state
+
 class PlatformCubit extends Cubit<DeviceInfoEntity> {
   PlatformCubit({required this.service}) : super(_initialState) {
     _initialize();

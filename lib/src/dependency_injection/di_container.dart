@@ -1,28 +1,7 @@
 import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:coore/src/api_handler/api_handler_impl.dart';
-import 'package:coore/src/api_handler/api_handler_interface.dart';
-import 'package:coore/src/api_handler/auth_token_manager.dart';
-import 'package:coore/src/api_handler/interceptors/auth_interceptor.dart';
-import 'package:coore/src/api_handler/interceptors/logging_interceptor.dart';
-import 'package:coore/src/config/entities/core_config_entity.dart';
-import 'package:coore/src/config/entities/network_config_entity.dart';
-import 'package:coore/src/config/service/config_service.dart';
-import 'package:coore/src/dev_tools/core_logger.dart';
-import 'package:coore/src/error_handling/exception_mapper/dio_exception_mapper.dart';
-import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
-import 'package:coore/src/local_storage/local_database/local_database_interface.dart';
-import 'package:coore/src/local_storage/local_database/nosql_database_imp.dart';
-import 'package:coore/src/local_storage/secure_database/secure_database_imp.dart';
-import 'package:coore/src/local_storage/secure_database/secure_database_interface.dart';
-import 'package:coore/src/localization/cubit/localization_cubit.dart';
-import 'package:coore/src/network_status/cubit/network_status_cubit.dart';
-import 'package:coore/src/network_status/service/network_status_imp.dart';
-import 'package:coore/src/network_status/service/network_status_interface.dart';
-import 'package:coore/src/platform/service/platform_service_impl.dart';
-import 'package:coore/src/platform/service/platform_service_interface.dart';
-import 'package:coore/src/theme/cubit/theme_cubit.dart';
+import 'package:coore/lib.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
@@ -105,7 +84,8 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
     )
     ..registerLazySingleton<PlatformServiceInterface>(
       () => PlatformServiceImpl(getIt(), getIt()),
-    );
+    )
+    ..registerLazySingleton(() => PlatformCubit(service: getIt()));
 }
 
 /// Get the platform service instance
