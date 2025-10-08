@@ -298,7 +298,7 @@ class _CorePinCodeFieldState extends State<CorePinCodeField> {
 
   @override
   Widget build(BuildContext context) {
-    return FieldWrapper<String>(
+    return TypedFieldWrapper<String>(
       fieldName: widget.name,
       initialValue: widget.initialValue,
       debounceTime: widget.debounceTime,

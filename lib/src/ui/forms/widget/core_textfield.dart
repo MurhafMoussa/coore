@@ -454,7 +454,7 @@ class _CoreTextFieldState extends State<CoreTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return FieldWrapper<String>(
+    return TypedFieldWrapper<String>(
       fieldName: widget.name,
       initialValue: widget.initialText,
       debounceTime: widget.debounceTime,
