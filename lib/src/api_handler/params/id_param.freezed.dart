@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$IdParam {
 
- Id get id;@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
+ Id get id;
 /// Create a copy of IdParam
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $IdParamCopyWith<IdParam> get copyWith => _$IdParamCopyWithImpl<IdParam>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IdParam&&(identical(other.id, id) || other.id == id)&&(identical(other.cancelRequestAdapter, cancelRequestAdapter) || other.cancelRequestAdapter == cancelRequestAdapter));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IdParam&&(identical(other.id, id) || other.id == id));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,cancelRequestAdapter);
+int get hashCode => Object.hash(runtimeType,id);
 
 @override
 String toString() {
-  return 'IdParam(id: $id, cancelRequestAdapter: $cancelRequestAdapter)';
+  return 'IdParam(id: $id)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $IdParamCopyWith<$Res>  {
   factory $IdParamCopyWith(IdParam value, $Res Function(IdParam) _then) = _$IdParamCopyWithImpl;
 @useResult
 $Res call({
- Id id,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ Id id
 });
 
 
@@ -65,11 +65,10 @@ class _$IdParamCopyWithImpl<$Res>
 
 /// Create a copy of IdParam
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? cancelRequestAdapter = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as Id,cancelRequestAdapter: freezed == cancelRequestAdapter ? _self.cancelRequestAdapter : cancelRequestAdapter // ignore: cast_nullable_to_non_nullable
-as CancelRequestAdapter?,
+as Id,
   ));
 }
 
@@ -154,10 +153,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Id id, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Id id)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IdParam() when $default != null:
-return $default(_that.id,_that.cancelRequestAdapter);case _:
+return $default(_that.id);case _:
   return orElse();
 
 }
@@ -175,10 +174,10 @@ return $default(_that.id,_that.cancelRequestAdapter);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Id id, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Id id)  $default,) {final _that = this;
 switch (_that) {
 case _IdParam():
-return $default(_that.id,_that.cancelRequestAdapter);case _:
+return $default(_that.id);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +194,10 @@ return $default(_that.id,_that.cancelRequestAdapter);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Id id, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Id id)?  $default,) {final _that = this;
 switch (_that) {
 case _IdParam() when $default != null:
-return $default(_that.id,_that.cancelRequestAdapter);case _:
+return $default(_that.id);case _:
   return null;
 
 }
@@ -210,11 +209,10 @@ return $default(_that.id,_that.cancelRequestAdapter);case _:
 @JsonSerializable()
 
 class _IdParam extends IdParam {
-  const _IdParam({required this.id, @JsonKey(includeToJson: false, includeFromJson: false) this.cancelRequestAdapter}): super._();
+  const _IdParam({required this.id}): super._();
   factory _IdParam.fromJson(Map<String, dynamic> json) => _$IdParamFromJson(json);
 
 @override final  Id id;
-@override@JsonKey(includeToJson: false, includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
 
 /// Create a copy of IdParam
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +227,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IdParam&&(identical(other.id, id) || other.id == id)&&(identical(other.cancelRequestAdapter, cancelRequestAdapter) || other.cancelRequestAdapter == cancelRequestAdapter));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IdParam&&(identical(other.id, id) || other.id == id));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,cancelRequestAdapter);
+int get hashCode => Object.hash(runtimeType,id);
 
 @override
 String toString() {
-  return 'IdParam(id: $id, cancelRequestAdapter: $cancelRequestAdapter)';
+  return 'IdParam(id: $id)';
 }
 
 
@@ -249,7 +247,7 @@ abstract mixin class _$IdParamCopyWith<$Res> implements $IdParamCopyWith<$Res> {
   factory _$IdParamCopyWith(_IdParam value, $Res Function(_IdParam) _then) = __$IdParamCopyWithImpl;
 @override @useResult
 $Res call({
- Id id,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ Id id
 });
 
 
@@ -266,11 +264,10 @@ class __$IdParamCopyWithImpl<$Res>
 
 /// Create a copy of IdParam
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? cancelRequestAdapter = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,}) {
   return _then(_IdParam(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as Id,cancelRequestAdapter: freezed == cancelRequestAdapter ? _self.cancelRequestAdapter : cancelRequestAdapter // ignore: cast_nullable_to_non_nullable
-as CancelRequestAdapter?,
+as Id,
   ));
 }
 

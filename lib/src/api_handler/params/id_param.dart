@@ -5,11 +5,10 @@ part 'id_param.freezed.dart';
 part 'id_param.g.dart';
 
 @freezed
-abstract class IdParam with _$IdParam implements Cancelable {
+abstract class IdParam with _$IdParam {
   const factory IdParam({
     required Id id,
-    @JsonKey(includeToJson: false, includeFromJson: false)
-    CancelRequestAdapter? cancelRequestAdapter,
+
   }) = _IdParam;
 
   factory IdParam.fromJson(Map<String, dynamic> json) =>
@@ -17,7 +16,5 @@ abstract class IdParam with _$IdParam implements Cancelable {
 
   const IdParam._();
 
-  @override
-  Cancelable copyWithCancelRequest(CancelRequestAdapter cancelRequestAdapter) =>
-      copyWith(cancelRequestAdapter: cancelRequestAdapter);
+ 
 }

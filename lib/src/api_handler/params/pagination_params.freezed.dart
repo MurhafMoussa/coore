@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SkipPagingStrategyParams {
 
- int get take; int get skip;@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
+ int get take; int get skip;
 /// Create a copy of SkipPagingStrategyParams
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $SkipPagingStrategyParamsCopyWith<SkipPagingStrategyParams> get copyWith => _$Sk
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SkipPagingStrategyParams&&(identical(other.take, take) || other.take == take)&&(identical(other.skip, skip) || other.skip == skip)&&(identical(other.cancelRequestAdapter, cancelRequestAdapter) || other.cancelRequestAdapter == cancelRequestAdapter));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SkipPagingStrategyParams&&(identical(other.take, take) || other.take == take)&&(identical(other.skip, skip) || other.skip == skip));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,take,skip,cancelRequestAdapter);
+int get hashCode => Object.hash(runtimeType,take,skip);
 
 @override
 String toString() {
-  return 'SkipPagingStrategyParams(take: $take, skip: $skip, cancelRequestAdapter: $cancelRequestAdapter)';
+  return 'SkipPagingStrategyParams(take: $take, skip: $skip)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $SkipPagingStrategyParamsCopyWith<$Res>  {
   factory $SkipPagingStrategyParamsCopyWith(SkipPagingStrategyParams value, $Res Function(SkipPagingStrategyParams) _then) = _$SkipPagingStrategyParamsCopyWithImpl;
 @useResult
 $Res call({
- int take, int skip,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ int take, int skip
 });
 
 
@@ -65,12 +65,11 @@ class _$SkipPagingStrategyParamsCopyWithImpl<$Res>
 
 /// Create a copy of SkipPagingStrategyParams
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? take = null,Object? skip = null,Object? cancelRequestAdapter = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? take = null,Object? skip = null,}) {
   return _then(_self.copyWith(
 take: null == take ? _self.take : take // ignore: cast_nullable_to_non_nullable
 as int,skip: null == skip ? _self.skip : skip // ignore: cast_nullable_to_non_nullable
-as int,cancelRequestAdapter: freezed == cancelRequestAdapter ? _self.cancelRequestAdapter : cancelRequestAdapter // ignore: cast_nullable_to_non_nullable
-as CancelRequestAdapter?,
+as int,
   ));
 }
 
@@ -155,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int take,  int skip, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int take,  int skip)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SkipPagingStrategyParams() when $default != null:
-return $default(_that.take,_that.skip,_that.cancelRequestAdapter);case _:
+return $default(_that.take,_that.skip);case _:
   return orElse();
 
 }
@@ -176,10 +175,10 @@ return $default(_that.take,_that.skip,_that.cancelRequestAdapter);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int take,  int skip, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int take,  int skip)  $default,) {final _that = this;
 switch (_that) {
 case _SkipPagingStrategyParams():
-return $default(_that.take,_that.skip,_that.cancelRequestAdapter);case _:
+return $default(_that.take,_that.skip);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +195,10 @@ return $default(_that.take,_that.skip,_that.cancelRequestAdapter);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int take,  int skip, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int take,  int skip)?  $default,) {final _that = this;
 switch (_that) {
 case _SkipPagingStrategyParams() when $default != null:
-return $default(_that.take,_that.skip,_that.cancelRequestAdapter);case _:
+return $default(_that.take,_that.skip);case _:
   return null;
 
 }
@@ -211,12 +210,11 @@ return $default(_that.take,_that.skip,_that.cancelRequestAdapter);case _:
 @JsonSerializable()
 
 class _SkipPagingStrategyParams extends SkipPagingStrategyParams {
-  const _SkipPagingStrategyParams({required this.take, required this.skip, @JsonKey(includeToJson: false, includeFromJson: false) this.cancelRequestAdapter}): super._();
+  const _SkipPagingStrategyParams({required this.take, required this.skip}): super._();
   factory _SkipPagingStrategyParams.fromJson(Map<String, dynamic> json) => _$SkipPagingStrategyParamsFromJson(json);
 
 @override final  int take;
 @override final  int skip;
-@override@JsonKey(includeToJson: false, includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
 
 /// Create a copy of SkipPagingStrategyParams
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +229,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SkipPagingStrategyParams&&(identical(other.take, take) || other.take == take)&&(identical(other.skip, skip) || other.skip == skip)&&(identical(other.cancelRequestAdapter, cancelRequestAdapter) || other.cancelRequestAdapter == cancelRequestAdapter));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SkipPagingStrategyParams&&(identical(other.take, take) || other.take == take)&&(identical(other.skip, skip) || other.skip == skip));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,take,skip,cancelRequestAdapter);
+int get hashCode => Object.hash(runtimeType,take,skip);
 
 @override
 String toString() {
-  return 'SkipPagingStrategyParams(take: $take, skip: $skip, cancelRequestAdapter: $cancelRequestAdapter)';
+  return 'SkipPagingStrategyParams(take: $take, skip: $skip)';
 }
 
 
@@ -251,7 +249,7 @@ abstract mixin class _$SkipPagingStrategyParamsCopyWith<$Res> implements $SkipPa
   factory _$SkipPagingStrategyParamsCopyWith(_SkipPagingStrategyParams value, $Res Function(_SkipPagingStrategyParams) _then) = __$SkipPagingStrategyParamsCopyWithImpl;
 @override @useResult
 $Res call({
- int take, int skip,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ int take, int skip
 });
 
 
@@ -268,12 +266,11 @@ class __$SkipPagingStrategyParamsCopyWithImpl<$Res>
 
 /// Create a copy of SkipPagingStrategyParams
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? take = null,Object? skip = null,Object? cancelRequestAdapter = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? take = null,Object? skip = null,}) {
   return _then(_SkipPagingStrategyParams(
 take: null == take ? _self.take : take // ignore: cast_nullable_to_non_nullable
 as int,skip: null == skip ? _self.skip : skip // ignore: cast_nullable_to_non_nullable
-as int,cancelRequestAdapter: freezed == cancelRequestAdapter ? _self.cancelRequestAdapter : cancelRequestAdapter // ignore: cast_nullable_to_non_nullable
-as CancelRequestAdapter?,
+as int,
   ));
 }
 
@@ -284,7 +281,7 @@ as CancelRequestAdapter?,
 /// @nodoc
 mixin _$PagePaginationParams {
 
- int get page; int get limit;@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? get cancelRequestAdapter;
+ int get page; int get limit;
 /// Create a copy of PagePaginationParams
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -297,16 +294,16 @@ $PagePaginationParamsCopyWith<PagePaginationParams> get copyWith => _$PagePagina
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PagePaginationParams&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.cancelRequestAdapter, cancelRequestAdapter) || other.cancelRequestAdapter == cancelRequestAdapter));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PagePaginationParams&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,page,limit,cancelRequestAdapter);
+int get hashCode => Object.hash(runtimeType,page,limit);
 
 @override
 String toString() {
-  return 'PagePaginationParams(page: $page, limit: $limit, cancelRequestAdapter: $cancelRequestAdapter)';
+  return 'PagePaginationParams(page: $page, limit: $limit)';
 }
 
 
@@ -317,7 +314,7 @@ abstract mixin class $PagePaginationParamsCopyWith<$Res>  {
   factory $PagePaginationParamsCopyWith(PagePaginationParams value, $Res Function(PagePaginationParams) _then) = _$PagePaginationParamsCopyWithImpl;
 @useResult
 $Res call({
- int page, int limit,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ int page, int limit
 });
 
 
@@ -334,12 +331,11 @@ class _$PagePaginationParamsCopyWithImpl<$Res>
 
 /// Create a copy of PagePaginationParams
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? page = null,Object? limit = null,Object? cancelRequestAdapter = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? page = null,Object? limit = null,}) {
   return _then(_self.copyWith(
 page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
-as int,cancelRequestAdapter: freezed == cancelRequestAdapter ? _self.cancelRequestAdapter : cancelRequestAdapter // ignore: cast_nullable_to_non_nullable
-as CancelRequestAdapter?,
+as int,
   ));
 }
 
@@ -424,10 +420,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int page,  int limit, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int page,  int limit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PagePaginationParams() when $default != null:
-return $default(_that.page,_that.limit,_that.cancelRequestAdapter);case _:
+return $default(_that.page,_that.limit);case _:
   return orElse();
 
 }
@@ -445,10 +441,10 @@ return $default(_that.page,_that.limit,_that.cancelRequestAdapter);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int page,  int limit, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int page,  int limit)  $default,) {final _that = this;
 switch (_that) {
 case _PagePaginationParams():
-return $default(_that.page,_that.limit,_that.cancelRequestAdapter);case _:
+return $default(_that.page,_that.limit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -465,10 +461,10 @@ return $default(_that.page,_that.limit,_that.cancelRequestAdapter);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int page,  int limit, @JsonKey(includeToJson: false, includeFromJson: false)  CancelRequestAdapter? cancelRequestAdapter)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int page,  int limit)?  $default,) {final _that = this;
 switch (_that) {
 case _PagePaginationParams() when $default != null:
-return $default(_that.page,_that.limit,_that.cancelRequestAdapter);case _:
+return $default(_that.page,_that.limit);case _:
   return null;
 
 }
@@ -480,12 +476,11 @@ return $default(_that.page,_that.limit,_that.cancelRequestAdapter);case _:
 @JsonSerializable()
 
 class _PagePaginationParams extends PagePaginationParams {
-  const _PagePaginationParams({required this.page, required this.limit, @JsonKey(includeToJson: false, includeFromJson: false) this.cancelRequestAdapter}): super._();
+  const _PagePaginationParams({required this.page, required this.limit}): super._();
   factory _PagePaginationParams.fromJson(Map<String, dynamic> json) => _$PagePaginationParamsFromJson(json);
 
 @override final  int page;
 @override final  int limit;
-@override@JsonKey(includeToJson: false, includeFromJson: false) final  CancelRequestAdapter? cancelRequestAdapter;
 
 /// Create a copy of PagePaginationParams
 /// with the given fields replaced by the non-null parameter values.
@@ -500,16 +495,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PagePaginationParams&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.cancelRequestAdapter, cancelRequestAdapter) || other.cancelRequestAdapter == cancelRequestAdapter));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PagePaginationParams&&(identical(other.page, page) || other.page == page)&&(identical(other.limit, limit) || other.limit == limit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,page,limit,cancelRequestAdapter);
+int get hashCode => Object.hash(runtimeType,page,limit);
 
 @override
 String toString() {
-  return 'PagePaginationParams(page: $page, limit: $limit, cancelRequestAdapter: $cancelRequestAdapter)';
+  return 'PagePaginationParams(page: $page, limit: $limit)';
 }
 
 
@@ -520,7 +515,7 @@ abstract mixin class _$PagePaginationParamsCopyWith<$Res> implements $PagePagina
   factory _$PagePaginationParamsCopyWith(_PagePaginationParams value, $Res Function(_PagePaginationParams) _then) = __$PagePaginationParamsCopyWithImpl;
 @override @useResult
 $Res call({
- int page, int limit,@JsonKey(includeToJson: false, includeFromJson: false) CancelRequestAdapter? cancelRequestAdapter
+ int page, int limit
 });
 
 
@@ -537,12 +532,11 @@ class __$PagePaginationParamsCopyWithImpl<$Res>
 
 /// Create a copy of PagePaginationParams
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? page = null,Object? limit = null,Object? cancelRequestAdapter = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? page = null,Object? limit = null,}) {
   return _then(_PagePaginationParams(
 page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,limit: null == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
-as int,cancelRequestAdapter: freezed == cancelRequestAdapter ? _self.cancelRequestAdapter : cancelRequestAdapter // ignore: cast_nullable_to_non_nullable
-as CancelRequestAdapter?,
+as int,
   ));
 }
 
