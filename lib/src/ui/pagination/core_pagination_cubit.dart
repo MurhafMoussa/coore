@@ -1,6 +1,8 @@
+import 'package:async/async.dart';
 import 'package:bloc/bloc.dart';
 import 'package:coore/lib.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -21,10 +23,8 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// {@macro core_pagination_cubit}
   CorePaginationCubit({
     /// Async function that fetches paginated data from usecase
-    required UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
-      int,
-      int,
-    )
+    required UseCaseCancelableFutureResponse<PaginationResponseModel<T, M>>
+    Function(int, int)
     paginationFunction,
 
     /// Pagination strategy implementation (Page/Skip)
@@ -38,10 +38,17 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
     _paginationFunction = paginationFunction;
   }
 
+  /// The currently active, cancelable API operation.
+  CancelableOperation<Either<Failure, PaginationResponseModel<T, M>>>?
+  _cancelableOperation;
+
   /// The data fetching function signature:
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
-  UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(int, int)
+  UseCaseCancelableFutureResponse<PaginationResponseModel<T, M>> Function(
+    int,
+    int,
+  )
   _paginationFunction;
 
   /// Active pagination strategy implementation
@@ -85,12 +92,13 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// - Routes to success/error handlers
   /// - Maintains initial/non-initial context
   Future<void> _fetchNetworkData({required bool isInitial}) async {
-    final result = await _paginationFunction(
+    _cancelableOperation = _paginationFunction(
       paginationStrategy.nextBatch,
       paginationStrategy.limit,
     );
-
-    if (!isClosed) {
+    final result = await _cancelableOperation?.value;
+    _cancelableOperation = null;
+    if (!isClosed && result != null) {
       result.fold(
         (failure) => _handleFailure(failure, isInitial),
         (paginatedResponseModel) =>
@@ -168,17 +176,19 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   @override
   Future<void> close() {
     _refreshController.dispose();
+    _cancelableOperation?.cancel();
     return super.close();
   }
 
   void updatePaginationFunction(
-    UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
+    UseCaseCancelableFutureResponse<PaginationResponseModel<T, M>> Function(
       int batch,
       int limit,
     )
     paginationFunction,
   ) {
     _paginationFunction = paginationFunction;
+    fetchInitialData();
   }
 
   /// Adds an item to the end of the list.
@@ -187,6 +197,8 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
       final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..add(item);
+      if (isClosed) return;
+
       emit(
         CorePaginationState.succeeded(
           paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
@@ -204,6 +216,7 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
       final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..insert(0, item);
+      if (isClosed) return;
       emit(
         CorePaginationState.succeeded(
           paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
@@ -223,16 +236,17 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
         currentState.paginatedResponseModel.data,
       );
       final index = updatedData.indexWhere((element) => element.id == item.id);
-      if (index != -1) {
-        updatedData[index] = item;
-        emit(
-          CorePaginationState.succeeded(
-            paginatedResponseModel: currentState.paginatedResponseModel
-                .copyWith(data: updatedData),
-            hasReachedMax: currentState.hasReachedMax,
+      if (index == -1 || isClosed) return;
+
+      updatedData[index] = item;
+      emit(
+        CorePaginationState.succeeded(
+          paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
+            data: updatedData,
           ),
-        );
-      }
+          hasReachedMax: currentState.hasReachedMax,
+        ),
+      );
     }
   }
 
@@ -242,6 +256,8 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
       final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..removeWhere((element) => element.id == id);
+      if (isClosed) return;
+
       emit(
         CorePaginationState.succeeded(
           paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
@@ -259,6 +275,8 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
       final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..addAll(items);
+      if (isClosed) return;
+
       emit(
         CorePaginationState.succeeded(
           paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
@@ -285,6 +303,8 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
           updatedData[index] = item;
         }
       }
+      if (isClosed) return;
+
       emit(
         CorePaginationState.succeeded(
           paginatedResponseModel: currentState.paginatedResponseModel.copyWith(
@@ -302,6 +322,8 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
       final currentState = state as PaginationSucceeded<T, M>;
       final updatedData = List<T>.from(currentState.paginatedResponseModel.data)
         ..removeWhere((element) => ids.contains(element.id));
+      if (isClosed) return;
+
       emit(
         CorePaginationState.succeeded(
           paginatedResponseModel: currentState.paginatedResponseModel.copyWith(

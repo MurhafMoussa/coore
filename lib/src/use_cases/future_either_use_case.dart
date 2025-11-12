@@ -4,5 +4,5 @@ import 'package:coore/src/use_cases/usecase.dart';
 abstract class FutureEitherUseCase<Output, Input> extends UseCase {
   const FutureEitherUseCase();
 
-  UseCaseFutureResponse<Output> call(Input input);
+  UseCaseCancelableFutureResponse<Output> call(Input input);
 }

@@ -19,6 +19,8 @@ class NetworkConfigEntity extends Equatable {
     this.maxRetries = 3,
     this.retryInterval = const Duration(seconds: 3),
     this.retryOnStatusCodes = const [500, 502, 503, 504],
+    this.requestEncoder,
+    this.responseDecoder,
     this.enableCache = false,
     this.cacheDuration = const Duration(minutes: 5),
 
@@ -67,8 +69,14 @@ class NetworkConfigEntity extends Equatable {
 
   /// Maximum allowed redirects
   final int maxRedirects;
+  /// Interceptors to be added to the Dio instance
   final List<Interceptor> interceptors;
+  /// Authentication interceptor type
   final AuthInterceptorType authInterceptorType;
+  /// Request encoder
+  final RequestEncoder? requestEncoder;
+  /// Response decoder
+  final ResponseDecoder? responseDecoder;
 
   @override
   List<Object?> get props => [

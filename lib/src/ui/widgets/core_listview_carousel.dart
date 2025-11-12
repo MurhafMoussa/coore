@@ -74,11 +74,12 @@ class CoreListViewCarousel extends StatefulWidget {
     required this.itemCount,
     required this.height,
     required this.childPerScreen,
-    this.controller,
+
     this.scrollDirection = Axis.horizontal,
     this.padding,
     this.physics,
-  }) : children = null;
+  }) : children = null,
+       controller = null;
 
   @override
   _CoreListViewCarouselState createState() => _CoreListViewCarouselState();
@@ -93,7 +94,7 @@ class _CoreListViewCarouselState extends State<CoreListViewCarousel> {
         builder: (context, constraints) {
           final itemExtent = (constraints.maxWidth) / widget.childPerScreen;
           final defaultPhysics = widget.physics ?? const PageScrollPhysics();
-
+          widget.controller?._attach(itemExtent);
           if (widget.children != null) {
             return ListView(
               controller: widget.controller,
@@ -146,62 +147,54 @@ class _CoreListViewCarouselState extends State<CoreListViewCarousel> {
 ///
 /// This controller allows programmatic control of the carousel scrolling.
 class CoreListViewCarouselController extends ScrollController {
+  /// Internal property to store the calculated size of each item.
+  double _itemExtent = 0;
+
+  /// Private method used by the widget to attach its calculated layout.
+  void _attach(double itemExtent) {
+    _itemExtent = itemExtent;
+  }
+
   /// Animate to a specific item index.
   Future<void> animateToItem(
     int index, {
-    required double itemWidth,
-    required double spacing,
     Duration duration = const Duration(milliseconds: 300),
     Curve curve = Curves.easeInOut,
   }) async {
-    final targetOffset = index * (itemWidth + spacing);
+    if (_itemExtent == 0) return; // Not attached yet
+    final targetOffset = index * _itemExtent;
     await animateTo(targetOffset, duration: duration, curve: curve);
   }
 
   /// Jump to a specific item index without animation.
-  void jumpToItem(
-    int index, {
-    required double itemWidth,
-    required double spacing,
-  }) {
-    final targetOffset = index * (itemWidth + spacing);
+  void jumpToItem(int index) {
+    if (_itemExtent == 0) return; // Not attached yet
+    final targetOffset = index * _itemExtent;
     jumpTo(targetOffset);
   }
 
   /// Animate to the next item.
   Future<void> next({
-    required double itemWidth,
-    required double spacing,
     Duration duration = const Duration(milliseconds: 300),
     Curve curve = Curves.easeInOut,
   }) async {
+    if (_itemExtent == 0) return; // Not attached yet
     final currentOffset = offset;
-    final currentIndex = (currentOffset / (itemWidth + spacing)).round();
-    await animateToItem(
-      currentIndex + 1,
-      itemWidth: itemWidth,
-      spacing: spacing,
-      duration: duration,
-      curve: curve,
-    );
+    final currentIndex = (currentOffset / _itemExtent).round();
+    // You might want to add a check against itemCount here if the controller
+    // also knew the total number of items. For now, it just scrolls.
+    await animateToItem(currentIndex + 1, duration: duration, curve: curve);
   }
 
   /// Animate to the previous item.
   Future<void> previous({
-    required double itemWidth,
-    required double spacing,
     Duration duration = const Duration(milliseconds: 300),
     Curve curve = Curves.easeInOut,
   }) async {
+    if (_itemExtent == 0) return; // Not attached yet
     final currentOffset = offset;
-    final currentIndex = (currentOffset / (itemWidth + spacing)).round();
+    final currentIndex = (currentOffset / _itemExtent).round();
     final prevIndex = currentIndex - 1 < 0 ? 0 : currentIndex - 1;
-    await animateToItem(
-      prevIndex,
-      itemWidth: itemWidth,
-      spacing: spacing,
-      duration: duration,
-      curve: curve,
-    );
+    await animateToItem(prevIndex, duration: duration, curve: curve);
   }
 }
