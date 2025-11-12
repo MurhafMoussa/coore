@@ -1,7 +1,9 @@
 // api_state_mixin.dart
 
+import 'package:async/async.dart';
 import 'package:coore/lib.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 
 /// A generic mixin for BLoCs/Cubits that manage composite state objects containing an API state.
 ///
@@ -26,11 +28,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// - Optionally provides a retry function for failed requests.
 mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
   /// Adapter instance used to cancel an ongoing API request.
-  CancelRequestAdapter? cancelRequestAdapter;
+  CancelableOperation<Either<Failure, SuccessData>>? _cancelableOperation;
 
   /// Cancels an ongoing API request, if one exists.
   void cancelRequest() {
-    cancelRequestAdapter?.cancelRequest();
+    _cancelableOperation?.cancel();
   }
 
   /// Retrieves the current API state from the composite state.
@@ -67,8 +69,9 @@ mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
   ///
   /// The method uses a cancellation adapter to ensure that the API call can be cancelled
   /// if needed. If the call fails, the state is updated with a failure and a retry function is provided.
-  Future<void> handleApiCall<T extends Cancelable>({
-    required UseCaseFutureResponse<SuccessData> Function(T params) apiCall,
+  Future<void> handleApiCall<T>({
+    required UseCaseCancelableFutureResponse<SuccessData> Function(T params)
+    apiCall,
     required T params,
     void Function(SuccessData data)? onSuccess,
     void Function(Failure failure)? onFailure,
@@ -79,16 +82,12 @@ mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
     // Emit loading state.
     emit(setApiState(state, const ApiState.loading()));
 
-    // Initialize the cancel request adapter.
-    cancelRequestAdapter = DioCancelRequestAdapter();
-
     // Execute the API call, attaching the cancel token.
-    final result = await apiCall(
-      params.copyWithCancelRequest(cancelRequestAdapter!) as T,
-    );
-
-    // Ensure that the Bloc/Cubit is still active before updating state.
-    if (!isClosed) {
+    _cancelableOperation = apiCall(params);
+    final result = await _cancelableOperation!.valueOrCancellation();
+    _cancelableOperation = null;
+    // Ensure that the Bl oc/Cubit is still active before updating state.
+    if (!isClosed && result != null) {
       result.fold(
         (failure) {
           // On failure: Emit failure state with a retry function.
