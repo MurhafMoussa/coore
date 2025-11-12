@@ -101,7 +101,6 @@ abstract class AuthInterceptor extends Interceptor {
       };
     }
 
-    // Now, throw an exception that contains the real backend error message
     throw DioException.badResponse(
       statusCode: statusCode,
       requestOptions: err.requestOptions,
@@ -111,7 +110,7 @@ abstract class AuthInterceptor extends Interceptor {
         data: responseData,
       ),
     );
-    // --- END OF FIX ---
+   
   }
 
   Future<void> _queueAndRefresh(
@@ -194,11 +193,14 @@ class TokenAuthInterceptor extends AuthInterceptor {
       if (rt.isEmpty) return false;
 
       final api = getIt<ApiHandlerInterface>();
-      final result = await api.post(
-        'auth/refresh',
-        body: {'refresh_token': rt},
-        isAuthorized: true,
-      );
+      final result = await api
+          .post(
+            'auth/refresh',
+            parser: (json) => json,
+            body: {'refresh_token': rt},
+            isAuthorized: true,
+          )
+          .value;
 
       return result.fold((l) => false, (data) async {
         await _tokenManager.setTokens(
@@ -233,7 +235,11 @@ class CookieAuthInterceptor extends AuthInterceptor {
   Future<bool> handleRefresh(DioException err) async {
     try {
       final api = getIt<ApiHandlerInterface>();
-      final result = await api.post('auth/refresh', isAuthorized: true);
+      final result = await api.post(
+        'auth/refresh',
+        parser: (json) => json,
+        isAuthorized: true,
+      ).value;
 
       return result.fold((l) => false, (data) async {
         // Server set new cookie; optionally update tokens too

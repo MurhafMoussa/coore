@@ -1,31 +1,36 @@
-import 'package:coore/src/api_handler/cancel_request_adapter.dart';
 import 'package:coore/src/api_handler/form_data_adapter.dart';
 import 'package:coore/src/error_handling/failures/network_failure.dart';
 import 'package:coore/src/typedefs/core_typedefs.dart';
 import 'package:fpdart/fpdart.dart';
 
 /// An abstract interface for handling API requests using a functional
-/// programming style with [TaskEither].
+/// programming style with [Either].
 ///
-/// The type [TaskEither<NetworkFailure, Map<String,dynamic>>] represents an asynchronous
+/// The type [RemoteCancelableResponse<T>] represents a cancelable asynchronous
 /// computation that can either yield a [NetworkFailure] on error or a value
-/// of type Map<String,dynamic> on success. This pattern helps in creating robust error
+/// of type [T] on success. The response is parsed from JSON using the provided
+/// [parser] function. The returned [CancelableOperation] allows callers to
+/// cancel the request if needed. This pattern helps in creating robust error
 /// handling mechanisms in the API layer.
 abstract interface class ApiHandlerInterface {
   /// Sends an HTTP GET request to the specified [path].
   ///
   /// - [path]: The endpoint URL path.
+  /// - [parser]: A function to parse the JSON response into type [T].
   /// - [queryParameters]: Optional map of query parameters to append to the URL.
-  /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
+  /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [shouldCache]: Indicates if the response should be cached. Defaults to false.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
-  /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
-  /// or a value of type Map<String,dynamic> on success.
-  ApiHandlerResponse get(
+  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
+  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
+  /// cancelled by calling [CancelableOperation.cancel].
+  RemoteCancelableResponse<T> get<T>(
     String path, {
+    required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-    CancelRequestAdapter? cancelRequestAdapter,
+
+    ProgressTrackerCallback? onReceiveProgress,
     bool shouldCache = false,
     bool isAuthorized = false,
   });
@@ -33,81 +38,96 @@ abstract interface class ApiHandlerInterface {
   /// Sends an HTTP POST request to the specified [path].
   ///
   /// - [path]: The endpoint URL path.
+  /// - [parser]: A function to parse the JSON response into type [T].
   /// - [body]: The request payload as a JSON-like map.
   /// - [formData]: An optional adapter for constructing multipart/form-data,
   ///   useful for file uploads.
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
-  /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
+  /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
-  /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
-  /// or a value of type Map<String,dynamic> on success.
-  ApiHandlerResponse post(
+  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
+  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
+  /// cancelled by calling [CancelableOperation.cancel].
+  RemoteCancelableResponse<T> post<T>(
     String path, {
+    required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
     FormDataAdapter? formData,
     Map<String, dynamic>? queryParameters,
     ProgressTrackerCallback? onSendProgress,
-    CancelRequestAdapter? cancelRequestAdapter,
+    ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
   });
 
   /// Sends an HTTP DELETE request to the specified [path].
   ///
   /// - [path]: The endpoint URL path.
+  /// - [parser]: A function to parse the JSON response into type [T].
   /// - [queryParameters]: Optional query parameters to append to the URL.
-  /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
-  /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
-  /// or a value of type Map<String,dynamic> on success.
-  ApiHandlerResponse delete(
+  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
+  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
+  /// cancelled by calling [CancelableOperation.cancel].
+  RemoteCancelableResponse<T> delete<T>(
     String path, {
+    required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-    CancelRequestAdapter? cancelRequestAdapter,
+
     bool isAuthorized = false,
   });
 
   /// Sends an HTTP PUT request to the specified [path].
   ///
   /// - [path]: The endpoint URL path.
+  /// - [parser]: A function to parse the JSON response into type [T].
   /// - [body]: The request payload as a JSON-like map.
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [formData]: An optional adapter for constructing multipart/form-data,
   ///   useful for file uploads.
-  /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
+  /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
+  /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
-  /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
-  /// or a value of type Map<String,dynamic> on success.
-  ApiHandlerResponse put(
+  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
+  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
+  /// cancelled by calling [CancelableOperation.cancel].
+  RemoteCancelableResponse<T> put<T>(
     String path, {
+    required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
     FormDataAdapter? formData,
-    CancelRequestAdapter? cancelRequestAdapter,
+    ProgressTrackerCallback? onSendProgress,
+    ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
   });
 
   /// Sends an HTTP PATCH request to the specified [path].
   ///
   /// - [path]: The endpoint URL path.
+  /// - [parser]: A function to parse the JSON response into type [T].
   /// - [body]: The partial request payload as a JSON-like map.
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [formData]: An optional adapter for constructing multipart/form-data,
   ///   useful for file uploads.
-  /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
+  /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
+  /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
   ///
-  /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
-  /// or a value of type Map<String,dynamic> on success.
-  ApiHandlerResponse patch(
+  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
+  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
+  /// cancelled by calling [CancelableOperation.cancel].
+  RemoteCancelableResponse<T> patch<T>(
     String path, {
+    required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
     FormDataAdapter? formData,
-    CancelRequestAdapter? cancelRequestAdapter,
+    ProgressTrackerCallback? onSendProgress,
+    ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
   });
 
@@ -115,18 +135,19 @@ abstract interface class ApiHandlerInterface {
   ///
   /// - [url]: The URL from which to download the file.
   /// - [downloadDestinationPath]: The local file path where the file should be saved.
+  /// - [parser]: A function to parse the JSON response into type [T].
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the download.
-  /// - [cancelRequestAdapter]: Optional adapter for request cancellation.
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [isAuthorized]: Indicates if the download request requires authorization. Defaults to false.
   ///
-  /// Returns a [TaskEither] that resolves to either a [NetworkFailure] on error,
-  /// or a value of type Map<String,dynamic> on success, which could be the file path or a success message.
-  ApiHandlerResponse download(
+  /// Returns a [RemoteCancelableResponse] that resolves to either a [NetworkFailure] on error,
+  /// or a value of type [T] on success, which could be the file path or a success message.
+  RemoteCancelableResponse<T> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,
-    CancelRequestAdapter? cancelRequestAdapter,
+    required T Function(Map<String, dynamic> json) parser,
+
     Map<String, dynamic>? queryParameters,
     bool isAuthorized = false,
   });

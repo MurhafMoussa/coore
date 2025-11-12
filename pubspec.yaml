@@ -8,6 +8,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  async: ^2.11.0
   bloc: any
   cached_network_image: ^3.4.1
   carousel_slider: ^5.1.1
@@ -55,6 +56,7 @@ dev_dependencies:
   freezed_lint: ^0.0.10
   hive_ce_generator: ^1.9.3
   json_serializable: ^6.10.0
+  mockito: ^5.4.4
 
 executables:
   # For information on the generic Dart part of this file, see the

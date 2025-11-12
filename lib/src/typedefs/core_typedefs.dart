@@ -1,13 +1,13 @@
+import 'package:async/async.dart';
 import 'package:coore/src/error_handling/failures/cache_failure.dart';
 import 'package:coore/src/error_handling/failures/failure.dart' show Failure;
 import 'package:coore/src/error_handling/failures/network_failure.dart';
 import 'package:fpdart/fpdart.dart';
 
-typedef ApiHandlerResponse =
-    Future<Either<NetworkFailure, Map<String, dynamic>>>;
-typedef RemoteResponse<T> = Future<Either<NetworkFailure, T>>;
+typedef RemoteCancelableResponse<T> =
+    CancelableOperation<Either<NetworkFailure, T>>;
 typedef CacheResponse<T> = Future<Either<CacheFailure, T>>;
-typedef UseCaseFutureResponse<T> = Future<Either<Failure, T>>;
+typedef UseCaseCancelableFutureResponse<T> = CancelableOperation<Either<Failure, T>>;
 typedef UseCaseStreamResponse<T> = Stream<Either<Failure, T>>;
 
 /// A callback used to track the download or upload progress

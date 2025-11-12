@@ -112,7 +112,16 @@ Dio _createDio(
     BaseOptions(
       baseUrl: entity.baseUrl,
       connectTimeout: entity.connectTimeout,
-      // ... other base options ...
+      contentType: entity.defaultContentType,
+      sendTimeout: entity.sendTimeout,
+      receiveTimeout: entity.receiveTimeout,
+      followRedirects: entity.followRedirects,
+      maxRedirects: entity.maxRedirects,
+      validateStatus: (status) => status != null && status < 500,
+      headers: entity.staticHeaders,
+      queryParameters: entity.defaultQueryParams,
+      requestEncoder: entity.requestEncoder,
+      responseDecoder: entity.responseDecoder,
     ),
   );
 
