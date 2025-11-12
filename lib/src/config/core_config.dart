@@ -1,6 +1,7 @@
 import 'package:coore/lib.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger.dart';
 
 class CoreConfig {
@@ -24,12 +25,19 @@ class CoreConfig {
   static Future<void> initializeCoreDependenciesAfterProjectSetup(
     CoreConfigAfterProjectSetupEntity coreEntity,
   ) async {
+    // Register CoreRouter
     getIt.registerLazySingleton(
-      () => CoreNavigator(
+      () => CoreRouter(
         logger: getIt(),
         shouldLog: coreEntity.shouldLog,
         navigationConfigEntity: coreEntity.navigationConfigEntity,
       ),
+    );
+
+    // CRITICAL: Also register the GoRouter instance itself
+    // This enables context-less navigation from BLoCs/Services
+    getIt.registerLazySingleton<GoRouter>(
+      () => getIt<CoreRouter>().router,
     );
   }
 }
