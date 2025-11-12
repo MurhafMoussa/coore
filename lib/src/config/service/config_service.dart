@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class ConfigService {
   ConfigService(this.localDatabaseInterface);
-  final LocalDatabaseInterface localDatabaseInterface;
+  final NoSqlDatabaseInterface localDatabaseInterface;
 
   Future<void> saveLanguageCode(String languageCode) async {
     localDatabaseInterface.save<String>('languageCode', languageCode);

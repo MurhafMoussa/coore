@@ -64,11 +64,11 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       () => NetworkStatusImp(getIt(), getIt()),
     )
     ..registerLazySingleton(() => NetworkStatusCubit(networkStatus: getIt()))
-    ..registerFactoryParam<LocalDatabaseInterface, String, void>(
-      (boxName, _) => HiveLocalDatabase(boxName),
+    ..registerFactoryParam<NoSqlDatabaseInterface, String, void>(
+      (boxName, _) => HiveNoSqlDatabase(boxName),
     )
     ..registerLazySingleton(
-      () => ConfigService(getIt<LocalDatabaseInterface>(param1: 'coreConfig')),
+      () => ConfigService(getIt<NoSqlDatabaseInterface>(param1: 'coreConfig')),
     )
     ..registerLazySingleton(
       () => LocalizationCubit(
