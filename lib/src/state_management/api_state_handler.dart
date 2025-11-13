@@ -89,13 +89,12 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
   ///
   /// ### Parameters:
   /// - [apiCall]: The async function (e.g., a UseCase) to execute. It must
-  ///   return a [UseCaseCancelableFutureResponse].
+  ///   return a [UseCaseCancelableResponse].
   /// - [params]: The parameters to pass to the [apiCall].
   /// - [onSuccess]: An optional callback executed on success with the [SuccessData].
   /// - [onFailure]: An optional callback executed on failure with the [Failure].
   Future<void> handleApiCall<T>({
-    required UseCaseCancelableFutureResponse<SuccessData> Function(T params)
-    apiCall,
+    required UseCaseCancelableResponse<SuccessData> Function(T params) apiCall,
     required T params,
     void Function(SuccessData data)? onSuccess,
     void Function(Failure failure)? onFailure,

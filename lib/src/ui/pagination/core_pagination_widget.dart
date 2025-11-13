@@ -68,7 +68,7 @@ class PaginationConfig<T extends Identifiable, M extends MetaModel>
   // ---------------------------------------------------------------------------------
 
   /// Function to fetch a page of data. [batch] is 1-based, [limit] is from strategy.
-  final UseCaseCancelableFutureResponse<PaginationResponseModel<T, M>> Function(
+  final UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(
     int batch,
     int limit,
   )?
@@ -220,7 +220,7 @@ class CorePaginationWidget<T extends Identifiable, M extends MetaModel>
   sliversBuilder;
 
   /// Function to fetch data pages.
-  final UseCaseCancelableFutureResponse<PaginationResponseModel<T, M>> Function(
+  final UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(
     int batch,
     int limit,
   )?

@@ -23,8 +23,10 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// {@macro core_pagination_cubit}
   CorePaginationCubit({
     /// Async function that fetches paginated data from usecase
-    required UseCaseCancelableFutureResponse<PaginationResponseModel<T, M>>
-    Function(int, int)
+    required UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(
+      int,
+      int,
+    )
     paginationFunction,
 
     /// Pagination strategy implementation (Page/Skip)
@@ -45,10 +47,7 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// The data fetching function signature:
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
-  UseCaseCancelableFutureResponse<PaginationResponseModel<T, M>> Function(
-    int,
-    int,
-  )
+  UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(int, int)
   _paginationFunction;
 
   /// Active pagination strategy implementation
@@ -181,7 +180,7 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   }
 
   void updatePaginationFunction(
-    UseCaseCancelableFutureResponse<PaginationResponseModel<T, M>> Function(
+    UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(
       int batch,
       int limit,
     )

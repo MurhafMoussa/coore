@@ -7,7 +7,8 @@ import 'package:fpdart/fpdart.dart';
 typedef RemoteCancelableResponse<T> =
     CancelableOperation<Either<NetworkFailure, T>>;
 typedef CacheResponse<T> = Future<Either<CacheFailure, T>>;
-typedef UseCaseCancelableFutureResponse<T> = CancelableOperation<Either<Failure, T>>;
+typedef UseCaseCancelableResponse<T> = CancelableOperation<Either<Failure, T>>;
+typedef UseCaseFutureResponse<T> = Future<Either<Failure, T>>;
 typedef UseCaseStreamResponse<T> = Stream<Either<Failure, T>>;
 
 /// A callback used to track the download or upload progress
