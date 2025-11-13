@@ -166,7 +166,3 @@ abstract interface class NoSqlDatabaseInterface {
   /// ```
   Stream<Map<String, T>> watchAll<T>();
 }
-
-/// Type alias for backward compatibility.
-@Deprecated('Use NoSqlDatabaseInterface instead')
-typedef LocalDatabaseInterface = NoSqlDatabaseInterface;

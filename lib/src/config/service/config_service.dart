@@ -1,5 +1,5 @@
 import 'package:coore/lib.dart';
-import 'package:coore/src/local_storage/local_database/local_database_interface.dart';
+import 'package:coore/src/local_storage/nosql_database/nosql_database_interface.dart';
 import 'package:flutter/material.dart';
 
 class ConfigService {

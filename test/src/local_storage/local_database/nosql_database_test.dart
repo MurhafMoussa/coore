@@ -1,5 +1,5 @@
-import 'package:coore/src/local_storage/local_database/local_database_interface.dart';
-import 'package:coore/src/local_storage/local_database/nosql_database_imp.dart';
+import 'package:coore/src/local_storage/nosql_database/nosql_database_imp.dart';
+import 'package:coore/src/local_storage/nosql_database/nosql_database_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -475,7 +475,6 @@ void main() {
         await Hive.deleteBoxFromDisk('uninitialized_box');
       },
     );
-
   });
 
   group('Edge Cases', () {
@@ -519,21 +518,9 @@ void main() {
 
     test('deleteAt with invalid index should return error', () async {
       final result = await db.deleteAt(999);
-      
+
       // Should return error for invalid index
       expect(result.isLeft(), isTrue);
-    });
-  });
-
-  group('Backward Compatibility', () {
-    test('LocalDatabaseInterface type alias should work', () {
-      final aliasDb = HiveLocalDatabase('alias_test_box');
-      expect(aliasDb, isA<NoSqlDatabaseInterface>());
-    });
-
-    test('HiveLocalDatabase type alias should work', () {
-      final aliasDb = HiveLocalDatabase('hive_alias_box');
-      expect(aliasDb, isA<HiveNoSqlDatabase>());
     });
   });
 }

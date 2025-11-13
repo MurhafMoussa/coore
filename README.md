@@ -870,7 +870,7 @@ The `CoreRouter` class provides a clean foundation for navigation by configuring
 class CoreRouter {
   /// Provides the configured GoRouter instance
   GoRouter get router;
-  
+
   /// Provides the root navigator key for dialogs/snackbars from BLoCs
   static GlobalKey<NavigatorState> get rootNavigatorKey;
   
@@ -896,7 +896,7 @@ class UserDetailsRoute extends GoRouteData {
   
   final String id;
   final String? tab; // Query parameter
-  
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return UserDetailsScreen(userId: id, initialTab: tab);
