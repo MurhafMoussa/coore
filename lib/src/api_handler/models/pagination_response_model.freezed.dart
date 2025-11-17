@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PaginationResponseModel<T,M extends MetaModel> {
 
- List<T> get data; M? get meta;
+ List<T> get data;@JsonKey(includeFromJson: false, includeToJson: false) M? get meta;
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $PaginationResponseModelCopyWith<T,M extends MetaModel,$Res
   factory $PaginationResponseModelCopyWith(PaginationResponseModel<T, M> value, $Res Function(PaginationResponseModel<T, M>) _then) = _$PaginationResponseModelCopyWithImpl;
 @useResult
 $Res call({
- List<T> data, M? meta
+ List<T> data,@JsonKey(includeFromJson: false, includeToJson: false) M? meta
 });
 
 
@@ -154,7 +154,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<T> data,  M? meta)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<T> data, @JsonKey(includeFromJson: false, includeToJson: false)  M? meta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PaginationResponseModel() when $default != null:
 return $default(_that.data,_that.meta);case _:
@@ -175,7 +175,7 @@ return $default(_that.data,_that.meta);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<T> data,  M? meta)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<T> data, @JsonKey(includeFromJson: false, includeToJson: false)  M? meta)  $default,) {final _that = this;
 switch (_that) {
 case _PaginationResponseModel():
 return $default(_that.data,_that.meta);case _:
@@ -195,7 +195,7 @@ return $default(_that.data,_that.meta);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<T> data,  M? meta)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<T> data, @JsonKey(includeFromJson: false, includeToJson: false)  M? meta)?  $default,) {final _that = this;
 switch (_that) {
 case _PaginationResponseModel() when $default != null:
 return $default(_that.data,_that.meta);case _:
@@ -210,7 +210,7 @@ return $default(_that.data,_that.meta);case _:
 @JsonSerializable(genericArgumentFactories: true)
 
 class _PaginationResponseModel<T,M extends MetaModel> implements PaginationResponseModel<T, M> {
-  const _PaginationResponseModel({final  List<T> data = const [], this.meta}): _data = data;
+  const _PaginationResponseModel({final  List<T> data = const [], @JsonKey(includeFromJson: false, includeToJson: false) this.meta}): _data = data;
   factory _PaginationResponseModel.fromJson(Map<String, dynamic> json,T Function(Object?) fromJsonT,M Function(Object?) fromJsonM) => _$PaginationResponseModelFromJson(json,fromJsonT,fromJsonM);
 
  final  List<T> _data;
@@ -220,7 +220,7 @@ class _PaginationResponseModel<T,M extends MetaModel> implements PaginationRespo
   return EqualUnmodifiableListView(_data);
 }
 
-@override final  M? meta;
+@override@JsonKey(includeFromJson: false, includeToJson: false) final  M? meta;
 
 /// Create a copy of PaginationResponseModel
 /// with the given fields replaced by the non-null parameter values.
@@ -255,7 +255,7 @@ abstract mixin class _$PaginationResponseModelCopyWith<T,M extends MetaModel,$Re
   factory _$PaginationResponseModelCopyWith(_PaginationResponseModel<T, M> value, $Res Function(_PaginationResponseModel<T, M>) _then) = __$PaginationResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- List<T> data, M? meta
+ List<T> data,@JsonKey(includeFromJson: false, includeToJson: false) M? meta
 });
 
 

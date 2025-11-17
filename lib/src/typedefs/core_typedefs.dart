@@ -1,15 +1,34 @@
 import 'package:async/async.dart';
-import 'package:coore/src/error_handling/failures/cache_failure.dart';
-import 'package:coore/src/error_handling/failures/failure.dart' show Failure;
-import 'package:coore/src/error_handling/failures/network_failure.dart';
+import 'package:coore/lib.dart';
+import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
+/// A typedef for a remote cancelable response
 typedef RemoteCancelableResponse<T> =
     CancelableOperation<Either<NetworkFailure, T>>;
 typedef CacheResponse<T> = Future<Either<CacheFailure, T>>;
+
+/// A typedef for a cache response
 typedef UseCaseCancelableResponse<T> = CancelableOperation<Either<Failure, T>>;
+
+/// A typedef for a use case future response
 typedef UseCaseFutureResponse<T> = Future<Either<Failure, T>>;
+
+/// A typedef for a use case stream response
 typedef UseCaseStreamResponse<T> = Stream<Either<Failure, T>>;
+
+/// A typedef for a no meta pagination response
+typedef NoMetaPaginationResponse<T> = PaginationResponseModel<T, NoMetaModel>;
+
+/// A typedef for a error model parser
+typedef ErrorModelParser = BaseErrorResponseModel Function(Response? response);
+
+/// A typedef for a failure builder
+typedef FailureBuilder =
+    NetworkFailure Function(
+      BaseErrorResponseModel error,
+      StackTrace? stackTrace,
+    );
 
 /// A callback used to track the download or upload progress
 

@@ -1,6 +1,9 @@
-import 'package:coore/src/error_handling/failures/network_failure.dart';
+import 'package:coore/lib.dart';
 
-abstract interface class NetworkExceptionMapper {
+abstract class NetworkExceptionMapper {
+  final ErrorModelParser errorParser;
+  final Map<int, FailureBuilder> codeToFailureMap;
+  NetworkExceptionMapper(this.errorParser, this.codeToFailureMap);
   // Abstract method that maps an exception to a Failure.
   NetworkFailure mapException(Exception exception, StackTrace? stackTrace);
 }

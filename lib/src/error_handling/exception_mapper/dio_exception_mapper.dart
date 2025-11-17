@@ -1,72 +1,65 @@
-import 'package:coore/src/api_handler/models/error_response_model.dart';
+import 'package:coore/src/api_handler/models/base_error_response_model.dart';
 import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
 import 'package:coore/src/error_handling/failures/network_failure.dart';
 import 'package:dio/dio.dart';
 
-class DioNetworkExceptionMapper implements NetworkExceptionMapper {
-  final Map<int, NetworkFailure Function(ErrorModel, StackTrace?)>
-  _codeToFailureMap = {
-    400: (ErrorModel error, StackTrace? stackTrace) =>
-        BadRequestFailure(error.message, stackTrace: stackTrace),
-    401: (ErrorModel error, StackTrace? stackTrace) =>
-        UnauthorizedRequestFailure(error.message, stackTrace: stackTrace),
+class DioNetworkExceptionMapper extends NetworkExceptionMapper {
+  DioNetworkExceptionMapper(
+    super.errorParser,
+    super.codeToFailureMap, {
+    this.defaultErrorMessage,
+  }) {
+    _defaultCodeToFailureMap = {
+      405: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          MethodNotAllowedFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    403: (ErrorModel error, StackTrace? stackTrace) =>
-        ForbiddenFailure(error.message, stackTrace: stackTrace),
+      406: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          NotAcceptableFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    404: (ErrorModel error, StackTrace? stackTrace) =>
-        NotFoundFailure(error.message, stackTrace: stackTrace),
+      409: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          ConflictFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    405: (ErrorModel error, StackTrace? stackTrace) =>
-        MethodNotAllowedFailure(_defaultErrorMessage, stackTrace: stackTrace),
+      413: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          PayloadTooLargeFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    406: (ErrorModel error, StackTrace? stackTrace) =>
-        NotAcceptableFailure(_defaultErrorMessage, stackTrace: stackTrace),
+      429: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          TooManyRequestsFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    409: (ErrorModel error, StackTrace? stackTrace) =>
-        ConflictFailure(_defaultErrorMessage, stackTrace: stackTrace),
+      418: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          TeapotFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    413: (ErrorModel error, StackTrace? stackTrace) =>
-        PayloadTooLargeFailure(_defaultErrorMessage, stackTrace: stackTrace),
-    422: (ErrorModel error, StackTrace? stackTrace) => ValidationFailure(
-      errors: error.details ?? [],
-      message: error.message,
-      stackTrace: stackTrace,
-    ),
+      500: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          InternalServerErrorFailure(
+            _defaultErrorMessage,
+            stackTrace: stackTrace,
+          ),
 
-    429: (ErrorModel error, StackTrace? stackTrace) =>
-        TooManyRequestsFailure(_defaultErrorMessage, stackTrace: stackTrace),
+      502: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          BadGatewayFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    418: (ErrorModel error, StackTrace? stackTrace) =>
-        TeapotFailure(_defaultErrorMessage, stackTrace: stackTrace),
+      503: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          ServiceUnavailableFailure(
+            _defaultErrorMessage,
+            stackTrace: stackTrace,
+          ),
 
-    451: (ErrorModel error, StackTrace? stackTrace) =>
-        UnavailableForLegalReasonsFailure(
-          error.message,
-          stackTrace: stackTrace,
-        ),
+      504: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          GatewayTimeoutFailure(_defaultErrorMessage, stackTrace: stackTrace),
 
-    500: (ErrorModel error, StackTrace? stackTrace) =>
-        InternalServerErrorFailure(
-          _defaultErrorMessage,
-          stackTrace: stackTrace,
-        ),
-
-    502: (ErrorModel error, StackTrace? stackTrace) =>
-        BadGatewayFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-    503: (ErrorModel error, StackTrace? stackTrace) =>
-        ServiceUnavailableFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-    504: (ErrorModel error, StackTrace? stackTrace) =>
-        GatewayTimeoutFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-    505: (ErrorModel error, StackTrace? stackTrace) =>
-        HttpVersionNotSupportedFailure(
-          _defaultErrorMessage,
-          stackTrace: stackTrace,
-        ),
-  };
+      505: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
+          HttpVersionNotSupportedFailure(
+            _defaultErrorMessage,
+            stackTrace: stackTrace,
+          ),
+    };
+    codeToFailureMap.addAll(_defaultCodeToFailureMap);
+  }
+  final String? defaultErrorMessage;
+  late final Map<
+    int,
+    NetworkFailure Function(BaseErrorResponseModel, StackTrace?)
+  >
+  _defaultCodeToFailureMap;
 
   @override
   NetworkFailure mapException(Exception exception, StackTrace? stackTrace) {
@@ -115,23 +108,11 @@ class DioNetworkExceptionMapper implements NetworkExceptionMapper {
   }
 
   NetworkFailure _mapBadResponse(Response? response, StackTrace? stackTrace) {
-    final error = response?.data is Map
-        ? ErrorResponseModel.fromJson(
-            response?.data as Map<String, dynamic>,
-          ).error
-        : ErrorModel(
-            status: response?.statusCode ?? 500,
-            message: _defaultErrorMessage,
-          );
-    final statusCode = error.status;
-    if (_codeToFailureMap[statusCode] != null) {
-      return _codeToFailureMap[statusCode]!.call(error, stackTrace);
-    }
-    return InvalidStatusCodeFailure(
-      'Invalid status code',
-      stackTrace: stackTrace,
-    );
+    final error = errorParser(response);
+    return codeToFailureMap[error.status]?.call(error, stackTrace) ??
+        InvalidStatusCodeFailure('Invalid status code', stackTrace: stackTrace);
   }
 
-  static String get _defaultErrorMessage => 'Error, please try again later';
+  String get _defaultErrorMessage =>
+      defaultErrorMessage ?? 'Error, please try again later';
 }

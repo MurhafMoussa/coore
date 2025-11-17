@@ -5,10 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i9;
 
-import 'package:coore/src/api_handler/form_data_adapter.dart' as _i15;
-import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart'
-    as _i11;
-import 'package:coore/src/error_handling/failures/network_failure.dart' as _i8;
+import 'package:coore/lib.dart' as _i8;
 import 'package:dio/dio.dart' as _i7;
 import 'package:dio/src/adapter.dart' as _i4;
 import 'package:dio/src/cancel_token.dart' as _i10;
@@ -16,9 +13,9 @@ import 'package:dio/src/dio_mixin.dart' as _i3;
 import 'package:dio/src/options.dart' as _i2;
 import 'package:dio/src/response.dart' as _i6;
 import 'package:dio/src/transformer.dart' as _i5;
-import 'package:http_cache_core/src/model/cache/cache_priority.dart' as _i14;
-import 'package:http_cache_core/src/model/cache/cache_response.dart' as _i13;
-import 'package:http_cache_core/src/store/cache_store.dart' as _i12;
+import 'package:http_cache_core/src/model/cache/cache_priority.dart' as _i13;
+import 'package:http_cache_core/src/model/cache/cache_response.dart' as _i12;
+import 'package:http_cache_core/src/store/cache_store.dart' as _i11;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -67,14 +64,20 @@ class _FakeDio_5 extends _i1.SmartFake implements _i7.Dio {
     : super(parent, parentInvocation);
 }
 
-class _FakeNetworkFailure_6 extends _i1.SmartFake
-    implements _i8.NetworkFailure {
-  _FakeNetworkFailure_6(Object parent, Invocation parentInvocation)
+class _FakeBaseErrorResponseModel_6 extends _i1.SmartFake
+    implements _i8.BaseErrorResponseModel {
+  _FakeBaseErrorResponseModel_6(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeFormData_7 extends _i1.SmartFake implements _i7.FormData {
-  _FakeFormData_7(Object parent, Invocation parentInvocation)
+class _FakeNetworkFailure_7 extends _i1.SmartFake
+    implements _i8.NetworkFailure {
+  _FakeNetworkFailure_7(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeFormData_8 extends _i1.SmartFake implements _i7.FormData {
+  _FakeFormData_8(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -827,10 +830,30 @@ class MockDio extends _i1.Mock implements _i7.Dio {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockNetworkExceptionMapper extends _i1.Mock
-    implements _i11.NetworkExceptionMapper {
+    implements _i8.NetworkExceptionMapper {
   MockNetworkExceptionMapper() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  _i8.ErrorModelParser get errorParser =>
+      (super.noSuchMethod(
+            Invocation.getter(#errorParser),
+            returnValue: (_i6.Response<dynamic>? response) =>
+                _FakeBaseErrorResponseModel_6(
+                  this,
+                  Invocation.getter(#errorParser),
+                ),
+          )
+          as _i8.ErrorModelParser);
+
+  @override
+  Map<int, _i8.FailureBuilder> get codeToFailureMap =>
+      (super.noSuchMethod(
+            Invocation.getter(#codeToFailureMap),
+            returnValue: <int, _i8.FailureBuilder>{},
+          )
+          as Map<int, _i8.FailureBuilder>);
 
   @override
   _i8.NetworkFailure mapException(
@@ -839,7 +862,7 @@ class MockNetworkExceptionMapper extends _i1.Mock
   ) =>
       (super.noSuchMethod(
             Invocation.method(#mapException, [exception, stackTrace]),
-            returnValue: _FakeNetworkFailure_6(
+            returnValue: _FakeNetworkFailure_7(
               this,
               Invocation.method(#mapException, [exception, stackTrace]),
             ),
@@ -850,7 +873,7 @@ class MockNetworkExceptionMapper extends _i1.Mock
 /// A class which mocks [CacheStore].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockCacheStore extends _i1.Mock implements _i12.CacheStore {
+class MockCacheStore extends _i1.Mock implements _i11.CacheStore {
   MockCacheStore() {
     _i1.throwOnMissingStub(this);
   }
@@ -864,15 +887,15 @@ class MockCacheStore extends _i1.Mock implements _i12.CacheStore {
           as _i9.Future<bool>);
 
   @override
-  _i9.Future<_i13.CacheResponse?> get(String? key) =>
+  _i9.Future<_i12.CacheResponse?> get(String? key) =>
       (super.noSuchMethod(
             Invocation.method(#get, [key]),
-            returnValue: _i9.Future<_i13.CacheResponse?>.value(),
+            returnValue: _i9.Future<_i12.CacheResponse?>.value(),
           )
-          as _i9.Future<_i13.CacheResponse?>);
+          as _i9.Future<_i12.CacheResponse?>);
 
   @override
-  _i9.Future<List<_i13.CacheResponse>> getFromPath(
+  _i9.Future<List<_i12.CacheResponse>> getFromPath(
     RegExp? pathPattern, {
     Map<String, String?>? queryParams,
   }) =>
@@ -882,14 +905,14 @@ class MockCacheStore extends _i1.Mock implements _i12.CacheStore {
               [pathPattern],
               {#queryParams: queryParams},
             ),
-            returnValue: _i9.Future<List<_i13.CacheResponse>>.value(
-              <_i13.CacheResponse>[],
+            returnValue: _i9.Future<List<_i12.CacheResponse>>.value(
+              <_i12.CacheResponse>[],
             ),
           )
-          as _i9.Future<List<_i13.CacheResponse>>);
+          as _i9.Future<List<_i12.CacheResponse>>);
 
   @override
-  _i9.Future<void> set(_i13.CacheResponse? response) =>
+  _i9.Future<void> set(_i12.CacheResponse? response) =>
       (super.noSuchMethod(
             Invocation.method(#set, [response]),
             returnValue: _i9.Future<void>.value(),
@@ -924,7 +947,7 @@ class MockCacheStore extends _i1.Mock implements _i12.CacheStore {
 
   @override
   _i9.Future<void> clean({
-    _i14.CachePriority? priorityOrBelow = _i14.CachePriority.high,
+    _i13.CachePriority? priorityOrBelow = _i13.CachePriority.high,
     bool? staleOnly = false,
   }) =>
       (super.noSuchMethod(
@@ -966,7 +989,7 @@ class MockCacheStore extends _i1.Mock implements _i12.CacheStore {
 /// A class which mocks [FormDataAdapter].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockFormDataAdapter extends _i1.Mock implements _i15.FormDataAdapter {
+class MockFormDataAdapter extends _i1.Mock implements _i8.FormDataAdapter {
   MockFormDataAdapter() {
     _i1.throwOnMissingStub(this);
   }
@@ -975,7 +998,7 @@ class MockFormDataAdapter extends _i1.Mock implements _i15.FormDataAdapter {
   _i7.FormData create() =>
       (super.noSuchMethod(
             Invocation.method(#create, []),
-            returnValue: _FakeFormData_7(this, Invocation.method(#create, [])),
+            returnValue: _FakeFormData_8(this, Invocation.method(#create, [])),
           )
           as _i7.FormData);
 }

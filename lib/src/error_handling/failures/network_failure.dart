@@ -1,32 +1,7 @@
-import 'package:coore/src/api_handler/api_handler.dart';
 import 'package:coore/src/error_handling/failures/failure.dart';
 
 abstract class NetworkFailure extends Failure {
   const NetworkFailure(super.message, {super.stackTrace});
-}
-
-/// 400 Bad Request Failure: The server cannot process the request due to a client error (e.g., invalid syntax).
-class BadRequestFailure extends NetworkFailure {
-  /// This is used when the client sends a request with invalid or malformed data.
-  const BadRequestFailure(super.message, {super.stackTrace});
-}
-
-/// 401 Unauthorized Failure: The request lacks valid authentication credentials.
-class UnauthorizedRequestFailure extends NetworkFailure {
-  /// This is used when the user needs to authenticate to access the requested resource.
-  const UnauthorizedRequestFailure(super.message, {super.stackTrace});
-}
-
-/// 403 Forbidden Failure: The server understands the request but refuses to authorize it.
-class ForbiddenFailure extends NetworkFailure {
-  /// This is used when the user is not allowed to access the resource, even with proper credentials.
-  const ForbiddenFailure(super.message, {super.stackTrace});
-}
-
-/// 404 Not Found Failure: The server cannot find the requested resource.
-class NotFoundFailure extends NetworkFailure {
-  /// This is used when the requested resource cannot be found on the server.
-  const NotFoundFailure(super.message, {super.stackTrace});
 }
 
 /// 405 Method Not Allowed Failure: The request method is not allowed for the requested resource.
@@ -51,18 +26,6 @@ class ConflictFailure extends NetworkFailure {
 class PayloadTooLargeFailure extends NetworkFailure {
   /// This is used when the request body is too large for the server to process.
   const PayloadTooLargeFailure(super.message, {super.stackTrace});
-}
-
-/// 422 Validation Failure: When the user submits a request with invalid data.
-class ValidationFailure extends NetworkFailure {
-  final List<ErrorDetail> errors;
-
-  /// This is used when the server cannot process the entity due to semantic errors in the request.
-  const ValidationFailure({
-    required String message,
-    required this.errors,
-    StackTrace? stackTrace,
-  }) : super(message, stackTrace: stackTrace);
 }
 
 /// 429 Too Many Requests Failure: The user has sent too many requests in a given amount of time.

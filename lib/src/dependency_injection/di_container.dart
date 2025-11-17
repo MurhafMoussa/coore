@@ -54,7 +54,10 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       () => SecureDatabaseImp(getIt()),
     )
     ..registerLazySingleton<NetworkExceptionMapper>(
-      () => DioNetworkExceptionMapper(),
+      () => DioNetworkExceptionMapper(
+        coreEntity.errorConfigEntity.errorModelParser,
+        coreEntity.errorConfigEntity.failureMap,
+      ),
     )
     ..registerLazySingleton<ApiHandlerInterface>(
       () => DioApiHandler(getIt(), getIt()),
@@ -149,7 +152,7 @@ Dio _createDio(
   late final AuthInterceptor authInterceptor;
   switch (entity.authInterceptorType) {
     case AuthInterceptorType.tokenBased:
-      authInterceptor = TokenAuthInterceptor(getIt());
+      authInterceptor = TokenAuthInterceptor(getIt(), entity);
       break;
     case AuthInterceptorType.cookieBased:
       final String appDocPath = directory.path;
@@ -158,7 +161,7 @@ Dio _createDio(
         storage: FileStorage('$appDocPath/.cookies/'),
       );
       dio.interceptors.add(CookieManager(jar));
-      authInterceptor = CookieAuthInterceptor(getIt());
+      authInterceptor = CookieAuthInterceptor(getIt(), entity);
       break;
   }
 

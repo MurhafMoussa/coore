@@ -13,9 +13,10 @@ import 'package:mutex/mutex.dart';
 ///    replays all pending requests
 ///  • Wraps *all* errors in the refresh flow as DioException.badResponse
 abstract class AuthInterceptor extends Interceptor {
-  AuthInterceptor(this._tokenManager);
+  AuthInterceptor(this._tokenManager, this._networkConfigEntity);
 
   final AuthTokenManager _tokenManager;
+  final NetworkConfigEntity _networkConfigEntity;
   final Mutex _refreshMutex = Mutex();
   final Queue<MapEntry<RequestOptions, ErrorInterceptorHandler>> _pending =
       Queue();
@@ -68,7 +69,7 @@ abstract class AuthInterceptor extends Interceptor {
     return err.response?.statusCode == 401 &&
         isAuth &&
         !isRetry &&
-        !opts.path.contains('auth/refresh');
+        !opts.path.contains(_networkConfigEntity.refreshTokenApiEndpoint);
   }
 
   Future<void> _injectToken(RequestOptions options) async {
@@ -110,7 +111,6 @@ abstract class AuthInterceptor extends Interceptor {
         data: responseData,
       ),
     );
-   
   }
 
   Future<void> _queueAndRefresh(
@@ -184,7 +184,7 @@ abstract class AuthInterceptor extends Interceptor {
 /// ---------------------------------------------------------------------------
 /// Sends Bearer tokens and refreshes via `auth/refresh`
 class TokenAuthInterceptor extends AuthInterceptor {
-  TokenAuthInterceptor(super._tokenManager);
+  TokenAuthInterceptor(super._tokenManager, super._networkConfigEntity);
 
   @override
   Future<bool> handleRefresh(DioException err) async {
@@ -195,17 +195,23 @@ class TokenAuthInterceptor extends AuthInterceptor {
       final api = getIt<ApiHandlerInterface>();
       final result = await api
           .post(
-            'auth/refresh',
+            _networkConfigEntity.refreshTokenApiEndpoint,
             parser: (json) => json,
-            body: {'refresh_token': rt},
+            body: {_networkConfigEntity.refreshTokenKey: rt},
             isAuthorized: true,
           )
           .value;
 
       return result.fold((l) => false, (data) async {
+        final accessToken =
+            getNestedValue(data, _networkConfigEntity.accessTokenKey)
+                as String?;
+        final refreshToken =
+            getNestedValue(data, _networkConfigEntity.refreshTokenKey)
+                as String?;
         await _tokenManager.setTokens(
-          accessToken: data['data']['access_token'] as String?,
-          refreshToken: data['data']['refresh_token'] as String?,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
         );
         return true;
       });
@@ -220,7 +226,7 @@ class TokenAuthInterceptor extends AuthInterceptor {
 /// ---------------------------------------------------------------------------
 /// Sends cookies + optional Bearer header, refreshes via `auth/refresh`
 class CookieAuthInterceptor extends AuthInterceptor {
-  CookieAuthInterceptor(super._tokenManager);
+  CookieAuthInterceptor(super._tokenManager, super._networkConfigEntity);
 
   @override
   Future<void> onRequest(
@@ -235,16 +241,26 @@ class CookieAuthInterceptor extends AuthInterceptor {
   Future<bool> handleRefresh(DioException err) async {
     try {
       final api = getIt<ApiHandlerInterface>();
-      final result = await api.post(
-        'auth/refresh',
-        parser: (json) => json,
-        isAuthorized: true,
-      ).value;
+      final result = await api
+          .post(
+            _networkConfigEntity.refreshTokenApiEndpoint,
+            parser: (json) => json,
+            isAuthorized: true,
+          )
+          .value;
 
       return result.fold((l) => false, (data) async {
+        /// extract access token from data
+        final refreshToken =
+            getNestedValue(data, _networkConfigEntity.refreshTokenKey)
+                as String?;
+        final accessToken =
+            getNestedValue(data, _networkConfigEntity.accessTokenKey)
+                as String?;
         // Server set new cookie; optionally update tokens too
         await _tokenManager.setTokens(
-          accessToken: data['data']['access_token'] as String?,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
         );
         return true;
       });
@@ -252,4 +268,27 @@ class CookieAuthInterceptor extends AuthInterceptor {
       await _clearTokensAndThrowException(err: err, exception: e);
     }
   }
+}
+
+dynamic getNestedValue(Map<String, dynamic> data, String path) {
+  // Split the path by the separator
+  List<String> keys = path.split('.');
+
+  // Start with the full map
+  dynamic currentValue = data;
+
+  // Loop through the keys
+  for (String key in keys) {
+    // Check if the current value is a Map and has the key
+    if (currentValue is Map<String, dynamic> && currentValue.containsKey(key)) {
+      // Go one level deeper
+      currentValue = currentValue[key];
+    } else {
+      // A key was missing, so the path is invalid
+      return null;
+    }
+  }
+
+  // Return the final value found
+  return currentValue;
 }
