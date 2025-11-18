@@ -69,22 +69,14 @@ abstract class AuthInterceptor extends Interceptor {
       return false;
     }
     final requestOptions = err.requestOptions;
-    final requiresAuthorization = requestOptions.extra['isAuthorized'] == true;
-    final isNotRetryAttempt = requestOptions.extra.containsKey('isRetry')
-        ? requestOptions.extra['isRetry'] != true
-        : false; // Safely check for 'isRetry' presence
-
-    // 1. Check if the error is 401
     final isUnauthorized = err.response?.statusCode == 401;
-
-    // 2. Check if the current path is in the exclusion list
-    final isNotExcludedPath = !_networkConfigEntity.excludedPaths.any(
-      (path) => requestOptions.path.contains(path),
-    );
-
-    // 3. Check if the current path is the refresh token endpoint itself
+    final requiresAuthorization = requestOptions.extra['isAuthorized'] == true;
+    final isNotRetryAttempt = requestOptions.extra['isRetry'] != true;
     final isNotRefreshTokenPath = !requestOptions.path.contains(
       _networkConfigEntity.refreshTokenApiEndpoint,
+    );
+    final isNotExcludedPath = !_networkConfigEntity.excludedPaths.any(
+      (path) => requestOptions.path.contains(path),
     );
     return isUnauthorized &&
         requiresAuthorization &&
