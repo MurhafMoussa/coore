@@ -17,7 +17,7 @@ abstract class BaseErrorResponseModel {
   // Note: We remove 'details' and 'errorCode' as concrete
   // implementations will define their own specific properties.
 
-  BaseErrorResponseModel({
+  const BaseErrorResponseModel({
     required this.status,
     required this.developerMessage,
     required this.timestamp,
