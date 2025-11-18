@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:coore/lib.dart';
 import 'package:dio/dio.dart';
@@ -17,7 +18,7 @@ abstract class AuthInterceptor extends Interceptor {
 
   final AuthTokenManager _tokenManager;
   final NetworkConfigEntity _networkConfigEntity;
-  
+
   final Mutex _refreshMutex = Mutex();
   final Queue<MapEntry<RequestOptions, ErrorInterceptorHandler>> _pending =
       Queue();
@@ -64,10 +65,13 @@ abstract class AuthInterceptor extends Interceptor {
   }
 
   bool _shouldHandle401(DioException err) {
-final opts = err.requestOptions;
-    final isAuth = opts.extra['isAuthorized'] == true;
-    final isNotRetryAttempt = opts.extra.containsKey('isRetry')
-        ? opts.extra['isRetry'] != true
+    if (!_networkConfigEntity.enableRefreshTokenBehavior) {
+      return false;
+    }
+    final requestOptions = err.requestOptions;
+    final requiresAuthorization = requestOptions.extra['isAuthorized'] == true;
+    final isNotRetryAttempt = requestOptions.extra.containsKey('isRetry')
+        ? requestOptions.extra['isRetry'] != true
         : false; // Safely check for 'isRetry' presence
 
     // 1. Check if the error is 401
@@ -75,15 +79,15 @@ final opts = err.requestOptions;
 
     // 2. Check if the current path is in the exclusion list
     final isNotExcludedPath = !_networkConfigEntity.excludedPaths.any(
-      (path) => opts.path.contains(path),
+      (path) => requestOptions.path.contains(path),
     );
 
     // 3. Check if the current path is the refresh token endpoint itself
-    final isNotRefreshTokenPath = !opts.path.contains(
+    final isNotRefreshTokenPath = !requestOptions.path.contains(
       _networkConfigEntity.refreshTokenApiEndpoint,
     );
     return isUnauthorized &&
-        isAuth && // Must require authorization
+        requiresAuthorization &&
         isNotRetryAttempt &&
         isNotRefreshTokenPath &&
         isNotExcludedPath;
@@ -92,7 +96,7 @@ final opts = err.requestOptions;
   Future<void> _injectToken(RequestOptions options) async {
     final token = await _tokenManager.accessToken;
     if (token.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $token';
+      options.headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:coore/lib.dart';
+import 'package:coore/src/api_handler/interceptors/retry_interceptor.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
@@ -149,24 +150,29 @@ Dio _createDio(
     );
     dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
   }
-
-  late final AuthInterceptor authInterceptor;
-  switch (entity.authInterceptorType) {
-    case AuthInterceptorType.tokenBased:
-      authInterceptor = TokenAuthInterceptor(getIt(), entity);
-      break;
-    case AuthInterceptorType.cookieBased:
-      final String appDocPath = directory.path;
-      final jar = PersistCookieJar(
-        ignoreExpires: true,
-        storage: FileStorage('$appDocPath/.cookies/'),
-      );
-      dio.interceptors.add(CookieManager(jar));
-      authInterceptor = CookieAuthInterceptor(getIt(), entity);
-      break;
+  if (entity.enableRetry) {
+    dio.interceptors.add(RetryInterceptor(entity));
   }
+  dio.interceptors.addAll([...entity.interceptors]);
+  if (entity.enableTokenInjection) {
+    late final AuthInterceptor authInterceptor;
+    switch (entity.authInterceptorType) {
+      case AuthInterceptorType.tokenBased:
+        authInterceptor = TokenAuthInterceptor(getIt(), entity);
+        break;
+      case AuthInterceptorType.cookieBased:
+        final String appDocPath = directory.path;
+        final jar = PersistCookieJar(
+          ignoreExpires: true,
+          storage: FileStorage('$appDocPath/.cookies/'),
+        );
+        dio.interceptors.add(CookieManager(jar));
+        authInterceptor = CookieAuthInterceptor(getIt(), entity);
+        break;
+    }
 
-  dio.interceptors.addAll([...entity.interceptors, authInterceptor]);
+    dio.interceptors.add(authInterceptor);
+  }
 
   return dio;
 }

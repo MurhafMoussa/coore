@@ -27,9 +27,11 @@ class NetworkConfigEntity extends Equatable {
     this.responseDecoder,
     this.enableCache = false,
     this.cacheDuration = const Duration(minutes: 5),
-
+    this.enableRetry = true,
     this.followRedirects = true,
     this.maxRedirects = 5,
+    this.enableTokenInjection = true,
+    this.enableRefreshTokenBehavior = true,
   });
 
   /// Base URL for API endpoints (e.g., "https://api.example.com")
@@ -83,16 +85,27 @@ class NetworkConfigEntity extends Equatable {
   /// Request encoder
   final RequestEncoder? requestEncoder;
 
+  /// Enable retry mechanism
+  final bool enableRetry;
+
   /// Response decoder
   final ResponseDecoder? responseDecoder;
+
   /// Refresh token API endpoint
   final String refreshTokenApiEndpoint;
+
   /// Access token key
   final String accessTokenKey;
+
   /// Refresh token key
   final String refreshTokenKey;
+
   /// Excluded paths that won't trigger the refresh token flow on 401 errors
   final List<String> excludedPaths;
+  /// Enable token injection
+  final bool enableTokenInjection;
+  /// Enable refresh token behavior 
+  final bool enableRefreshTokenBehavior;
   @override
   List<Object?> get props => [
     baseUrl,
@@ -113,6 +126,16 @@ class NetworkConfigEntity extends Equatable {
 
     followRedirects,
     maxRedirects,
+    enableRetry,
+    excludedPaths,
+    authInterceptorType,
+    requestEncoder,
+    responseDecoder,
+    refreshTokenApiEndpoint,
+    accessTokenKey,
+    refreshTokenKey,
+    enableTokenInjection,
+    enableRefreshTokenBehavior,
   ];
 }
 
