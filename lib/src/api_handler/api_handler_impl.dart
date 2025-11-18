@@ -74,12 +74,28 @@ class DioApiHandler implements ApiHandlerInterface {
     final future = Future<Either<NetworkFailure, T>>(() async {
       try {
         final response = await dioMethod(cancelToken);
-        return right<NetworkFailure, T>(
-          parser(response.data as Map<String, dynamic>),
-        );
+        if (response.data is List<dynamic>) {
+          final formattedMap = {'data': response.data};
+          final parsedData = parser(formattedMap);
+
+          return right(parsedData);
+        } else if (response.data is Map<String, dynamic>) {
+          final parsedData = parser(response.data as Map<String, dynamic>);
+          return right(parsedData);
+        } else if (response.data is String) {
+          final formattedMap = {'data': response.data};
+          final parsedData = parser(formattedMap);
+          return right(parsedData);
+        } else {
+          return left<NetworkFailure, T>(
+            UnableToProcessFailure(
+              'Invalid response data',
+              stackTrace: StackTrace.current,
+            ),
+          );
+        }
       } on DioException catch (error, stackTrace) {
         if (error.type == DioExceptionType.cancel) {
-
           rethrow;
         }
         return left<NetworkFailure, T>(
@@ -87,7 +103,7 @@ class DioApiHandler implements ApiHandlerInterface {
         );
       } on Exception catch (error, stackTrace) {
         return left<NetworkFailure, T>(
-          NoInternetConnectionFailure(error.toString(), stackTrace: stackTrace),
+          UnableToProcessFailure(error.toString(), stackTrace: stackTrace),
         );
       }
     });

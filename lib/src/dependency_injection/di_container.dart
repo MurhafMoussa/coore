@@ -120,7 +120,8 @@ Dio _createDio(
       receiveTimeout: entity.receiveTimeout,
       followRedirects: entity.followRedirects,
       maxRedirects: entity.maxRedirects,
-      validateStatus: (status) => status != null && status < 500,
+      validateStatus: (status) =>
+          status != null && status >= 200 && status < 300,
       headers: entity.staticHeaders,
       queryParameters: entity.defaultQueryParams,
       requestEncoder: entity.requestEncoder,
