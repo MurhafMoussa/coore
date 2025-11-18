@@ -164,13 +164,26 @@ class CoreNavigationObserver extends NavigatorObserver {
   String _extractRouteInfo(Route<dynamic>? route) {
     if (route == null) return 'None';
 
-    // GoRouter populates route.settings.name with the route's name or path.
+    // 1. Check for the GoRouter path (route.settings.name)
     final routeName = route.settings.name;
     if (routeName != null && routeName.isNotEmpty) {
-      return routeName;
+      return 'Path: $routeName';
     }
 
-    // Fallback to the runtime type if no name is available
+    // 2. Handle specific route types for better clarity
+    if (route is PopupRoute) {
+      // For Dialogs and other popups, return a generic "Dialog" label
+      return 'DialogRoute: ${route.runtimeType}';
+    }
+
+    // 3. Check for the underlying Widget's name (useful for CustomTransitionPage)
+    // In some setups, the custom transition page holds the target widget in its arguments.
+    final arguments = route.settings.arguments;
+    if (arguments is Widget) {
+      return 'Screen: ${arguments.runtimeType}';
+    }
+
+    // Fallback: Return the runtime type of the route itself
     return route.runtimeType.toString();
   }
 }

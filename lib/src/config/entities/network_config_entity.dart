@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 class NetworkConfigEntity extends Equatable {
   const NetworkConfigEntity({
     required this.baseUrl,
+    required this.excludedPaths,
     required this.refreshTokenApiEndpoint,
     required this.accessTokenKey,
     required this.refreshTokenKey,
@@ -90,6 +91,8 @@ class NetworkConfigEntity extends Equatable {
   final String accessTokenKey;
   /// Refresh token key
   final String refreshTokenKey;
+  /// Excluded paths that won't trigger the refresh token flow on 401 errors
+  final List<String> excludedPaths;
   @override
   List<Object?> get props => [
     baseUrl,

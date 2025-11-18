@@ -17,6 +17,7 @@ abstract class AuthInterceptor extends Interceptor {
 
   final AuthTokenManager _tokenManager;
   final NetworkConfigEntity _networkConfigEntity;
+  
   final Mutex _refreshMutex = Mutex();
   final Queue<MapEntry<RequestOptions, ErrorInterceptorHandler>> _pending =
       Queue();
@@ -63,13 +64,29 @@ abstract class AuthInterceptor extends Interceptor {
   }
 
   bool _shouldHandle401(DioException err) {
-    final opts = err.requestOptions;
+final opts = err.requestOptions;
     final isAuth = opts.extra['isAuthorized'] == true;
-    final isRetry = opts.extra['isRetry'] == true;
-    return err.response?.statusCode == 401 &&
-        isAuth &&
-        !isRetry &&
-        !opts.path.contains(_networkConfigEntity.refreshTokenApiEndpoint);
+    final isNotRetryAttempt = opts.extra.containsKey('isRetry')
+        ? opts.extra['isRetry'] != true
+        : false; // Safely check for 'isRetry' presence
+
+    // 1. Check if the error is 401
+    final isUnauthorized = err.response?.statusCode == 401;
+
+    // 2. Check if the current path is in the exclusion list
+    final isNotExcludedPath = !_networkConfigEntity.excludedPaths.any(
+      (path) => opts.path.contains(path),
+    );
+
+    // 3. Check if the current path is the refresh token endpoint itself
+    final isNotRefreshTokenPath = !opts.path.contains(
+      _networkConfigEntity.refreshTokenApiEndpoint,
+    );
+    return isUnauthorized &&
+        isAuth && // Must require authorization
+        isNotRetryAttempt &&
+        isNotRefreshTokenPath &&
+        isNotExcludedPath;
   }
 
   Future<void> _injectToken(RequestOptions options) async {
