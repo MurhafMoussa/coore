@@ -29,15 +29,22 @@ class ConfigService {
   }
 
   Future<ThemeMode> getThemeMode(ThemeMode defaultThemeMode) async {
-    final themeConfigEither = await localDatabaseInterface.get<String>(
-      'themeMode',
-    );
-    return themeConfigEither.fold(
-      (l) => defaultThemeMode,
-      (r) => r != null
-          ? ThemeMode.values.firstWhere((element) => element.name == r)
-          : defaultThemeMode,
-    );
+    try {
+      final themeConfigEither = await localDatabaseInterface.get<String>(
+        'themeMode',
+      );
+
+      return themeConfigEither.fold((l) => defaultThemeMode, (savedString) {
+        if (savedString == null) return defaultThemeMode;
+
+        return ThemeMode.values.firstWhere(
+          (e) => e.name == savedString,
+          orElse: () => defaultThemeMode,
+        );
+      });
+    } catch (e) {
+      return defaultThemeMode;
+    }
   }
 
   Future<void> setThemeMode(ThemeMode themeMode) async {

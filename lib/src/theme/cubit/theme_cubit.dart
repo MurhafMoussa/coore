@@ -19,7 +19,9 @@ class ThemeCubit extends Cubit<ThemeConfigEntity> {
   Future<void> _init() async {
     final savedThemeMode = await _configService.getThemeMode(state.themeMode);
 
-    emit(state.copyWith(themeMode: savedThemeMode));
+    if (savedThemeMode != state.themeMode && !isClosed) {
+      emit(state.copyWith(themeMode: savedThemeMode));
+    }
   }
 
   void setThemeMode(ThemeMode mode) {
