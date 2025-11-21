@@ -326,76 +326,79 @@ class _CorePinCodeFieldState extends State<CorePinCodeField> {
               ),
             );
 
-        return Pinput(
-          length: widget.length,
-          controller: _controller,
-          focusNode: _focusNode,
-          enabled: widget.enabled,
-          readOnly: widget.readOnly,
-          autofocus: widget.autofocus,
-          obscureText: widget.obscureText,
-          obscuringCharacter: widget.obscuringCharacter,
-          obscuringWidget: widget.obscuringWidget,
-          keyboardType: widget.keyboardType,
-          textInputAction: widget.textInputAction,
-          onChanged: (text) {
-            widget.onChanged?.call(text);
-            updateValue(text); // Use FieldWrapper's updateValue
-          },
-          onCompleted: (pin) {
-            // No need to call updateValue here as onChanged is already called
-            widget.onCompleted?.call(pin);
-          },
-          onSubmitted: (value) {
-            updateValue(value); // Use FieldWrapper's updateValue
-            widget.onSubmitted?.call(value);
-          },
-          onTap: widget.onTap,
-          onLongPress: widget.onLongPress,
-          onTapOutside: widget.onTapOutside,
-          onClipboardFound: widget.onClipboardFound,
-          onAppPrivateCommand: widget.onAppPrivateCommand,
-          pinputAutovalidateMode: PinputAutovalidateMode.disabled,
-          showCursor: widget.showCursor,
-          cursor: widget.cursor,
-          separatorBuilder: widget.separatorBuilder,
-          forceErrorState: hasError,
-          errorText: widget.errorBuilder == null ? error : null,
-          errorTextStyle: widget.errorTextStyle,
-          errorBuilder: widget.errorBuilder != null && hasError
-              ? (error, _) => widget.errorBuilder!(context, error)
-              : null,
-          defaultPinTheme: defaultPinTheme,
-          focusedPinTheme: widget.focusedPinTheme,
-          submittedPinTheme: widget.submittedPinTheme,
-          followingPinTheme: widget.followingPinTheme,
-          disabledPinTheme: widget.disabledPinTheme,
-          errorPinTheme: widget.errorPinTheme,
-          preFilledWidget: widget.preFilledWidget,
-          mainAxisAlignment: widget.mainAxisAlignment,
-          crossAxisAlignment: widget.crossAxisAlignment,
-          pinContentAlignment: widget.pinContentAlignment,
-          animationCurve: widget.animationCurve,
-          animationDuration: widget.animationDuration,
-          pinAnimationType: widget.pinAnimationType,
-          slideTransitionBeginOffset: widget.slideTransitionBeginOffset,
-          useNativeKeyboard: widget.useNativeKeyboard,
-          toolbarEnabled: widget.toolbarEnabled,
-          isCursorAnimationEnabled: widget.isCursorAnimationEnabled,
-          enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          enableSuggestions: widget.enableSuggestions,
-          hapticFeedbackType: widget.hapticFeedbackType,
-          closeKeyboardWhenCompleted: widget.closeKeyboardWhenCompleted,
-          textCapitalization: widget.textCapitalization,
-          keyboardAppearance: widget.keyboardAppearance,
-          inputFormatters: widget.inputFormatters ?? [],
-          autofillHints: widget.autofillHints,
-          selectionControls: widget.selectionControls,
-          restorationId: widget.restorationId,
-          mouseCursor: widget.mouseCursor,
-          scrollPadding: widget.scrollPadding,
-          contextMenuBuilder: widget.contextMenuBuilder,
-          smsRetriever: widget.smsRetriever,
+        return IgnorePointer(
+          ignoring: widget.readOnly,
+          child: Pinput(
+            length: widget.length,
+            controller: _controller,
+            focusNode: _focusNode,
+            enabled: widget.enabled,
+            readOnly: widget.readOnly,
+            autofocus: widget.autofocus,
+            obscureText: widget.obscureText,
+            obscuringCharacter: widget.obscuringCharacter,
+            obscuringWidget: widget.obscuringWidget,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            onChanged: (text) {
+              widget.onChanged?.call(text);
+              updateValue(text); // Use FieldWrapper's updateValue
+            },
+            onCompleted: (pin) {
+              // No need to call updateValue here as onChanged is already called
+              widget.onCompleted?.call(pin);
+            },
+            onSubmitted: (value) {
+              updateValue(value); // Use FieldWrapper's updateValue
+              widget.onSubmitted?.call(value);
+            },
+            onTap: widget.onTap,
+            onLongPress: widget.onLongPress,
+            onTapOutside: widget.onTapOutside,
+            onClipboardFound: widget.onClipboardFound,
+            onAppPrivateCommand: widget.onAppPrivateCommand,
+            pinputAutovalidateMode: PinputAutovalidateMode.disabled,
+            showCursor: widget.showCursor,
+            cursor: widget.cursor,
+            separatorBuilder: widget.separatorBuilder,
+            forceErrorState: hasError,
+            errorText: widget.errorBuilder == null ? error : null,
+            errorTextStyle: widget.errorTextStyle,
+            errorBuilder: widget.errorBuilder != null && hasError
+                ? (error, _) => widget.errorBuilder!(context, error)
+                : null,
+            defaultPinTheme: defaultPinTheme,
+            focusedPinTheme: widget.focusedPinTheme,
+            submittedPinTheme: widget.submittedPinTheme,
+            followingPinTheme: widget.followingPinTheme,
+            disabledPinTheme: widget.disabledPinTheme,
+            errorPinTheme: widget.errorPinTheme,
+            preFilledWidget: widget.preFilledWidget,
+            mainAxisAlignment: widget.mainAxisAlignment,
+            crossAxisAlignment: widget.crossAxisAlignment,
+            pinContentAlignment: widget.pinContentAlignment,
+            animationCurve: widget.animationCurve,
+            animationDuration: widget.animationDuration,
+            pinAnimationType: widget.pinAnimationType,
+            slideTransitionBeginOffset: widget.slideTransitionBeginOffset,
+            useNativeKeyboard: widget.useNativeKeyboard,
+            toolbarEnabled: widget.toolbarEnabled,
+            isCursorAnimationEnabled: widget.isCursorAnimationEnabled,
+            enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            enableSuggestions: widget.enableSuggestions,
+            hapticFeedbackType: widget.hapticFeedbackType,
+            closeKeyboardWhenCompleted: widget.closeKeyboardWhenCompleted,
+            textCapitalization: widget.textCapitalization,
+            keyboardAppearance: widget.keyboardAppearance,
+            inputFormatters: widget.inputFormatters ?? [],
+            autofillHints: widget.autofillHints,
+            selectionControls: widget.selectionControls,
+            restorationId: widget.restorationId,
+            mouseCursor: widget.mouseCursor,
+            scrollPadding: widget.scrollPadding,
+            contextMenuBuilder: widget.contextMenuBuilder,
+            smsRetriever: widget.smsRetriever,
+          ),
         );
       },
     );
