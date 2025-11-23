@@ -28,40 +28,24 @@ import 'package:go_router/go_router.dart';
 /// ```
 class CoreRouter {
   CoreRouter({
-    required CoreLogger logger,
+   
     required NavigationConfigEntity navigationConfigEntity,
     required bool shouldLog,
-  }) : _logger = logger,
+  }) : 
        _configEntity = navigationConfigEntity,
        _shouldLog = shouldLog,
        refreshListenable = navigationConfigEntity.refreshListenable {
     _goRouter = _createRouter();
   }
 
-  final CoreLogger _logger;
+ 
   final NavigationConfigEntity _configEntity;
   final Listenable? refreshListenable;
   final bool _shouldLog;
 
   late GoRouter _goRouter;
 
-  /// The root navigator key used by GoRouter.
-  ///
-  /// This key is essential for:
-  /// - Accessing the root navigator from anywhere in the app
-  /// - Showing dialogs, snackbars, and overlays from BLoCs/Services
-  /// - Context-less navigation scenarios
-  static final GlobalKey<NavigatorState> _routeNavigationKey =
-      GlobalKey<NavigatorState>(debugLabel: 'root');
-
-  /// Provides the root navigator key to the app.
-  ///
-  /// Use this when you need to access the root BuildContext for:
-  /// - Showing dialogs from BLoCs: `showDialog(context: CoreRouter.rootNavigatorKey.currentContext!)`
-  /// - Displaying snackbars from services
-  /// - Any other context-dependent operations outside the widget tree
-  static GlobalKey<NavigatorState> get rootNavigatorKey => _routeNavigationKey;
-
+ 
   /// Provides the configured GoRouter instance.
   ///
   /// This is the main API your app will use for navigation.
@@ -83,15 +67,14 @@ class CoreRouter {
 
   GoRouter _createRouter() {
     return GoRouter(
-      navigatorKey: _routeNavigationKey,
+      navigatorKey: _configEntity.navigatorKey,
       routes: _configEntity.routes,
       errorBuilder: _configEntity.errorBuilder ?? _defaultErrorWidget,
-      debugLogDiagnostics: _configEntity.shouldUsePackageLog,
+      debugLogDiagnostics:_shouldLog,
       restorationScopeId: 'coreRouter',
       redirect: _configEntity.redirect,
       refreshListenable: refreshListenable,
       observers: [
-        if (_shouldLog) CoreNavigationObserver(_logger),
         ..._configEntity.navigationObservers,
       ],
     );
@@ -105,85 +88,3 @@ class CoreRouter {
   }
 }
 
-/// Type alias for backward compatibility.
-///
-/// Use [CoreRouter] instead.
-@Deprecated('Use CoreRouter instead')
-typedef CoreNavigator = CoreRouter;
-
-/// Type alias for backward compatibility.
-///
-/// Use [CoreRouter] instead.
-@Deprecated('Use CoreRouter instead')
-typedef GoRouterNavigator = CoreRouter;
-
-/// Navigation observer for logging and tracking navigation events.
-///
-/// This observer logs all navigation actions (push, pop, replace, remove)
-class CoreNavigationObserver extends NavigatorObserver {
-  CoreNavigationObserver(this._logger);
-  final CoreLogger _logger;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _logAndTrack('PUSH', route, previousRoute);
-    super.didPush(route, previousRoute);
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _logAndTrack('POP', previousRoute, route);
-    super.didPop(route, previousRoute);
-  }
-
-  @override
-  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    _logAndTrack('REPLACE', newRoute, oldRoute);
-    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-  }
-
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _logAndTrack('REMOVE', route, previousRoute);
-    super.didRemove(route, previousRoute);
-  }
-
-  void _logAndTrack(
-    String action,
-    Route<dynamic>? route,
-    Route<dynamic>? previousRoute,
-  ) {
-    final currentRouteInfo = _extractRouteInfo(route);
-    final previousRouteInfo = _extractRouteInfo(previousRoute);
-
-    _logger.debug(
-      'Navigation [$action] → Current: $currentRouteInfo | Previous: $previousRouteInfo',
-    );
-  }
-
-  String _extractRouteInfo(Route<dynamic>? route) {
-    if (route == null) return 'None';
-
-    // 1. Check for the GoRouter path (route.settings.name)
-    final routeName = route.settings.name;
-    if (routeName != null && routeName.isNotEmpty) {
-      return 'Path: $routeName';
-    }
-
-    // 2. Handle specific route types for better clarity
-    if (route is PopupRoute) {
-      // For Dialogs and other popups, return a generic "Dialog" label
-      return 'DialogRoute: ${route.runtimeType}';
-    }
-
-    // 3. Check for the underlying Widget's name (useful for CustomTransitionPage)
-    // In some setups, the custom transition page holds the target widget in its arguments.
-    final arguments = route.settings.arguments;
-    if (arguments is Widget) {
-      return 'Screen: ${arguments.runtimeType}';
-    }
-
-    // Fallback: Return the runtime type of the route itself
-    return route.runtimeType.toString();
-  }
-}

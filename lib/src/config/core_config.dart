@@ -28,7 +28,6 @@ class CoreConfig {
     // Register CoreRouter
     getIt.registerLazySingleton(
       () => CoreRouter(
-        logger: getIt(),
         shouldLog: coreEntity.shouldLog,
         navigationConfigEntity: coreEntity.navigationConfigEntity,
       ),

@@ -12,6 +12,7 @@ class NavigationConfigEntity extends Equatable {
     this.navigationObservers = const [],
     this.refreshListenable,
     this.shouldUsePackageLog = false,
+    this.navigatorKey,
   });
   final List<RouteBase> routes;
   final String initialRoute;
@@ -21,6 +22,7 @@ class NavigationConfigEntity extends Equatable {
   final Listenable? refreshListenable;
   final List<NavigatorObserver> navigationObservers;
   final bool shouldUsePackageLog;
+  final GlobalKey<NavigatorState>? navigatorKey;
   @override
   List<Object?> get props => [
     routes,
