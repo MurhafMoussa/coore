@@ -1,5 +1,4 @@
 import 'package:coore/src/config/entities/navigation_config_entity.dart';
-import 'package:coore/src/dev_tools/core_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,24 +27,20 @@ import 'package:go_router/go_router.dart';
 /// ```
 class CoreRouter {
   CoreRouter({
-   
     required NavigationConfigEntity navigationConfigEntity,
     required bool shouldLog,
-  }) : 
-       _configEntity = navigationConfigEntity,
+  }) : _configEntity = navigationConfigEntity,
        _shouldLog = shouldLog,
        refreshListenable = navigationConfigEntity.refreshListenable {
     _goRouter = _createRouter();
   }
 
- 
   final NavigationConfigEntity _configEntity;
   final Listenable? refreshListenable;
   final bool _shouldLog;
 
   late GoRouter _goRouter;
 
- 
   /// Provides the configured GoRouter instance.
   ///
   /// This is the main API your app will use for navigation.
@@ -70,13 +65,11 @@ class CoreRouter {
       navigatorKey: _configEntity.navigatorKey,
       routes: _configEntity.routes,
       errorBuilder: _configEntity.errorBuilder ?? _defaultErrorWidget,
-      debugLogDiagnostics:_shouldLog,
+      debugLogDiagnostics: _shouldLog,
       restorationScopeId: 'coreRouter',
       redirect: _configEntity.redirect,
       refreshListenable: refreshListenable,
-      observers: [
-        ..._configEntity.navigationObservers,
-      ],
+      observers: [..._configEntity.navigationObservers],
     );
   }
 
@@ -87,4 +80,3 @@ class CoreRouter {
     );
   }
 }
-
