@@ -1,8 +1,6 @@
-import 'package:async/async.dart';
 import 'package:bloc/bloc.dart';
 import 'package:coore/lib.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -23,10 +21,11 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// {@macro core_pagination_cubit}
   CorePaginationCubit({
     /// Async function that fetches paginated data from usecase
-    required UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(
-      int,
-      int,
-    )
+    required UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
+      int batch,
+      int limit, {
+      String? requestId,
+    })
     paginationFunction,
 
     /// Pagination strategy implementation (Page/Skip)
@@ -40,15 +39,18 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
     _paginationFunction = paginationFunction;
   }
 
-  /// The currently active, cancelable API operation.
-  CancelableOperation<Either<Failure, PaginationResponseModel<T, M>>>?
-  _cancelableOperation;
+  /// The current request ID, if cancellation is enabled
+  String? _currentRequestId;
 
   /// The data fetching function signature:
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
-  UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(int, int)
-  _paginationFunction;
+  /// - requestId: Optional request ID for cancellation support
+  UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
+    int batch,
+    int limit, {
+    String? requestId,
+  }) _paginationFunction;
 
   /// Active pagination strategy implementation
   final PaginationStrategy paginationStrategy;
@@ -91,18 +93,29 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// - Routes to success/error handlers
   /// - Maintains initial/non-initial context
   Future<void> _fetchNetworkData({required bool isInitial}) async {
-    _cancelableOperation = _paginationFunction(
-      paginationStrategy.nextBatch,
-      paginationStrategy.limit,
-    );
-    final result = await _cancelableOperation?.value;
-    _cancelableOperation = null;
-    if (!isClosed && result != null) {
-      result.fold(
-        (failure) => _handleFailure(failure, isInitial),
-        (paginatedResponseModel) =>
-            _handleSuccess(paginatedResponseModel, isInitial),
+    // Register request for cancellation support
+    _currentRequestId = getIt<CancelRequestManager>().registerRequest();
+
+    try {
+      final result = await _paginationFunction(
+        paginationStrategy.nextBatch,
+        paginationStrategy.limit,
+        requestId: _currentRequestId,
       );
+
+      if (!isClosed) {
+        result.fold(
+          (failure) => _handleFailure(failure, isInitial),
+          (paginatedResponseModel) =>
+              _handleSuccess(paginatedResponseModel, isInitial),
+        );
+      }
+    } finally {
+      // Cleanup request registration
+      if (_currentRequestId != null) {
+        getIt<CancelRequestManager>().unregisterRequest(_currentRequestId!);
+        _currentRequestId = null;
+      }
     }
   }
 
@@ -175,15 +188,20 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   @override
   Future<void> close() {
     _refreshController.dispose();
-    _cancelableOperation?.cancel();
+    // Cancel ongoing request if exists
+    if (_currentRequestId != null) {
+      getIt<CancelRequestManager>().cancelRequest(_currentRequestId!);
+      _currentRequestId = null;
+    }
     return super.close();
   }
 
   void updatePaginationFunction(
-    UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(
+    UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
       int batch,
-      int limit,
-    )
+      int limit, {
+      String? requestId,
+    })
     paginationFunction,
   ) {
     _paginationFunction = paginationFunction;

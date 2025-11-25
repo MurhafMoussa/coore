@@ -1,5 +1,6 @@
-import 'package:async/async.dart';
 import 'package:coore/src/api_handler/api_handler_impl.dart';
+import 'package:coore/src/api_handler/cancel_request_manager.dart';
+import 'package:coore/src/api_handler/cancel_request_manager_impl.dart';
 import 'package:coore/src/api_handler/form_data_adapter.dart';
 import 'package:coore/src/dependency_injection/di_container.dart';
 import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
@@ -7,6 +8,7 @@ import 'package:coore/src/error_handling/failures/network_failure.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -42,12 +44,21 @@ void main() {
     }
     getIt.registerSingleton<CacheStore>(mockCacheStore);
 
+    // Register CancelRequestManager in GetIt for testing
+    if (getIt.isRegistered<CancelRequestManager>()) {
+      getIt.unregister<CancelRequestManager>();
+    }
+    getIt.registerSingleton<CancelRequestManager>(CancelRequestManagerImpl());
+
     apiHandler = DioApiHandler(mockDio, mockExceptionMapper);
   });
 
   tearDown(() {
     if (getIt.isRegistered<CacheStore>()) {
       getIt.unregister<CacheStore>();
+    }
+    if (getIt.isRegistered<CancelRequestManager>()) {
+      getIt.unregister<CancelRequestManager>();
     }
   });
 
@@ -62,7 +73,7 @@ void main() {
 
   void mockDioGet(Response response) {
     when(
-      mockDio.get(
+      mockDio.get<dynamic>(
         any,
         queryParameters: anyNamed('queryParameters'),
         options: anyNamed('options'),
@@ -74,7 +85,7 @@ void main() {
 
   void mockDioPost(Response response) {
     when(
-      mockDio.post(
+      mockDio.post<dynamic>(
         any,
         data: anyNamed('data'),
         queryParameters: anyNamed('queryParameters'),
@@ -88,7 +99,7 @@ void main() {
 
   void mockDioPut(Response response) {
     when(
-      mockDio.put(
+      mockDio.put<dynamic>(
         any,
         data: anyNamed('data'),
         queryParameters: anyNamed('queryParameters'),
@@ -102,7 +113,7 @@ void main() {
 
   void mockDioPatch(Response response) {
     when(
-      mockDio.patch(
+      mockDio.patch<dynamic>(
         any,
         data: anyNamed('data'),
         queryParameters: anyNamed('queryParameters'),
@@ -116,8 +127,9 @@ void main() {
 
   void mockDioDelete(Response response) {
     when(
-      mockDio.delete(
+      mockDio.delete<dynamic>(
         any,
+        data: anyNamed('data'),
         queryParameters: anyNamed('queryParameters'),
         options: anyNamed('options'),
         cancelToken: anyNamed('cancelToken'),
@@ -134,6 +146,10 @@ void main() {
         options: anyNamed('options'),
         cancelToken: anyNamed('cancelToken'),
         onReceiveProgress: anyNamed('onReceiveProgress'),
+        deleteOnError: anyNamed('deleteOnError'),
+        lengthHeader: anyNamed('lengthHeader'),
+        data: anyNamed('data'),
+        fileAccessMode: anyNamed('fileAccessMode'),
       ),
     ).thenAnswer((_) async => response);
   }
@@ -144,7 +160,7 @@ void main() {
     int receiveTotal = 0,
   }) {
     when(
-      mockDio.get(
+      mockDio.get<dynamic>(
         any,
         queryParameters: anyNamed('queryParameters'),
         options: anyNamed('options'),
@@ -169,7 +185,7 @@ void main() {
     int receiveTotal = 0,
   }) {
     when(
-      mockDio.post(
+      mockDio.post<dynamic>(
         any,
         data: anyNamed('data'),
         queryParameters: anyNamed('queryParameters'),
@@ -201,7 +217,7 @@ void main() {
     int receiveTotal = 0,
   }) {
     when(
-      mockDio.put(
+      mockDio.put<dynamic>(
         any,
         data: anyNamed('data'),
         queryParameters: anyNamed('queryParameters'),
@@ -233,7 +249,7 @@ void main() {
     int receiveTotal = 0,
   }) {
     when(
-      mockDio.patch(
+      mockDio.patch<dynamic>(
         any,
         data: anyNamed('data'),
         queryParameters: anyNamed('queryParameters'),
@@ -270,6 +286,10 @@ void main() {
         options: anyNamed('options'),
         cancelToken: anyNamed('cancelToken'),
         onReceiveProgress: anyNamed('onReceiveProgress'),
+        deleteOnError: anyNamed('deleteOnError'),
+        lengthHeader: anyNamed('lengthHeader'),
+        data: anyNamed('data'),
+        fileAccessMode: anyNamed('fileAccessMode'),
       ),
     ).thenAnswer((invocation) async {
       final onReceive =
@@ -281,27 +301,32 @@ void main() {
     });
   }
 
-  Future<void> expectSuccess<T>(
-    CancelableOperation<dynamic> operation,
-    T expectedData,
-  ) async {
-    final result = await operation.value;
+  Future<void> expectSuccess<T>(Future<dynamic> future, T expectedData) async {
+    final result = await future;
     expect(result.isRight(), isTrue);
-    result.fold(
-      (failure) => fail('Expected success but got failure: $failure'),
-      (data) => expect(data, equals(expectedData)),
+    (result as Either<NetworkFailure, dynamic>).fold(
+      (NetworkFailure failure) {
+        fail('Expected success but got failure: $failure');
+      },
+      (dynamic data) {
+        expect(data as T, equals(expectedData));
+      },
     );
   }
 
   Future<void> expectFailure(
-    CancelableOperation<dynamic> operation,
+    Future<dynamic> future,
     NetworkFailure expectedFailure,
   ) async {
-    final result = await operation.value;
+    final result = await future;
     expect(result.isLeft(), isTrue);
-    result.fold(
-      (failure) => expect(failure, equals(expectedFailure)),
-      (data) => fail('Expected failure but got success: $data'),
+    (result as Either<NetworkFailure, dynamic>).fold(
+      (NetworkFailure failure) {
+        expect(failure, equals(expectedFailure));
+      },
+      (dynamic data) {
+        fail('Expected failure but got success: $data');
+      },
     );
   }
 
@@ -324,14 +349,14 @@ void main() {
         final responseData = {'id': 1, 'name': 'Test'};
         mockDioGet(createSuccessResponse(responseData));
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
         );
 
-        await expectSuccess(operation, responseData);
+        await expectSuccess(future, responseData);
         verify(
-          mockDio.get(
+          mockDio.get<dynamic>(
             '/test',
             options: anyNamed('options'),
             cancelToken: anyNamed('cancelToken'),
@@ -343,15 +368,15 @@ void main() {
         final queryParams = {'page': 1, 'limit': 10};
         mockDioGet(createSuccessResponse());
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           queryParameters: queryParams,
         );
-        await operation.value;
+        await future;
 
         verify(
-          mockDio.get(
+          mockDio.get<dynamic>(
             '/test',
             queryParameters: queryParams,
             options: anyNamed('options'),
@@ -368,12 +393,12 @@ void main() {
           receiveTotal: 100,
         );
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           onReceiveProgress: (progress) => receivedProgress = progress,
         );
-        await operation.value;
+        await future;
 
         expect(receivedProgress, equals(0.5));
       });
@@ -381,16 +406,16 @@ void main() {
       test('should handle caching when shouldCache is true', () async {
         mockDioGet(createSuccessResponse());
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           shouldCache: true,
         );
-        await operation.value;
+        await future;
 
         final options = captureOptions(
           verify(
-            mockDio.get(
+            mockDio.get<dynamic>(
               '/test',
               queryParameters: anyNamed('queryParameters'),
               options: captureAnyNamed('options'),
@@ -402,21 +427,26 @@ void main() {
 
         expect(options.extra, isNotNull);
         expect(options.extra!['isAuthorized'], equals(true));
-        expect(options.extra!.containsKey('cache-policy'), isTrue);
+        // Check if cache options are present (CacheOptions.toExtra() adds multiple keys)
+        expect(
+          options.extra!.keys.any((key) => key.contains('cache')),
+          isTrue,
+          reason: 'Cache options should be present in extra map',
+        );
       });
 
       test('should handle authorization flag', () async {
         mockDioGet(createSuccessResponse());
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           isAuthorized: false,
         );
-        await operation.value;
+        await future;
 
         verify(
-          mockDio.get(
+          mockDio.get<dynamic>(
             '/test',
             options: argThat(
               predicate<Options>(
@@ -439,7 +469,7 @@ void main() {
         const networkFailure = RequestTimeoutFailure('Request timed out');
 
         when(
-          mockDio.get(
+          mockDio.get<dynamic>(
             any,
             queryParameters: anyNamed('queryParameters'),
             options: anyNamed('options'),
@@ -452,27 +482,24 @@ void main() {
           mockExceptionMapper.mapException(dioException, any),
         ).thenReturn(networkFailure);
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
         );
 
-        await expectFailure(operation, networkFailure);
+        await expectFailure(future, networkFailure);
       });
 
-      test('should return cancelable operation', () async {
+      test('should return Future for cancellation support', () async {
         mockDioGet(createSuccessResponse());
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
         );
 
-        expect(operation, isA<CancelableOperation>());
-        expect(operation.isCanceled, isFalse);
-
-        operation.cancel();
-        expect(operation.isCanceled, isTrue);
+        expect(future, isA<Future>());
+        // Future can be cancelled via CancelRequestManager with requestId
       });
     });
 
@@ -482,15 +509,15 @@ void main() {
         final responseData = {'id': 1, 'name': 'Test'};
         mockDioPost(createSuccessResponse(responseData));
 
-        final operation = apiHandler.post<Map<String, dynamic>>(
+        final future = apiHandler.post<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           body: requestBody,
         );
 
-        await expectSuccess(operation, responseData);
+        await expectSuccess(future, responseData);
         verify(
-          mockDio.post(
+          mockDio.post<dynamic>(
             '/test',
             data: requestBody,
             options: anyNamed('options'),
@@ -503,18 +530,18 @@ void main() {
         final mockFormData = createMockFormData();
         mockDioPost(createSuccessResponse());
 
-        final operation = apiHandler.post<Map<String, dynamic>>(
+        final future = apiHandler.post<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           formData: mockFormData,
         );
-        await operation.value;
+        await future;
 
         verify(mockFormData.create()).called(1);
         verify(
-          mockDio.post(
+          mockDio.post<dynamic>(
             '/test',
-            data: any,
+            data: argThat(isNotNull, named: 'data'),
             options: argThat(
               predicate<Options>(
                 (options) =>
@@ -538,14 +565,14 @@ void main() {
           receiveTotal: 100,
         );
 
-        final operation = apiHandler.post<Map<String, dynamic>>(
+        final future = apiHandler.post<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           body: {'key': 'value'},
           onSendProgress: (progress) => sendProgress = progress,
           onReceiveProgress: (progress) => receiveProgress = progress,
         );
-        await operation.value;
+        await future;
 
         expect(sendProgress, equals(0.25));
         expect(receiveProgress, equals(0.75));
@@ -557,15 +584,15 @@ void main() {
         final responseData = {'deleted': true};
         mockDioDelete(createSuccessResponse(responseData));
 
-        final operation = apiHandler.delete<Map<String, dynamic>>(
+        final future = apiHandler.delete<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
         );
-        await operation.value;
+        final result = await future;
 
-        expect((await operation.value).isRight(), isTrue);
+        expect(result.isRight(), isTrue);
         verify(
-          mockDio.delete(
+          mockDio.delete<dynamic>(
             '/test',
             options: anyNamed('options'),
             cancelToken: anyNamed('cancelToken'),
@@ -580,16 +607,16 @@ void main() {
         final responseData = {'id': 1, 'name': 'Updated'};
         mockDioPut(createSuccessResponse(responseData));
 
-        final operation = apiHandler.put<Map<String, dynamic>>(
+        final future = apiHandler.put<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           body: requestBody,
         );
-        await operation.value;
+        final result = await future;
 
-        expect((await operation.value).isRight(), isTrue);
+        expect(result.isRight(), isTrue);
         verify(
-          mockDio.put(
+          mockDio.put<dynamic>(
             '/test',
             data: requestBody,
             options: anyNamed('options'),
@@ -602,12 +629,12 @@ void main() {
         final mockFormData = createMockFormData();
         mockDioPut(createSuccessResponse());
 
-        final operation = apiHandler.put<Map<String, dynamic>>(
+        final future = apiHandler.put<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           formData: mockFormData,
         );
-        await operation.value;
+        await future;
 
         verify(mockFormData.create()).called(1);
       });
@@ -623,14 +650,14 @@ void main() {
           receiveTotal: 100,
         );
 
-        final operation = apiHandler.put<Map<String, dynamic>>(
+        final future = apiHandler.put<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           body: {'key': 'value'},
           onSendProgress: (progress) => sendProgress = progress,
           onReceiveProgress: (progress) => receiveProgress = progress,
         );
-        await operation.value;
+        await future;
 
         expect(sendProgress, equals(0.3));
         expect(receiveProgress, equals(0.7));
@@ -643,16 +670,16 @@ void main() {
         final responseData = {'id': 1, 'name': 'Patched'};
         mockDioPatch(createSuccessResponse(responseData));
 
-        final operation = apiHandler.patch<Map<String, dynamic>>(
+        final future = apiHandler.patch<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           body: requestBody,
         );
-        await operation.value;
+        final result = await future;
 
-        expect((await operation.value).isRight(), isTrue);
+        expect(result.isRight(), isTrue);
         verify(
-          mockDio.patch(
+          mockDio.patch<dynamic>(
             '/test',
             data: requestBody,
             options: anyNamed('options'),
@@ -665,12 +692,12 @@ void main() {
         final mockFormData = createMockFormData();
         mockDioPatch(createSuccessResponse());
 
-        final operation = apiHandler.patch<Map<String, dynamic>>(
+        final future = apiHandler.patch<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           formData: mockFormData,
         );
-        await operation.value;
+        await future;
 
         verify(mockFormData.create()).called(1);
       });
@@ -686,14 +713,14 @@ void main() {
           receiveTotal: 100,
         );
 
-        final operation = apiHandler.patch<Map<String, dynamic>>(
+        final future = apiHandler.patch<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           body: {'key': 'value'},
           onSendProgress: (progress) => sendProgress = progress,
           onReceiveProgress: (progress) => receiveProgress = progress,
         );
-        await operation.value;
+        await future;
 
         expect(sendProgress, equals(0.4));
         expect(receiveProgress, equals(0.6));
@@ -704,14 +731,14 @@ void main() {
       test('should return success response', () async {
         mockDioDownload(createSuccessResponse({'download': 'complete'}));
 
-        final operation = apiHandler.download<Map<String, dynamic>>(
+        final future = apiHandler.download<Map<String, dynamic>>(
           'https://example.com/file',
           '/path/to/save',
           parser: (json) => json,
         );
-        await operation.value;
+        final result = await future;
 
-        expect((await operation.value).isRight(), isTrue);
+        expect(result.isRight(), isTrue);
         verify(
           mockDio.download(
             'https://example.com/file',
@@ -735,13 +762,13 @@ void main() {
           receiveTotal: 100,
         );
 
-        final operation = apiHandler.download<Map<String, dynamic>>(
+        final future = apiHandler.download<Map<String, dynamic>>(
           'https://example.com/file',
           '/path/to/save',
           parser: (json) => json,
           onReceiveProgress: (progress) => receivedProgress = progress,
         );
-        await operation.value;
+        await future;
 
         expect(receivedProgress, equals(0.5));
       });
@@ -753,7 +780,7 @@ void main() {
         () async {
           final exception = Exception('Generic error');
           when(
-            mockDio.get(
+            mockDio.get<dynamic>(
               any,
               queryParameters: anyNamed('queryParameters'),
               options: anyNamed('options'),
@@ -762,11 +789,11 @@ void main() {
             ),
           ).thenThrow(exception);
 
-          final operation = apiHandler.get<Map<String, dynamic>>(
+          final future = apiHandler.get<Map<String, dynamic>>(
             '/test',
             parser: (json) => json,
           );
-          final result = await operation.value;
+          final result = await future;
 
           expect(result.isLeft(), isTrue);
           result.fold((failure) {
@@ -783,7 +810,7 @@ void main() {
         );
 
         when(
-          mockDio.get(
+          mockDio.get<dynamic>(
             any,
             queryParameters: anyNamed('queryParameters'),
             options: anyNamed('options'),
@@ -792,43 +819,51 @@ void main() {
           ),
         ).thenThrow(dioException);
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
         );
 
-        await expectLater(operation.value, throwsA(isA<DioException>()));
+        await expectLater(future, throwsA(isA<DioException>()));
       });
     });
 
     group('Cancellation', () {
-      test('should return cancelable operation', () async {
+      test('should support cancellation via requestId', () async {
         mockDioGet(createSuccessResponse());
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final cancelManager = getIt<CancelRequestManager>();
+        final requestId = cancelManager.registerRequest();
+
+        apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
+          requestId: requestId,
         );
 
-        expect(operation, isA<CancelableOperation>());
-        expect(operation.isCanceled, isFalse);
+        // Cancel the request
+        cancelManager.cancelRequest(requestId);
 
-        operation.cancel();
-        expect(operation.isCanceled, isTrue);
+        // Verify cancellation was called
+        expect(cancelManager.getCancelToken(requestId)?.isCancelled, isTrue);
+
+        // Cleanup
+        cancelManager.unregisterRequest(requestId);
       });
 
       test('should not cancel if token is already cancelled', () async {
         mockDioGet(createSuccessResponse());
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
-          '/test',
-          parser: (json) => json,
-        );
+        final cancelManager = getIt<CancelRequestManager>();
+        final requestId = cancelManager.registerRequest();
 
-        operation.cancel();
-        operation.cancel();
+        cancelManager.cancelRequest(requestId);
+        cancelManager.cancelRequest(requestId); // Second cancel should be safe
 
-        expect(operation.isCanceled, isTrue);
+        expect(cancelManager.getCancelToken(requestId)?.isCancelled, isTrue);
+
+        // Cleanup
+        cancelManager.unregisterRequest(requestId);
       });
     });
 
@@ -837,11 +872,11 @@ void main() {
         final responseData = {'id': 1, 'name': 'Test'};
         mockDioGet(createSuccessResponse(responseData));
 
-        final operation = apiHandler.get<TestModel>(
+        final future = apiHandler.get<TestModel>(
           '/test',
           parser: (json) => TestModel.fromJson(json),
         );
-        final result = await operation.value;
+        final result = await future;
 
         expect(result.isRight(), isTrue);
         result.fold(
@@ -858,15 +893,15 @@ void main() {
       test('should build options with JSON content type by default', () async {
         mockDioPost(createSuccessResponse());
 
-        final operation = apiHandler.post<Map<String, dynamic>>(
+        final future = apiHandler.post<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           body: {'key': 'value'},
         );
-        await operation.value;
+        await future;
 
         verify(
-          mockDio.post(
+          mockDio.post<dynamic>(
             '/test',
             data: {'key': 'value'},
             options: argThat(
@@ -886,17 +921,17 @@ void main() {
           final mockFormData = createMockFormData();
           mockDioPost(createSuccessResponse());
 
-          final operation = apiHandler.post<Map<String, dynamic>>(
+          final future = apiHandler.post<Map<String, dynamic>>(
             '/test',
             parser: (json) => json,
             formData: mockFormData,
           );
-          await operation.value;
+          await future;
 
           verify(
-            mockDio.post(
+            mockDio.post<dynamic>(
               '/test',
-              data: any,
+              data: argThat(isNotNull, named: 'data'),
               options: argThat(
                 predicate<Options>(
                   (options) =>
@@ -914,14 +949,14 @@ void main() {
       test('should not add cache options when shouldCache is false', () async {
         mockDioGet(createSuccessResponse());
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
         );
-        await operation.value;
+        await future;
 
         verify(
-          mockDio.get(
+          mockDio.get<dynamic>(
             '/test',
             options: argThat(
               predicate<Options>(
@@ -942,15 +977,15 @@ void main() {
       test('should handle empty query parameters', () async {
         mockDioGet(createSuccessResponse());
 
-        final operation = apiHandler.get<Map<String, dynamic>>(
+        final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           queryParameters: {},
         );
-        await operation.value;
+        await future;
 
         verify(
-          mockDio.get(
+          mockDio.get<dynamic>(
             '/test',
             queryParameters: {},
             options: anyNamed('options'),
@@ -962,14 +997,14 @@ void main() {
       test('should handle null body in POST request', () async {
         mockDioPost(createSuccessResponse());
 
-        final operation = apiHandler.post<Map<String, dynamic>>(
+        final future = apiHandler.post<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
         );
-        await operation.value;
+        await future;
 
         verify(
-          mockDio.post(
+          mockDio.post<dynamic>(
             '/test',
             options: anyNamed('options'),
             cancelToken: anyNamed('cancelToken'),
@@ -981,18 +1016,18 @@ void main() {
         final mockFormData = createMockFormData();
         mockDioPut(createSuccessResponse());
 
-        final operation = apiHandler.put<Map<String, dynamic>>(
+        final future = apiHandler.put<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
           formData: mockFormData,
         );
-        await operation.value;
+        await future;
 
         verify(mockFormData.create()).called(1);
         verify(
-          mockDio.put(
+          mockDio.put<dynamic>(
             '/test',
-            data: any,
+            data: argThat(isNotNull, named: 'data'),
             options: anyNamed('options'),
             cancelToken: anyNamed('cancelToken'),
           ),
@@ -1003,13 +1038,13 @@ void main() {
         final queryParams = {'token': 'abc123'};
         mockDioDownload(createSuccessResponse({'download': 'complete'}));
 
-        final operation = apiHandler.download<Map<String, dynamic>>(
+        final future = apiHandler.download<Map<String, dynamic>>(
           'https://example.com/file',
           '/path/to/save',
           parser: (json) => json,
           queryParameters: queryParams,
         );
-        await operation.value;
+        await future;
 
         verify(
           mockDio.download(

@@ -1,4 +1,3 @@
-import 'package:async/async.dart';
 import 'package:coore/lib.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
@@ -6,14 +5,13 @@ import 'package:fpdart/fpdart.dart';
 
 /// An API handler implementation using Dio.
 ///
-/// The [DioApiHandler] accepts a Dio instance via constructor injection.
-/// It wraps HTTP calls in a common response handler that returns a
-/// [RemoteCancelableResponse] (a [CancelableOperation]). This allows the API
-/// layer to use functional error handling and provide clear, user-friendly errors
-/// via [NetworkFailure]. The returned [CancelableOperation] enables request
-/// cancellation. Additional options for caching and authorization are
-/// included in the request options. Responses are parsed from JSON using the
-/// provided parser function into the specified type [T].
+/// The [DioApiHandler] accepts a Dio instance and [NetworkExceptionMapper] via constructor injection.
+/// It wraps HTTP calls in a common response handler that returns a [Future] with [Either].
+/// This allows the API layer to use functional error handling and provide clear, user-friendly errors
+/// via [NetworkFailure]. Request cancellation is supported through [CancelRequestManager] by
+/// providing an optional [requestId]. Additional options for caching and authorization are
+/// included in the request options. Responses are parsed from JSON using the provided parser
+/// function into the specified type [T].
 class DioApiHandler implements ApiHandlerInterface {
   /// Creates a new instance of [DioApiHandler] with the provided Dio instance
   /// and [NetworkExceptionMapper].
@@ -53,70 +51,64 @@ class DioApiHandler implements ApiHandlerInterface {
 
   /// A common method for handling API responses.
   ///
-  /// This method takes a [dioMethod] function that returns a [Future<Response>],
-  /// then wraps the call in a [CancelableOperation]. On success, it parses the response data
-  /// from JSON using the provided [parser] function and returns the parsed value
-  /// of type [T]. On error, if the error is a [DioException], it is mapped to a
-  /// [NetworkFailure] using the exception mapper; otherwise, a [NoInternetConnectionFailure]
-  /// is returned.
+  /// This method takes a [dioMethod] function that returns a [Future<Response>].
+  /// On success, it parses the response data from JSON using the provided [parser] function
+  /// and returns the parsed value of type [T]. On error, if the error is a [DioException],
+  /// it is mapped to a [NetworkFailure] using the exception mapper; otherwise, a
+  /// [UnableToProcessFailure] is returned.
   ///
-  /// The returned [CancelableOperation] allows the caller to cancel the request
-  /// by calling [CancelableOperation.cancel]. When cancelled, the underlying
-  /// Dio request will also be cancelled via the [CancelToken].
-  RemoteCancelableResponse<T> _handleResponse<T>({
+  /// If a [requestId] is provided, the cancel token is retrieved from [CancelRequestManager].
+  /// The request can be cancelled by calling [CancelRequestManager.cancelRequest] with the
+  /// same [requestId]. The request is automatically unregistered after completion.
+  Future<Either<NetworkFailure, T>> _handleResponse<T>({
     required Future<Response> Function(CancelToken cancelToken) dioMethod,
     required T Function(Map<String, dynamic> json) parser,
-  }) {
-    // 1. Create the token *here*
-    final cancelToken = CancelToken();
+    String? requestId,
+  }) async {
+    // Get cancel token from CancelRequestManager if requestId provided, otherwise create new one
+    final cancelToken = requestId != null
+        ? getIt<CancelRequestManager>().getOrCreateCancelToken(requestId)
+        : CancelToken();
 
-    // 2. Create the future
-    final future = Future<Either<NetworkFailure, T>>(() async {
-      try {
-        final response = await dioMethod(cancelToken);
-        if (response.data is List<dynamic>) {
-          final formattedMap = {'data': response.data};
-          final parsedData = parser(formattedMap);
+    try {
+      final response = await dioMethod(cancelToken);
+      if (response.data is List<dynamic>) {
+        final formattedMap = {'data': response.data};
+        final parsedData = parser(formattedMap);
 
-          return right(parsedData);
-        } else if (response.data is Map<String, dynamic>) {
-          final parsedData = parser(response.data as Map<String, dynamic>);
-          return right(parsedData);
-        } else if (response.data is String) {
-          final formattedMap = {'data': response.data};
-          final parsedData = parser(formattedMap);
-          return right(parsedData);
-        } else {
-          return left<NetworkFailure, T>(
-            UnableToProcessFailure(
-              'Invalid response data',
-              stackTrace: StackTrace.current,
-            ),
-          );
-        }
-      } on DioException catch (error, stackTrace) {
-        if (error.type == DioExceptionType.cancel) {
-          rethrow;
-        }
+        return right(parsedData);
+      } else if (response.data is Map<String, dynamic>) {
+        final parsedData = parser(response.data as Map<String, dynamic>);
+        return right(parsedData);
+      } else if (response.data is String) {
+        final formattedMap = {'data': response.data};
+        final parsedData = parser(formattedMap);
+        return right(parsedData);
+      } else {
         return left<NetworkFailure, T>(
-          _exceptionMapper.mapException(error, stackTrace),
-        );
-      } on Exception catch (error, stackTrace) {
-        return left<NetworkFailure, T>(
-          UnableToProcessFailure(error.toString(), stackTrace: stackTrace),
+          UnableToProcessFailure(
+            'Invalid response data',
+            stackTrace: StackTrace.current,
+          ),
         );
       }
-    });
-
-    // 3. Return the operation, linking it to the token
-    return CancelableOperation.fromFuture(
-      future,
-      onCancel: () {
-        if (!cancelToken.isCancelled) {
-          cancelToken.cancel('Request cancelled by user');
-        }
-      },
-    );
+    } on DioException catch (error, stackTrace) {
+      if (error.type == DioExceptionType.cancel) {
+        rethrow;
+      }
+      return left<NetworkFailure, T>(
+        _exceptionMapper.mapException(error, stackTrace),
+      );
+    } on Exception catch (error, stackTrace) {
+      return left<NetworkFailure, T>(
+        NoInternetConnectionFailure(error.toString(), stackTrace: stackTrace),
+      );
+    } finally {
+      // Cleanup if requestId was provided
+      if (requestId != null) {
+        getIt<CancelRequestManager>().unregisterRequest(requestId);
+      }
+    }
   }
 
   /// Sends an HTTP GET request to the specified [path].
@@ -127,18 +119,18 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// [shouldCache]: Indicates whether the response should be cached.
   /// [isAuthorized]: Indicates whether the request requires authorization.
+  /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) containing either a
-  /// [NetworkFailure] on error or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
+  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  RemoteCancelableResponse<T> get<T>(
+  Future<Either<NetworkFailure, T>> get<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
     ProgressTrackerCallback? onReceiveProgress,
     bool shouldCache = false,
     bool isAuthorized = true,
+    String? requestId,
   }) {
     return _handleResponse(
       dioMethod: (CancelToken cancelToken) => _dio.get(
@@ -154,6 +146,7 @@ class DioApiHandler implements ApiHandlerInterface {
         cancelToken: cancelToken,
       ),
       parser: parser,
+      requestId: requestId,
     );
   }
 
@@ -167,12 +160,11 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onSendProgress]: Optional callback to track the progress of the data being sent.
   /// [onReceiveProgress]: Optional callback to track the progress of the data being received.
   /// [isAuthorized]: Indicates whether the request requires authorization.
+  /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) containing either a
-  /// [NetworkFailure] on error or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
+  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  RemoteCancelableResponse<T> post<T>(
+  Future<Either<NetworkFailure, T>> post<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -181,6 +173,7 @@ class DioApiHandler implements ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = true,
+    String? requestId,
   }) {
     return _handleResponse(
       dioMethod: (CancelToken cancelToken) {
@@ -202,6 +195,7 @@ class DioApiHandler implements ApiHandlerInterface {
         );
       },
       parser: parser,
+      requestId: requestId,
     );
   }
 
@@ -211,17 +205,16 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [parser]: A function to parse the JSON response into type [T].
   /// [queryParameters]: Optional query parameters to append to the URL.
   /// [isAuthorized]: Indicates whether the request requires authorization.
+  /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) containing either a
-  /// [NetworkFailure] on error or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
+  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  RemoteCancelableResponse<T> delete<T>(
+  Future<Either<NetworkFailure, T>> delete<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-
     bool isAuthorized = true,
+    String? requestId,
   }) {
     return _handleResponse(
       dioMethod: (CancelToken cancelToken) => _dio.delete(
@@ -231,6 +224,7 @@ class DioApiHandler implements ApiHandlerInterface {
         cancelToken: cancelToken,
       ),
       parser: parser,
+      requestId: requestId,
     );
   }
 
@@ -244,12 +238,11 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onSendProgress]: Optional callback to track the progress of the data being sent.
   /// [onReceiveProgress]: Optional callback to track the progress of the data being received.
   /// [isAuthorized]: Indicates whether the request requires authorization.
+  /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) containing either a
-  /// [NetworkFailure] on error or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
+  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  RemoteCancelableResponse<T> put<T>(
+  Future<Either<NetworkFailure, T>> put<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -258,6 +251,7 @@ class DioApiHandler implements ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = true,
+    String? requestId,
   }) {
     return _handleResponse(
       dioMethod: (CancelToken cancelToken) {
@@ -280,6 +274,7 @@ class DioApiHandler implements ApiHandlerInterface {
         );
       },
       parser: parser,
+      requestId: requestId,
     );
   }
 
@@ -293,12 +288,11 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onSendProgress]: Optional callback to track the progress of the data being sent.
   /// [onReceiveProgress]: Optional callback to track the progress of the data being received.
   /// [isAuthorized]: Indicates whether the request requires authorization.
+  /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) containing either a
-  /// [NetworkFailure] on error or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
+  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  RemoteCancelableResponse<T> patch<T>(
+  Future<Either<NetworkFailure, T>> patch<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -307,6 +301,7 @@ class DioApiHandler implements ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = true,
+    String? requestId,
   }) {
     return _handleResponse(
       dioMethod: (CancelToken cancelToken) {
@@ -329,6 +324,7 @@ class DioApiHandler implements ApiHandlerInterface {
         );
       },
       parser: parser,
+      requestId: requestId,
     );
   }
 
@@ -340,19 +336,18 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onReceiveProgress]: Optional callback to track the progress of the download.
   /// [queryParameters]: Optional query parameters to append to the URL.
   /// [isAuthorized]: Indicates whether the download request requires authorization.
+  /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) containing either a
-  /// [NetworkFailure] on error or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
+  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  RemoteCancelableResponse<T> download<T>(
+  Future<Either<NetworkFailure, T>> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,
     required T Function(Map<String, dynamic> json) parser,
-
     Map<String, dynamic>? queryParameters,
     bool isAuthorized = true,
+    String? requestId,
   }) {
     return _handleResponse(
       dioMethod: (CancelToken cancelToken) => _dio.download(
@@ -368,6 +363,7 @@ class DioApiHandler implements ApiHandlerInterface {
         cancelToken: cancelToken,
       ),
       parser: parser,
+      requestId: requestId,
     );
   }
 }

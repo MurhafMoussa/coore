@@ -4,6 +4,8 @@
 export 'api_handler_impl.dart';
 export 'api_handler_interface.dart';
 export 'auth_token_manager.dart';
+export 'cancel_request_manager.dart';
+export 'cancel_request_manager_impl.dart';
 export 'entities/entities.dart';
 export 'form_data_adapter.dart';
 export 'interceptors/interceptors.dart';

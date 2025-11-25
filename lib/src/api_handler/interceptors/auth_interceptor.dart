@@ -206,14 +206,12 @@ class TokenAuthInterceptor extends AuthInterceptor {
       if (rt.isEmpty) return false;
 
       final api = getIt<ApiHandlerInterface>();
-      final result = await api
-          .post(
-            _networkConfigEntity.refreshTokenApiEndpoint,
-            parser: (json) => json,
-            body: {_networkConfigEntity.refreshTokenKey: rt},
-            isAuthorized: true,
-          )
-          .value;
+      final result = await api.post(
+        _networkConfigEntity.refreshTokenApiEndpoint,
+        parser: (json) => json,
+        body: {_networkConfigEntity.refreshTokenKey: rt},
+        isAuthorized: true,
+      );
 
       return result.fold((l) => false, (data) async {
         final accessToken =
@@ -254,13 +252,11 @@ class CookieAuthInterceptor extends AuthInterceptor {
   Future<bool> handleRefresh(DioException err) async {
     try {
       final api = getIt<ApiHandlerInterface>();
-      final result = await api
-          .post(
-            _networkConfigEntity.refreshTokenApiEndpoint,
-            parser: (json) => json,
-            isAuthorized: true,
-          )
-          .value;
+      final result = await api.post(
+        _networkConfigEntity.refreshTokenApiEndpoint,
+        parser: (json) => json,
+        isAuthorized: true,
+      );
 
       return result.fold((l) => false, (data) async {
         /// extract access token from data

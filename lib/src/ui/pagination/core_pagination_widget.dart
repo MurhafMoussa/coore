@@ -68,10 +68,11 @@ class PaginationConfig<T extends Identifiable, M extends MetaModel>
   // ---------------------------------------------------------------------------------
 
   /// Function to fetch a page of data. [batch] is 1-based, [limit] is from strategy.
-  final UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(
+  final UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
     int batch,
-    int limit,
-  )?
+    int limit, {
+    String? requestId,
+  })?
   paginationFunction;
 
   /// Strategy defining page size and thresholds.
@@ -220,10 +221,11 @@ class CorePaginationWidget<T extends Identifiable, M extends MetaModel>
   sliversBuilder;
 
   /// Function to fetch data pages.
-  final UseCaseCancelableResponse<PaginationResponseModel<T, M>> Function(
+  final UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
     int batch,
-    int limit,
-  )?
+    int limit, {
+    String? requestId,
+  })?
   paginationFunction;
 
   /// Defines page size and thresholds.

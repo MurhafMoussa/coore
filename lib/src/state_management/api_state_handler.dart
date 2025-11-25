@@ -1,6 +1,4 @@
-import 'package:async/async.dart';
 import 'package:coore/lib.dart';
-import 'package:fpdart/fpdart.dart';
 
 /// A simple interface for disposable handlers.
 ///
@@ -8,7 +6,7 @@ import 'package:fpdart/fpdart.dart';
 /// handler it creates, regardless of its generic types.
 abstract class IApiStateHandler {
   /// Cleans up any resources held by the handler, such as
-  /// canceling pending [CancelableOperation]s.
+  /// canceling pending requests via [CancelRequestManager].
   void dispose();
 }
 
@@ -46,8 +44,8 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
   final CompositeState Function(CompositeState, ApiState<SuccessData>)
   _setApiState;
 
-  /// The currently active, cancelable API operation.
-  CancelableOperation<Either<Failure, SuccessData>>? _cancelableOperation;
+  /// The current request ID, if cancellation is enabled
+  String? _currentRequestId;
 
   /// Creates a new [ApiStateHandler].
   ///
@@ -69,7 +67,10 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
 
   /// Cancels the ongoing API request, if one exists.
   void cancelRequest() {
-    _cancelableOperation?.cancel();
+    if (_currentRequestId != null) {
+      getIt<CancelRequestManager>().cancelRequest(_currentRequestId!);
+      _currentRequestId = null;
+    }
   }
 
   /// Executes the API call and manages its full state lifecycle.
@@ -77,9 +78,9 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
   /// This is the primary method of the handler. It performs the following steps:
   /// 1. Checks if the state is already loading; if so, it returns.
   /// 2. Emits a new [CompositeState] with the [ApiState] set to `loading()`.
-  /// 3. Executes the provided [apiCall] and stores the [CancelableOperation].
-  /// 4. Awaits the result.
-  /// 5. If the operation was cancelled, it does nothing.
+  /// 3. If [enableCancellation] is true, registers the request with [CancelRequestManager].
+  /// 4. Executes the provided [apiCall] and passes the request ID if cancellation is enabled.
+  /// 5. Awaits the result.
   /// 6. If the Cubit is closed, it does nothing.
   /// 7. On success, it emits a `succeeded(data)` state.
   /// 8. On failure, it emits a `failed(failure)` state with a built-in [retryFunction].
@@ -89,15 +90,22 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
   ///
   /// ### Parameters:
   /// - [apiCall]: The async function (e.g., a UseCase) to execute. It must
-  ///   return a [UseCaseCancelableResponse].
+  ///   return a [UseCaseFutureResponse] and optionally accept a [requestId] parameter.
   /// - [params]: The parameters to pass to the [apiCall].
   /// - [onSuccess]: An optional callback executed on success with the [SuccessData].
   /// - [onFailure]: An optional callback executed on failure with the [Failure].
+  /// - [enableCancellation]: If `true`, registers the request with [CancelRequestManager]
+  ///                         and enables cancellation via [cancelRequest]. Defaults to `true`.
   Future<void> handleApiCall<T>({
-    required UseCaseCancelableResponse<SuccessData> Function(T params) apiCall,
+    required UseCaseFutureResponse<SuccessData> Function(
+      T params, {
+      String? requestId,
+    })
+    apiCall,
     required T params,
     void Function(SuccessData data)? onSuccess,
     void Function(Failure failure)? onFailure,
+    bool enableCancellation = true,
   }) async {
     // 1. Get the *current* state
     final currentState = _getState();
@@ -107,41 +115,53 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
     // 2. Emit loading state using the provided functions
     _emit(_setApiState(currentState, const ApiState.loading()));
 
-    // 3. Execute the call and store the operation
-    _cancelableOperation = apiCall(params);
-    final result = await _cancelableOperation!.valueOrCancellation();
-    _cancelableOperation = null;
+    // 3. Register request if cancellation is enabled
+    if (enableCancellation) {
+      _currentRequestId = getIt<CancelRequestManager>().registerRequest();
+    }
 
-    // 4. Check if the Cubit is closed or if the request was cancelled (result == null)
-    if (!_isClosed() && result != null) {
-      // 5. Get the *latest* state, as it might have changed during the await
-      final latestState = _getState();
+    try {
+      // 4. Execute the call and pass requestId if cancellation is enabled
+      final result = await apiCall(params, requestId: _currentRequestId);
 
-      // 6. Fold the result and emit the final state
-      result.fold(
-        (failure) {
-          _emit(
-            _setApiState(
-              latestState,
-              ApiState.failed(
-                failure,
-                // The retry function recursively calls this method with the same params
-                retryFunction: () => handleApiCall(
-                  onFailure: onFailure,
-                  onSuccess: onSuccess,
-                  apiCall: apiCall,
-                  params: params,
+      // 5. Check if the Cubit is closed
+      if (!_isClosed()) {
+        // 6. Get the *latest* state, as it might have changed during the await
+        final latestState = _getState();
+
+        // 7. Fold the result and emit the final state
+        result.fold(
+          (failure) {
+            _emit(
+              _setApiState(
+                latestState,
+                ApiState.failed(
+                  failure,
+                  // The retry function recursively calls this method with the same params
+                  retryFunction: () => handleApiCall(
+                    onFailure: onFailure,
+                    onSuccess: onSuccess,
+                    apiCall: apiCall,
+                    params: params,
+                    enableCancellation: enableCancellation,
+                  ),
                 ),
               ),
-            ),
-          );
-          onFailure?.call(failure);
-        },
-        (success) {
-          _emit(_setApiState(latestState, ApiState.succeeded(success)));
-          onSuccess?.call(success);
-        },
-      );
+            );
+            onFailure?.call(failure);
+          },
+          (success) {
+            _emit(_setApiState(latestState, ApiState.succeeded(success)));
+            onSuccess?.call(success);
+          },
+        );
+      }
+    } finally {
+      // 8. Cleanup request registration
+      if (_currentRequestId != null) {
+        getIt<CancelRequestManager>().unregisterRequest(_currentRequestId!);
+        _currentRequestId = null;
+      }
     }
   }
 

@@ -6,12 +6,11 @@ import 'package:fpdart/fpdart.dart';
 /// An abstract interface for handling API requests using a functional
 /// programming style with [Either].
 ///
-/// The type [RemoteCancelableResponse<T>] represents a cancelable asynchronous
-/// computation that can either yield a [NetworkFailure] on error or a value
+/// Returns a [Future] that resolves to either a [NetworkFailure] on error or a value
 /// of type [T] on success. The response is parsed from JSON using the provided
-/// [parser] function. The returned [CancelableOperation] allows callers to
-/// cancel the request if needed. This pattern helps in creating robust error
-/// handling mechanisms in the API layer.
+/// [parser] function. Requests can be cancelled by providing a [requestId] and
+/// using [CancelRequestManager] to cancel them. This pattern helps in creating
+/// robust error handling mechanisms in the API layer.
 abstract interface class ApiHandlerInterface {
   /// Sends an HTTP GET request to the specified [path].
   ///
@@ -21,18 +20,19 @@ abstract interface class ApiHandlerInterface {
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [shouldCache]: Indicates if the response should be cached. Defaults to false.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
+  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
+  ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
-  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
-  RemoteCancelableResponse<T> get<T>(
+  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// of type [T] on success.
+  Future<Either<NetworkFailure, T>> get<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-
     ProgressTrackerCallback? onReceiveProgress,
     bool shouldCache = false,
     bool isAuthorized = false,
+    String? requestId,
   });
 
   /// Sends an HTTP POST request to the specified [path].
@@ -46,11 +46,12 @@ abstract interface class ApiHandlerInterface {
   /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
+  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
+  ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
-  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
-  RemoteCancelableResponse<T> post<T>(
+  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// of type [T] on success.
+  Future<Either<NetworkFailure, T>> post<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -59,6 +60,7 @@ abstract interface class ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
+    String? requestId,
   });
 
   /// Sends an HTTP DELETE request to the specified [path].
@@ -67,16 +69,17 @@ abstract interface class ApiHandlerInterface {
   /// - [parser]: A function to parse the JSON response into type [T].
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
+  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
+  ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
-  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
-  RemoteCancelableResponse<T> delete<T>(
+  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// of type [T] on success.
+  Future<Either<NetworkFailure, T>> delete<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-
     bool isAuthorized = false,
+    String? requestId,
   });
 
   /// Sends an HTTP PUT request to the specified [path].
@@ -90,11 +93,12 @@ abstract interface class ApiHandlerInterface {
   /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
+  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
+  ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
-  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
-  RemoteCancelableResponse<T> put<T>(
+  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// of type [T] on success.
+  Future<Either<NetworkFailure, T>> put<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -103,6 +107,7 @@ abstract interface class ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
+    String? requestId,
   });
 
   /// Sends an HTTP PATCH request to the specified [path].
@@ -116,11 +121,12 @@ abstract interface class ApiHandlerInterface {
   /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
+  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
+  ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [RemoteCancelableResponse] (a [CancelableOperation]) that resolves to either
-  /// a [NetworkFailure] on error, or a value of type [T] on success. The operation can be
-  /// cancelled by calling [CancelableOperation.cancel].
-  RemoteCancelableResponse<T> patch<T>(
+  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// of type [T] on success.
+  Future<Either<NetworkFailure, T>> patch<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -129,6 +135,7 @@ abstract interface class ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
+    String? requestId,
   });
 
   /// Downloads a file from the given [url] and saves it to the [downloadDestinationPath].
@@ -139,16 +146,18 @@ abstract interface class ApiHandlerInterface {
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the download.
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [isAuthorized]: Indicates if the download request requires authorization. Defaults to false.
+  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
+  ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [RemoteCancelableResponse] that resolves to either a [NetworkFailure] on error,
-  /// or a value of type [T] on success, which could be the file path or a success message.
-  RemoteCancelableResponse<T> download<T>(
+  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// of type [T] on success, which could be the file path or a success message.
+  Future<Either<NetworkFailure, T>> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,
     required T Function(Map<String, dynamic> json) parser,
-
     Map<String, dynamic>? queryParameters,
     bool isAuthorized = false,
+    String? requestId,
   });
 }

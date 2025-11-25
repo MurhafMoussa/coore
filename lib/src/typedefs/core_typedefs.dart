@@ -1,15 +1,9 @@
-import 'package:async/async.dart';
 import 'package:coore/lib.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
-/// A typedef for a remote cancelable response
-typedef RemoteCancelableResponse<T> =
-    CancelableOperation<Either<NetworkFailure, T>>;
-typedef CacheResponse<T> = Future<Either<CacheFailure, T>>;
-
 /// A typedef for a cache response
-typedef UseCaseCancelableResponse<T> = CancelableOperation<Either<Failure, T>>;
+typedef CacheResponse<T> = Future<Either<CacheFailure, T>>;
 
 /// A typedef for a use case future response
 typedef UseCaseFutureResponse<T> = Future<Either<Failure, T>>;

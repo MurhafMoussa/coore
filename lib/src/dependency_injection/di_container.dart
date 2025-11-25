@@ -60,6 +60,9 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
         coreEntity.errorConfigEntity.failureMap,
       ),
     )
+    ..registerLazySingleton<CancelRequestManager>(
+      () => CancelRequestManagerImpl(),
+    )
     ..registerLazySingleton<ApiHandlerInterface>(
       () => DioApiHandler(getIt(), getIt()),
     )
