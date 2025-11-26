@@ -1,6 +1,6 @@
 name: coore
 description: "A Flutter package built for simplifying development process"
-version: 1.0.0
+version: 1.0.1
 homepage: null
 
 environment:
@@ -63,6 +63,7 @@ executables:
   # following page: https://dart.dev/tools/pub/pubspec
   # The following section is specific to Flutter packages.
   m2e:
+
 flutter: null
 # To add assets to your package, add an assets section, like this:
 # assets:

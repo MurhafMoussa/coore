@@ -25,7 +25,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
   /// of type [T] on success.
-  Future<Either<NetworkFailure, T>> get<T>(
+  RemoteResponse<T> get<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -51,7 +51,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
   /// of type [T] on success.
-  Future<Either<NetworkFailure, T>> post<T>(
+  RemoteResponse<T> post<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -74,7 +74,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
   /// of type [T] on success.
-  Future<Either<NetworkFailure, T>> delete<T>(
+  RemoteResponse<T> delete<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -98,7 +98,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
   /// of type [T] on success.
-  Future<Either<NetworkFailure, T>> put<T>(
+  RemoteResponse<T> put<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -126,7 +126,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
   /// of type [T] on success.
-  Future<Either<NetworkFailure, T>> patch<T>(
+  RemoteResponse<T> patch<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -151,7 +151,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
   /// of type [T] on success, which could be the file path or a success message.
-  Future<Either<NetworkFailure, T>> download<T>(
+  RemoteResponse<T> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,

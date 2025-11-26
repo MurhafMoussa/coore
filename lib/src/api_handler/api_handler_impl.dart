@@ -60,7 +60,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// If a [requestId] is provided, the cancel token is retrieved from [CancelRequestManager].
   /// The request can be cancelled by calling [CancelRequestManager.cancelRequest] with the
   /// same [requestId]. The request is automatically unregistered after completion.
-  Future<Either<NetworkFailure, T>> _handleResponse<T>({
+  RemoteResponse<T> _handleResponse<T>({
     required Future<Response> Function(CancelToken cancelToken) dioMethod,
     required T Function(Map<String, dynamic> json) parser,
     String? requestId,
@@ -123,7 +123,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  Future<Either<NetworkFailure, T>> get<T>(
+  RemoteResponse<T> get<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -164,7 +164,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  Future<Either<NetworkFailure, T>> post<T>(
+  RemoteResponse<T> post<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -209,7 +209,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  Future<Either<NetworkFailure, T>> delete<T>(
+  RemoteResponse<T> delete<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -242,7 +242,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  Future<Either<NetworkFailure, T>> put<T>(
+  RemoteResponse<T> put<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -292,7 +292,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  Future<Either<NetworkFailure, T>> patch<T>(
+  RemoteResponse<T> patch<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -340,7 +340,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
   @override
-  Future<Either<NetworkFailure, T>> download<T>(
+  RemoteResponse<T> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,

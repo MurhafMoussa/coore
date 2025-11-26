@@ -5,6 +5,8 @@ import 'package:fpdart/fpdart.dart';
 /// A typedef for a cache response
 typedef CacheResponse<T> = Future<Either<CacheFailure, T>>;
 
+/// A typedef for a network response
+typedef RemoteResponse<T> = Future<Either<NetworkFailure, T>>;
 /// A typedef for a use case future response
 typedef UseCaseFutureResponse<T> = Future<Either<Failure, T>>;
 
