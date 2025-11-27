@@ -71,7 +71,7 @@ class _FakeBaseErrorResponseModel_6 extends _i1.SmartFake
 }
 
 class _FakeNetworkFailure_7 extends _i1.SmartFake
-    implements _i8.NetworkFailure {
+    implements _i8.Failure {
   _FakeNetworkFailure_7(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }

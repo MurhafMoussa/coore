@@ -55,9 +55,8 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       () => SecureDatabaseImp(getIt()),
     )
     ..registerLazySingleton<NetworkExceptionMapper>(
-      () => DioNetworkExceptionMapper(
+      () => DioExceptionMapper(
         coreEntity.errorConfigEntity.errorModelParser,
-        coreEntity.errorConfigEntity.failureMap,
       ),
     )
     ..registerLazySingleton<CancelRequestManager>(

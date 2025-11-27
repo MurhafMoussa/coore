@@ -77,7 +77,7 @@ mixin ApiStateMixin<CompositeState, SuccessData> on BlocBase<CompositeState> {
   /// The method uses [CancelRequestManager] to ensure that the API call can be cancelled
   /// if needed. If the call fails, the state is updated with a failure and a retry function is provided.
   Future<void> handleApiCall<T>({
-    required UseCaseFutureResponse<SuccessData> Function(
+    required ResultFuture<SuccessData> Function(
       T params, {
       String? requestId,
     })

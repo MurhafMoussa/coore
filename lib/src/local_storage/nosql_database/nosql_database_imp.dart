@@ -15,28 +15,26 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
 
   late Box _box;
   bool _isInitialized = false;
-  CacheResponse<Unit>? _initialization;
+  ResultFuture<Unit>? _initialization;
 
   @override
-  CacheResponse<Unit> initialize() async {
+  ResultFuture<Unit> initialize() async {
     if (_initialization != null) return _initialization!;
     _initialization = _initializeBox();
     return _initialization!;
   }
 
-  CacheResponse<Unit> _initializeBox() async {
+  ResultFuture<Unit> _initializeBox() async {
     try {
       _box = await Hive.openBox(_boxName);
       _isInitialized = true;
       return right(unit);
     } catch (e, stackTrace) {
-      return left(
-        CacheInitializationFailure(e.toString(), stackTrace: stackTrace),
-      );
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
-  CacheResponse<Unit> _ensureInitialized() async {
+  ResultFuture<Unit> _ensureInitialized() async {
     if (!_isInitialized) {
       final result = await initialize();
       if (result.isLeft()) return result;
@@ -45,18 +43,18 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
   }
 
   @override
-  CacheResponse<Unit> close() async {
+  ResultFuture<Unit> close() async {
     try {
       await _box.close();
       _isInitialized = false;
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheCorruptedFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Unit> deleteFromDisk() async {
+  ResultFuture<Unit> deleteFromDisk() async {
     try {
       if (_isInitialized) {
         await close();
@@ -64,7 +62,7 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
       await Hive.deleteBoxFromDisk(_boxName);
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
@@ -73,7 +71,7 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
   // ============================================================================
 
   @override
-  CacheResponse<Unit> save<T>(String key, T value) async {
+  ResultFuture<Unit> save<T>(String key, T value) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) async {
@@ -81,12 +79,12 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         return right(unit);
       });
     } catch (e, stackTrace) {
-      return left(CacheWriteFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Unit> saveAll<T>(Map<String, T> entries) async {
+  ResultFuture<Unit> saveAll<T>(Map<String, T> entries) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) async {
@@ -94,7 +92,7 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         return right(unit);
       });
     } catch (e, stackTrace) {
-      return left(CacheWriteFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
@@ -103,17 +101,17 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
   // ============================================================================
 
   @override
-  CacheResponse<T?> get<T>(String key) async {
+  ResultFuture<T?> get<T>(String key) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) => right(_box.get(key) as T?));
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<T> getOrDefault<T>(String key, T defaultValue) async {
+  ResultFuture<T> getOrDefault<T>(String key, T defaultValue) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold(
@@ -121,12 +119,12 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         (r) => right(_box.get(key, defaultValue: defaultValue) as T),
       );
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Map<String, T>> getAll<T>() async {
+  ResultFuture<Map<String, T>> getAll<T>() async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold(
@@ -134,12 +132,12 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         (r) => right(_box.toMap().cast<String, T>()),
       );
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<List<String>> getKeys() async {
+  ResultFuture<List<String>> getKeys() async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold(
@@ -147,12 +145,12 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         (r) => right(_box.keys.map((key) => key.toString()).toList()),
       );
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<List<T>> getValues<T>() async {
+  ResultFuture<List<T>> getValues<T>() async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold(
@@ -160,12 +158,12 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         (r) => right(_box.values.cast<T>().toList()),
       );
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<T> getAt<T>(int index) async {
+  ResultFuture<T> getAt<T>(int index) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold(
@@ -173,7 +171,7 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         (r) => right(_box.getAt(index) as T),
       );
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
@@ -182,7 +180,7 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
   // ============================================================================
 
   @override
-  CacheResponse<Unit> delete(String key) async {
+  ResultFuture<Unit> delete(String key) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) async {
@@ -190,12 +188,12 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         return right(unit);
       });
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Unit> deleteAll(Iterable<String> keys) async {
+  ResultFuture<Unit> deleteAll(Iterable<String> keys) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) async {
@@ -203,12 +201,12 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         return right(unit);
       });
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Unit> clear() async {
+  ResultFuture<Unit> clear() async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) async {
@@ -216,20 +214,21 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         return right(unit);
       });
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Unit> deleteAt(int index) async {
+  ResultFuture<Unit> deleteAt(int index) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) async {
         // Check if index is valid
         if (index < 0 || index >= _box.length) {
           return left(
-            CacheDeleteFailure(
-              'Index out of range: $index (box length: ${_box.length})',
+            CacheFailure(
+              message:
+                  'Index out of range: $index (box length: ${_box.length})',
             ),
           );
         }
@@ -237,7 +236,7 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         return right(unit);
       });
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
@@ -246,7 +245,7 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
   // ============================================================================
 
   @override
-  CacheResponse<bool> contains(String key) async {
+  ResultFuture<bool> contains(String key) async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold(
@@ -254,27 +253,27 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
         (r) => right(_box.containsKey(key)),
       );
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<int> count() async {
+  ResultFuture<int> count() async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) => right(_box.length));
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<bool> isEmpty() async {
+  ResultFuture<bool> isEmpty() async {
     try {
       final initResult = await _ensureInitialized();
       return initResult.fold((l) => left(l), (r) => right(_box.isEmpty));
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e.toString(), stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
@@ -283,22 +282,22 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
   // ============================================================================
 
   @override
-  Stream<T?> watch<T>(String key) async* {
+  ResultStream<T?> watch<T>(String key) async* {
     if (!_isInitialized) {
       throw StateError('Database must be initialized before calling watch()');
     }
 
     // Emit current value immediately
-    yield _box.get(key) as T?;
+    yield right(_box.get(key) as T?);
 
     // Use Hive's native watch method to listen for changes to this specific key
     await for (final event in _box.watch(key: key)) {
-      yield event.value as T?;
+      yield right(event.value as T?);
     }
   }
 
   @override
-  Stream<Map<String, T>> watchKeys<T>(List<String> keys) async* {
+  ResultStream<Map<String, T>> watchKeys<T>(List<String> keys) async* {
     if (!_isInitialized) {
       throw StateError(
         'Database must be initialized before calling watchKeys()',
@@ -317,19 +316,19 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
     }
 
     // Emit current values immediately
-    yield getCurrentValues();
+    yield right(getCurrentValues());
 
     // Use Hive's native watch to listen for changes to any key
     await for (final event in _box.watch()) {
       // Only emit if the changed key is in our watch list
       if (keys.contains(event.key)) {
-        yield getCurrentValues();
+        yield right(getCurrentValues());
       }
     }
   }
 
   @override
-  Stream<Map<String, T>> watchAll<T>() async* {
+  ResultStream<Map<String, T>> watchAll<T>() async* {
     if (!_isInitialized) {
       throw StateError(
         'Database must be initialized before calling watchAll()',
@@ -337,11 +336,11 @@ class HiveNoSqlDatabase implements NoSqlDatabaseInterface {
     }
 
     // Emit current state immediately
-    yield _box.toMap().cast<String, T>();
+    yield right(_box.toMap().cast<String, T>());
 
     // Use Hive's native watch to listen for all changes
     await for (final _ in _box.watch()) {
-      yield _box.toMap().cast<String, T>();
+      yield right(_box.toMap().cast<String, T>());
     }
   }
 }

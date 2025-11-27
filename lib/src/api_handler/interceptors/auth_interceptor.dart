@@ -279,7 +279,7 @@ class CookieAuthInterceptor extends AuthInterceptor {
   }
 }
 
-dynamic getNestedValue(Map<String, dynamic> data, String path) {
+dynamic getNestedValue(Map<String, dynamic>? data, String path) {
   // Split the path by the separator
   List<String> keys = path.split('.');
 

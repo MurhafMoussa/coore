@@ -2,33 +2,31 @@ import 'package:coore/lib.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
-/// A typedef for a cache response
-typedef CacheResponse<T> = Future<Either<CacheFailure, T>>;
+// ==============================================================================
+// 1. CORE RESPONSES (Layer Agnostic)
+// ==============================================================================
 
-/// A typedef for a network response
-typedef RemoteResponse<T> = Future<Either<NetworkFailure, T>>;
-/// A typedef for a use case future response
-typedef UseCaseFutureResponse<T> = Future<Either<Failure, T>>;
+/// Standard Async Response: Use this for Repositories, DataSources, AND UseCases.
+/// Replaces: RemoteResponse, CacheResponse, UseCaseFutureResponse
+typedef ResultFuture<T> = Future<Either<Failure, T>>;
 
-/// A typedef for a use case stream response
-typedef UseCaseStreamResponse<T> = Stream<Either<Failure, T>>;
+/// Standard Stream Response: Use for real-time data (WebSockets, Firestore).
+typedef ResultStream<T> = Stream<Either<Failure, T>>;
 
-/// A typedef for a no meta pagination response
-typedef NoMetaPaginationResponse<T> = PaginationResponseModel<T, NoMetaModel>;
 
-/// A typedef for a error model parser
+
+// ==============================================================================
+// 2. HELPER TYPEDEFS
+// ==============================================================================
+
+/// Helper for paginated lists that don't use metadata
+typedef NoMetaPaginationModel<T> = PaginationResponseModel<T, NoMetaModel>;
+
+/// Parses the 'data' field from a Dio response into a specific error model
 typedef ErrorModelParser = BaseErrorResponseModel Function(Response? response);
 
-/// A typedef for a failure builder
-typedef FailureBuilder =
-    NetworkFailure Function(
-      BaseErrorResponseModel error,
-      StackTrace? stackTrace,
-    );
-
-/// A callback used to track the download or upload progress
-
+/// Callback for upload/download progress (0.0 to 1.0)
 typedef ProgressTrackerCallback = void Function(double progress);
 
-/// The core id that will be used in all entities
+/// Standard ID type (makes refactoring String <-> int IDs easier later)
 typedef Id = String;

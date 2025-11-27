@@ -8,61 +8,61 @@ class SecureDatabaseImp implements SecureDatabaseInterface {
   final FlutterSecureStorage _flutterSecureStorage;
 
   @override
-  CacheResponse<Unit> delete(String key) async {
+  ResultFuture<Unit> delete(String key) async {
     try {
       await _flutterSecureStorage.delete(key: key);
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e, stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Unit> deleteAll() async {
+  ResultFuture<Unit> deleteAll() async {
     try {
       await _flutterSecureStorage.deleteAll();
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheDeleteFailure(e, stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Unit> initialize() async {
+  ResultFuture<Unit> initialize() async {
     try {
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheInitializationFailure(e, stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<String?> read(String key) async {
+  ResultFuture<String?> read(String key) async {
     try {
       final value = await _flutterSecureStorage.read(key: key);
       return right(value);
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e, stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Map<String, String>> readAll() async {
+  ResultFuture<Map<String, String>> readAll() async {
     try {
       final value = await _flutterSecureStorage.readAll();
       return right(value);
     } catch (e, stackTrace) {
-      return left(CacheReadFailure(e, stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  CacheResponse<Unit> write(String key, String value) async {
+  ResultFuture<Unit> write(String key, String value) async {
     try {
       await _flutterSecureStorage.write(key: key, value: value);
       return right(unit);
     } catch (e, stackTrace) {
-      return left(CacheWriteFailure(e, stackTrace: stackTrace));
+      return left(CacheFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 }

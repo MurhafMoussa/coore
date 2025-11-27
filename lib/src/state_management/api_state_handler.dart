@@ -97,7 +97,7 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
   /// - [enableCancellation]: If `true`, registers the request with [CancelRequestManager]
   ///                         and enables cancellation via [cancelRequest]. Defaults to `true`.
   Future<void> handleApiCall<T>({
-    required UseCaseFutureResponse<SuccessData> Function(
+    required ResultFuture<SuccessData> Function(
       T params, {
       String? requestId,
     })

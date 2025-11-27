@@ -8,7 +8,7 @@ import 'package:fpdart/fpdart.dart';
 /// The [DioApiHandler] accepts a Dio instance and [NetworkExceptionMapper] via constructor injection.
 /// It wraps HTTP calls in a common response handler that returns a [Future] with [Either].
 /// This allows the API layer to use functional error handling and provide clear, user-friendly errors
-/// via [NetworkFailure]. Request cancellation is supported through [CancelRequestManager] by
+/// via [Failure]. Request cancellation is supported through [CancelRequestManager] by
 /// providing an optional [requestId]. Additional options for caching and authorization are
 /// included in the request options. Responses are parsed from JSON using the provided parser
 /// function into the specified type [T].
@@ -17,7 +17,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// and [NetworkExceptionMapper].
   ///
   /// [dio]: The Dio instance to be used for HTTP calls.
-  /// [exceptionMapper]: A mapper to convert Network exceptions into [NetworkFailure] instances.
+  /// [exceptionMapper]: A mapper to convert Network exceptions into [Failure] instances.
   DioApiHandler(this._dio, this._exceptionMapper);
   final Dio _dio;
   final NetworkExceptionMapper _exceptionMapper;
@@ -54,13 +54,13 @@ class DioApiHandler implements ApiHandlerInterface {
   /// This method takes a [dioMethod] function that returns a [Future<Response>].
   /// On success, it parses the response data from JSON using the provided [parser] function
   /// and returns the parsed value of type [T]. On error, if the error is a [DioException],
-  /// it is mapped to a [NetworkFailure] using the exception mapper; otherwise, a
-  /// [UnableToProcessFailure] is returned.
+  /// it is mapped to a [Failure] using the exception mapper; otherwise, an
+  /// [UnknownFailure] is returned.
   ///
   /// If a [requestId] is provided, the cancel token is retrieved from [CancelRequestManager].
   /// The request can be cancelled by calling [CancelRequestManager.cancelRequest] with the
   /// same [requestId]. The request is automatically unregistered after completion.
-  RemoteResponse<T> _handleResponse<T>({
+  ResultFuture<T?> _handleResponse<T>({
     required Future<Response> Function(CancelToken cancelToken) dioMethod,
     required T Function(Map<String, dynamic> json) parser,
     String? requestId,
@@ -85,23 +85,22 @@ class DioApiHandler implements ApiHandlerInterface {
         final parsedData = parser(formattedMap);
         return right(parsedData);
       } else {
-        return left<NetworkFailure, T>(
-          UnableToProcessFailure(
-            'Invalid response data',
-            stackTrace: StackTrace.current,
-          ),
+        return left<FormatFailure, T>(
+          const FormatFailure(message: 'Invalid response data'),
         );
       }
     } on DioException catch (error, stackTrace) {
       if (error.type == DioExceptionType.cancel) {
         rethrow;
       }
-      return left<NetworkFailure, T>(
-        _exceptionMapper.mapException(error, stackTrace),
-      );
+      return left<Failure, T>(_exceptionMapper.mapException(error, stackTrace));
     } on Exception catch (error, stackTrace) {
-      return left<NetworkFailure, T>(
-        NoInternetConnectionFailure(error.toString(), stackTrace: stackTrace),
+      return left<Failure, T>(
+        UnknownFailure(
+          message: error.toString(),
+          stackTrace: stackTrace,
+          originalException: error,
+        ),
       );
     } finally {
       // Cleanup if requestId was provided
@@ -121,9 +120,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [isAuthorized]: Indicates whether the request requires authorization.
   /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
+  /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  RemoteResponse<T> get<T>(
+  ResultFuture<T?> get<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -162,9 +161,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [isAuthorized]: Indicates whether the request requires authorization.
   /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
+  /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  RemoteResponse<T> post<T>(
+  ResultFuture<T?> post<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -207,9 +206,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [isAuthorized]: Indicates whether the request requires authorization.
   /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
+  /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  RemoteResponse<T> delete<T>(
+  ResultFuture<T?> delete<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -240,9 +239,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [isAuthorized]: Indicates whether the request requires authorization.
   /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
+  /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  RemoteResponse<T> put<T>(
+  ResultFuture<T?> put<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -290,9 +289,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [isAuthorized]: Indicates whether the request requires authorization.
   /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
+  /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  RemoteResponse<T> patch<T>(
+  ResultFuture<T?> patch<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -338,9 +337,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [isAuthorized]: Indicates whether the download request requires authorization.
   /// [requestId]: Optional request ID for cancellation support.
   ///
-  /// Returns a [Future] containing either a [NetworkFailure] on error or a value of type [T] on success.
+  /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  RemoteResponse<T> download<T>(
+  ResultFuture<T?> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,

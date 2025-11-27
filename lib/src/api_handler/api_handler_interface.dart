@@ -1,12 +1,11 @@
 import 'package:coore/src/api_handler/form_data_adapter.dart';
-import 'package:coore/src/error_handling/failures/network_failure.dart';
 import 'package:coore/src/typedefs/core_typedefs.dart';
 import 'package:fpdart/fpdart.dart';
 
 /// An abstract interface for handling API requests using a functional
 /// programming style with [Either].
 ///
-/// Returns a [Future] that resolves to either a [NetworkFailure] on error or a value
+/// Returns a [Future] that resolves to either a [Failure] on error or a value
 /// of type [T] on success. The response is parsed from JSON using the provided
 /// [parser] function. Requests can be cancelled by providing a [requestId] and
 /// using [CancelRequestManager] to cancel them. This pattern helps in creating
@@ -23,9 +22,9 @@ abstract interface class ApiHandlerInterface {
   /// - [requestId]: Optional request ID for cancellation support. If provided, the request
   ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  RemoteResponse<T> get<T>(
+  ResultFuture<T?> get<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -49,9 +48,9 @@ abstract interface class ApiHandlerInterface {
   /// - [requestId]: Optional request ID for cancellation support. If provided, the request
   ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  RemoteResponse<T> post<T>(
+  ResultFuture<T?> post<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -72,9 +71,9 @@ abstract interface class ApiHandlerInterface {
   /// - [requestId]: Optional request ID for cancellation support. If provided, the request
   ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  RemoteResponse<T> delete<T>(
+  ResultFuture<T?> delete<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -96,9 +95,9 @@ abstract interface class ApiHandlerInterface {
   /// - [requestId]: Optional request ID for cancellation support. If provided, the request
   ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  RemoteResponse<T> put<T>(
+  ResultFuture<T?> put<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -124,9 +123,9 @@ abstract interface class ApiHandlerInterface {
   /// - [requestId]: Optional request ID for cancellation support. If provided, the request
   ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  RemoteResponse<T> patch<T>(
+  ResultFuture<T?> patch<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -149,9 +148,9 @@ abstract interface class ApiHandlerInterface {
   /// - [requestId]: Optional request ID for cancellation support. If provided, the request
   ///                can be cancelled via [CancelRequestManager].
   ///
-  /// Returns a [Future] that resolves to either a [NetworkFailure] on error, or a value
+  /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success, which could be the file path or a success message.
-  RemoteResponse<T> download<T>(
+  ResultFuture<T?> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,

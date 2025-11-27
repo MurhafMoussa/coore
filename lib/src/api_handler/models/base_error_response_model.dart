@@ -1,4 +1,11 @@
 abstract class BaseErrorResponseModel {
+    const BaseErrorResponseModel({
+    required this.status,
+    required this.developerMessage,
+    required this.timestamp,
+    this.traceId,
+    this.path,
+  });
   /// The HTTP status code. (e.g., 404, 500)
   final int status;
 
@@ -14,14 +21,12 @@ abstract class BaseErrorResponseModel {
   /// The timestamp of when the error occurred.
   final DateTime timestamp;
 
-  // Note: We remove 'details' and 'errorCode' as concrete
-  // implementations will define their own specific properties.
 
-  const BaseErrorResponseModel({
-    required this.status,
-    required this.developerMessage,
-    required this.timestamp,
-    this.traceId,
-    this.path,
-  });
+  /// Returns a map of field names to error messages.
+  ///
+  /// Concrete implementations (in the app layer) must implement this
+  /// to parse their specific JSON structure into this standard Map.
+  ///
+  /// Returns empty map if not a validation error.
+  Map<String, String> get validationErrors;
 }

@@ -1,4 +1,5 @@
 import 'package:coore/lib.dart'; // Assuming this imports Failure, ApiState, CoreDefaultErrorWidget, etc.
+import 'package:coore/src/error_handling/failures/unknown_failure.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
@@ -103,12 +104,16 @@ class ApiStateBuilder<CompositeState, SuccessData> extends StatelessWidget {
           Failed(:final failureObject, :final retryFunction) =>
             errorBuilder?.call(
                   context,
-                  failureObject.getOrElse(() => const UnknownFailure()),
+                  failureObject.getOrElse(
+                    () => const UnknownFailure(message: 'Unknown failure'),
+                  ),
                   retryFunction,
                 ) ??
                 CoreDefaultErrorWidget(
                   message: failureObject
-                      .getOrElse(() => const UnknownFailure())
+                      .getOrElse(
+                        () => const UnknownFailure(message: 'Unknown failure'),
+                      )
                       .message,
                   onRetry: retryFunction,
                 ),

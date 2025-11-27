@@ -1,10 +1,11 @@
+import 'package:coore/coore.dart';
 import 'package:coore/src/api_handler/api_handler_impl.dart';
 import 'package:coore/src/api_handler/cancel_request_manager.dart';
 import 'package:coore/src/api_handler/cancel_request_manager_impl.dart';
 import 'package:coore/src/api_handler/form_data_adapter.dart';
 import 'package:coore/src/dependency_injection/di_container.dart';
 import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
-import 'package:coore/src/error_handling/failures/network_failure.dart';
+import 'package:coore/src/error_handling/failures/connection_failure.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -304,8 +305,8 @@ void main() {
   Future<void> expectSuccess<T>(Future<dynamic> future, T expectedData) async {
     final result = await future;
     expect(result.isRight(), isTrue);
-    (result as Either<NetworkFailure, dynamic>).fold(
-      (NetworkFailure failure) {
+    (result as Either<Failure, dynamic>).fold(
+      (Failure failure) {
         fail('Expected success but got failure: $failure');
       },
       (dynamic data) {
@@ -316,12 +317,12 @@ void main() {
 
   Future<void> expectFailure(
     Future<dynamic> future,
-    NetworkFailure expectedFailure,
+    Failure expectedFailure,
   ) async {
     final result = await future;
     expect(result.isLeft(), isTrue);
-    (result as Either<NetworkFailure, dynamic>).fold(
-      (NetworkFailure failure) {
+      (result as Either<Failure, dynamic>).fold(
+      (Failure failure) {
         expect(failure, equals(expectedFailure));
       },
       (dynamic data) {
@@ -797,7 +798,7 @@ void main() {
 
           expect(result.isLeft(), isTrue);
           result.fold((failure) {
-            expect(failure, isA<NoInternetConnectionFailure>());
+            expect(failure, isA<ConnectionFailure>());
             expect(failure.message, contains('Generic error'));
           }, (data) => fail('Expected failure but got success: $data'));
         },
