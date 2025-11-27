@@ -102,7 +102,7 @@ await CoreConfig.initializeCoreDependenciesAfterProjectSetup(
 
 ### 🌐 Networking
 
-Coore provides a type-safe API handler that wraps all network calls in `Either<NetworkFailure, T>`, enabling functional error handling.
+Coore provides a type-safe API handler that wraps all network calls in `Either<Failure, T>`, enabling functional error handling with granular failure types.
 
 #### Making API Requests
 
@@ -124,11 +124,22 @@ final result = await apiHandler.get<List<User>>(
   requestId: 'fetch-users', // Optional: for cancellation
 );
 
-// Handle the Either result
+// Handle the Either result with type-safe error handling
 result.fold(
   (failure) {
-    // Handle error
-    print('Error: ${failure.message}');
+    // Handle specific failure types
+    if (failure is ConnectionFailure) {
+      // Show offline message
+      print('No internet: ${failure.message}');
+    } else if (failure is ServerFailure) {
+      // Show server error with status code
+      print('Server error ${failure.statusCode}: ${failure.message}');
+    } else if (failure is AuthFailure) {
+      // Navigate to login
+      print('Authentication required');
+    } else {
+      print('Error: ${failure.message}');
+    }
   },
   (users) {
     // Handle success
@@ -168,6 +179,120 @@ final result = await apiHandler.post<Map<String, dynamic>>(
   isAuthorized: true,
 );
 ```
+
+---
+
+### ⚠️ Error Handling & Failures
+
+Coore provides a comprehensive failure hierarchy for enterprise-grade error handling. All API calls return `Either<Failure, T>`, where `Failure` is a base class with specific subtypes for different error scenarios.
+
+#### Failure Types
+
+```dart
+// Base Failure class with observability support
+abstract class Failure extends Equatable implements Exception {
+  final String message;              // User-friendly message
+  final String? code;                 // Analytics code (e.g., 'AUTH_001')
+  final StackTrace? stackTrace;      // For Crashlytics/Sentry
+  final Object? originalException;   // Original exception for debugging
+}
+```
+
+**Available Failure Types:**
+
+- **`ConnectionFailure`** - Network-level issues (timeouts, DNS, SSL, no internet)
+  - `code: 'TIMEOUT'` - Request timeout
+  - `code: 'NO_INTERNET'` - No internet connection
+  - `code: 'SSL_ERR'` - SSL certificate error
+
+- **`ServerFailure`** - HTTP 4xx/5xx errors from backend
+  - `statusCode` - HTTP status code (e.g., 404, 500)
+  - `requestId` - Backend trace ID for log correlation
+
+- **`AuthFailure`** - Authentication issues (401)
+  - Triggers auto-logout or token refresh flows
+
+- **`UnauthorizedFailure`** - Authorization issues (403)
+  - User is logged in but lacks required permissions
+
+- **`ValidationFailure`** - Data validation errors (422)
+  - `errors: Map<String, String>` - Field-specific errors
+  - `firstError` - Helper to get first error message
+  - `getErrorFor(String fieldName)` - Get error for specific field
+
+- **`BusinessFailure`** - Business rule violations (200 OK but business error)
+  - Example: "Insufficient funds", "Duplicate transaction"
+
+- **`FormatFailure`** - Data parsing issues (malformed JSON, type mismatch)
+
+- **`CacheFailure`** - Local storage issues (database, secure storage, filesystem)
+
+- **`OperationCancelledFailure`** - User cancelled operation
+
+- **`UnknownFailure`** - Unexpected errors (unhandled exceptions)
+
+#### Error Handling Example
+
+```dart
+final result = await apiHandler.get<User>('/users/123', ...);
+
+result.fold(
+  (failure) {
+    // Pattern matching on failure types
+    switch (failure.runtimeType) {
+      case ConnectionFailure:
+        // Show offline UI
+        showSnackBar('No internet connection');
+        break;
+        
+      case AuthFailure:
+        // Navigate to login
+        router.push('/login');
+        break;
+        
+      case ValidationFailure:
+        final validationFailure = failure as ValidationFailure;
+        // Show field-specific errors
+        if (validationFailure.errors.containsKey('email')) {
+          showFieldError('email', validationFailure.getErrorFor('email'));
+        }
+        break;
+        
+      case ServerFailure:
+        final serverFailure = failure as ServerFailure;
+        // Log with request ID for backend correlation
+        logger.error(
+          'Server error ${serverFailure.statusCode}',
+          error: serverFailure,
+          stackTrace: serverFailure.stackTrace,
+          extra: {'requestId': serverFailure.requestId},
+        );
+        showSnackBar(serverFailure.message);
+        break;
+        
+      default:
+        // Handle unknown errors
+        showSnackBar(failure.message);
+    }
+  },
+  (user) {
+    // Success handling
+    displayUser(user);
+  },
+);
+```
+
+#### Exception Mapping
+
+Coore automatically maps Dio exceptions to appropriate failure types:
+
+- `DioExceptionType.connectionTimeout` → `ConnectionFailure(code: 'TIMEOUT')`
+- `DioExceptionType.connectionError` → `ConnectionFailure(code: 'NO_INTERNET')`
+- `DioExceptionType.badResponse` (401) → `AuthFailure`
+- `DioExceptionType.badResponse` (403) → `UnauthorizedFailure`
+- `DioExceptionType.badResponse` (422) → `ValidationFailure`
+- `DioExceptionType.badResponse` (4xx/5xx) → `ServerFailure`
+- Generic `Exception` → `UnknownFailure`
 
 ---
 
@@ -256,7 +381,17 @@ class UserCubit extends Cubit<UserState> with ApiStateHostMixin<UserState> {
 
 #### Pagination Widget
 
-`CorePaginationWidget` provides a complete pagination solution with pull-to-refresh, load-more, skeleton loading, and error handling. **Optimized for performance** with minimal rebuilds and efficient memory usage.
+`CorePaginationWidget` provides a complete pagination solution powered by **EasyRefresh v3** with pull-to-refresh, load-more, skeleton loading, and error handling. **Highly optimized for performance** with minimal rebuilds and efficient memory usage.
+
+**Key Features:**
+- 🔄 Pull-to-refresh with customizable headers (`MaterialHeader`, `ClassicHeader`, or custom)
+- ⬇️ Load-more with customizable footers (`MaterialFooter`, `ClassicFooter`, or custom)
+- 💀 Skeleton loading with `Skeletonizer` integration
+- ⚠️ Error handling with retry functionality
+- 🎯 Scroll-to-top FAB (optional)
+- 📊 Supports both `ScrollView` and `Sliver` modes
+
+**Basic Usage:**
 
 ```dart
 CorePaginationWidget<User, PageMeta>(
@@ -265,10 +400,7 @@ CorePaginationWidget<User, PageMeta>(
       PagePaginationParams(page: batch, limit: limit),
     );
   },
-  paginationStrategy: const PaginationStrategy(
-    initialBatch: 1,
-    batchSize: 20,
-  ),
+  paginationStrategy: PagePaginationStrategy(limit: 20),
   scrollableBuilder: (context, response, controller) {
     return ListView.builder(
       controller: controller,
@@ -283,18 +415,106 @@ CorePaginationWidget<User, PageMeta>(
     );
   },
   // Required if loadingBuilder is not provided (for skeleton loading)
-  emptyEntity: User(id: '', name: '', email: ''),
+  emptyEntity: const User(id: '', name: '', email: ''),
   emptyBuilder: (context) => const Center(
     child: Text('No users found'),
   ),
 )
 ```
 
-**Performance Features:**
-- ✅ Optimized rebuilds using `BlocSelector` (only rebuilds when necessary)
-- ✅ Cached skeleton placeholders (reduces memory allocations)
-- ✅ Lazy error widget evaluation (builds only when needed)
-- ✅ Efficient list concatenation for large datasets
+**Advanced Usage with Custom Headers/Footers:**
+
+```dart
+CorePaginationWidget<Product, PageMeta>(
+  paginationFunction: (batch, limit, {requestId}) async {
+    return await productRepository.getProducts(
+      PagePaginationParams(page: batch, limit: limit),
+    );
+  },
+  paginationStrategy: PagePaginationStrategy(limit: 20),
+  scrollableBuilder: (context, response, controller) {
+    return GridView.builder(
+      controller: controller,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      itemCount: response.data.length,
+      itemBuilder: (context, index) => ProductCard(
+        product: response.data[index],
+      ),
+    );
+  },
+  emptyEntity: const Product(id: '', name: '', price: 0),
+  // Custom refresh header
+  headerBuilder: (context) => ClassicHeader(
+    dragText: 'Pull to refresh',
+    armedText: 'Release to refresh',
+    readyText: 'Refreshing...',
+    processingText: 'Refreshing...',
+    processedText: 'Refreshed',
+    noMoreText: 'No more',
+  ),
+  // Custom load-more footer
+  footerBuilder: (context) => ClassicFooter(
+    dragText: 'Pull to load',
+    armedText: 'Release to load',
+    readyText: 'Loading...',
+    processingText: 'Loading...',
+    processedText: 'Loaded',
+    noMoreText: 'No more data',
+  ),
+  // Custom error builder
+  errorBuilder: (context, failure, retry, alreadyFetchedItemsWidget) {
+    return Column(
+      children: [
+        if (alreadyFetchedItemsWidget != null) 
+          Expanded(child: alreadyFetchedItemsWidget),
+        Center(
+          child: Column(
+            children: [
+              Text('Error: ${failure.message}'),
+              ElevatedButton(
+                onPressed: retry,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  },
+)
+```
+
+**Using with Existing Cubit:**
+
+```dart
+// Create cubit elsewhere
+final paginationCubit = CorePaginationCubit<Product, PageMeta>(
+  paginationFunction: (batch, limit, {requestId}) async {
+    return await productRepository.getProducts(
+      PagePaginationParams(page: batch, limit: limit),
+    );
+  },
+  paginationStrategy: PagePaginationStrategy(limit: 20),
+);
+
+// Use in widget
+CorePaginationWidget<Product, PageMeta>(
+  paginationCubit: paginationCubit,
+  scrollableBuilder: (context, response, controller) {
+    // Your list implementation
+  },
+  emptyEntity: const Product(id: '', name: '', price: 0),
+)
+```
+
+**Performance Optimizations:**
+- ✅ **BlocSelector optimization** - Only rebuilds `EasyRefresh` when `hasReachedMax` changes
+- ✅ **Cached skeleton placeholders** - Instance-level caching prevents regeneration on theme changes
+- ✅ **Lazy error widget evaluation** - `alreadyFetchedItemsWidget` only built when error builder uses it
+- ✅ **Efficient list concatenation** - Uses `List.from()..addAll()` for better performance with large datasets
+- ✅ **Widget extraction** - `_PaginationBody` isolates state listening to prevent unnecessary rebuilds
 
 #### Form Fields
 
