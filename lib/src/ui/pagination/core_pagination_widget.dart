@@ -68,7 +68,7 @@ class PaginationConfig<T extends Identifiable, M extends MetaModel>
   // ---------------------------------------------------------------------------------
 
   /// Function to fetch a page of data. [batch] is 1-based, [limit] is from strategy.
-  final UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
+  final ResultFuture<PaginationResponseModel<T, M>> Function(
     int batch,
     int limit, {
     String? requestId,
@@ -112,7 +112,7 @@ class PaginationConfig<T extends Identifiable, M extends MetaModel>
   errorBuilder;
 
   // ---------------------------------------------------------------------------------
-  // PULL-TO-REFRESH
+  // REFRESH & LOAD MORE (EasyRefresh)
   // ---------------------------------------------------------------------------------
 
   /// Whether pull-down-to-refresh is enabled.
@@ -227,7 +227,7 @@ class CorePaginationWidget<T extends Identifiable, M extends MetaModel>
   sliversBuilder;
 
   /// Function to fetch data pages.
-  final UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
+  final ResultFuture<PaginationResponseModel<T, M>> Function(
     int batch,
     int limit, {
     String? requestId,

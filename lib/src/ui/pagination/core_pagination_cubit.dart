@@ -19,7 +19,7 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// {@macro core_pagination_cubit}
   CorePaginationCubit({
     /// Async function that fetches paginated data from usecase
-    required UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
+    required ResultFuture<PaginationResponseModel<T, M>> Function(
       int batch,
       int limit, {
       String? requestId,
@@ -43,7 +43,7 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
   /// - requestId: Optional request ID for cancellation support
-  UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
+  ResultFuture<PaginationResponseModel<T, M>> Function(
     int batch,
     int limit, {
     String? requestId,
@@ -182,7 +182,7 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   }
 
   void updatePaginationFunction(
-    UseCaseFutureResponse<PaginationResponseModel<T, M>> Function(
+    ResultFuture<PaginationResponseModel<T, M>> Function(
       int batch,
       int limit, {
       String? requestId,
