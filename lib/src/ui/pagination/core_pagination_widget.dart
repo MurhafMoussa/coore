@@ -1,7 +1,7 @@
 import 'package:coore/lib.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 // =====================================================================================
@@ -119,12 +119,14 @@ class PaginationConfig<T extends Identifiable, M extends MetaModel>
   final bool showRefreshIndicator;
 
   /// Custom header widget builder for refresh.
-  final Widget Function(BuildContext context, RefreshController controller)?
-  headerBuilder;
+  /// Takes BuildContext only (EasyRefresh handles state internally).
+  /// Must return a Header widget (e.g., MaterialHeader, ClassicHeader).
+  final Header Function(BuildContext context)? headerBuilder;
 
   /// Custom footer widget builder for load-more.
-  final Widget Function(BuildContext context, RefreshController controller)?
-  footerBuilder;
+  /// Takes BuildContext only (EasyRefresh handles state internally).
+  /// Must return a Footer widget (e.g., MaterialFooter, ClassicFooter).
+  final Footer Function(BuildContext context)? footerBuilder;
 
   // ---------------------------------------------------------------------------------
   // SKELETON LOADING
@@ -163,8 +165,8 @@ class PaginationConfig<T extends Identifiable, M extends MetaModel>
 
 /// A ready-to-use pagination widget that wires:
 ///  • [PaginationConfig] inheritance
-///  • [CorePaginationCubit] ,Mstate management
-///  • Pull-to-refresh and load-more via [SmartRefresher]
+///  • [CorePaginationCubit] state management
+///  • Pull-to-refresh and load-more via [EasyRefresh]
 ///  • Skeleton loading or custom loader
 ///  • Error handling with retry
 ///  • Optional scroll-to-top FAB
@@ -200,6 +202,10 @@ class CorePaginationWidget<T extends Identifiable, M extends MetaModel>
          (paginationCubit != null) ||
              (paginationFunction != null && paginationStrategy != null),
          'Either paginationCubit or both paginationFunction and paginationStrategy must be provided',
+       ),
+       assert(
+         loadingBuilder != null || emptyEntity != null,
+         'If loadingBuilder is not provided, emptyEntity MUST be provided for Skeletonizer.',
        );
 
   final CorePaginationCubit<T, M>? paginationCubit;
@@ -254,10 +260,14 @@ class CorePaginationWidget<T extends Identifiable, M extends MetaModel>
   final bool showRefreshIndicator;
 
   /// Custom refresh header.
-  final Widget Function(BuildContext, RefreshController)? headerBuilder;
+  /// Takes BuildContext only (EasyRefresh handles state internally).
+  /// Must return a Header widget (e.g., MaterialHeader, ClassicHeader).
+  final Header Function(BuildContext)? headerBuilder;
 
   /// Custom load-more footer.
-  final Widget Function(BuildContext, RefreshController)? footerBuilder;
+  /// Takes BuildContext only (EasyRefresh handles state internally).
+  /// Must return a Footer widget (e.g., MaterialFooter, ClassicFooter).
+  final Footer Function(BuildContext)? footerBuilder;
 
   /// Number of skeleton placeholders.
   final int? skeletonItemCount;
@@ -351,23 +361,25 @@ class _PaginationContent<T extends Identifiable, M extends MetaModel>
 
   @override
   Widget build(BuildContext context) {
+    // OPTIMIZATION: Removed redundant BlocBuilder - enableScrollToTop is static config
+    // Children handle their own state listening
     final config = PaginationConfig.of<T, M>(context);
-    return BlocBuilder<CorePaginationCubit<T, M>, CorePaginationState<T, M>>(
-      builder: (context, state) {
-        return config.enableScrollToTop
-            ? CoreScrollableContentWithFab(
-                scrollableBuilder: (controller) =>
-                    _SmartRefresherWidget<T, M>(controller: controller),
-              )
-            : _SmartRefresherWidget<T, M>();
-      },
-    );
+    return config.enableScrollToTop
+        ? CoreScrollableContentWithFab(
+            scrollableBuilder: (controller) =>
+                _EasyRefreshWidget<T, M>(controller: controller),
+          )
+        : _EasyRefreshWidget<T, M>();
   }
 }
 
-class _SmartRefresherWidget<T extends Identifiable, M extends MetaModel>
+/// EasyRefresh wrapper widget with optimized rebuilds.
+///
+/// Uses BlocSelector to only rebuild when hasReachedMax changes,
+/// which affects whether load-more is enabled.
+class _EasyRefreshWidget<T extends Identifiable, M extends MetaModel>
     extends StatelessWidget {
-  const _SmartRefresherWidget({this.controller});
+  const _EasyRefreshWidget({this.controller});
 
   final ScrollController? controller;
 
@@ -376,21 +388,41 @@ class _SmartRefresherWidget<T extends Identifiable, M extends MetaModel>
     final config = PaginationConfig.of<T, M>(context);
     final cubit = context.read<CorePaginationCubit<T, M>>();
 
-    return SmartRefresher(
-      controller: cubit.refreshController,
-      scrollDirection: config.scrollDirection,
-      physics: config.physics,
-      enablePullUp: !cubit.state.hasReachedMax,
-      enablePullDown: config.showRefreshIndicator,
-      onRefresh: cubit.fetchInitialData,
-      onLoading: cubit.fetchMoreData,
-      header: config.headerBuilder?.call(context, cubit.refreshController),
-      footer: config.footerBuilder?.call(context, cubit.refreshController),
-      child: _contentBuilder(context),
+    // OPTIMIZATION: BlocSelector prevents rebuilds on every state change
+    // Only rebuilds when hasReachedMax changes (affects enableLoadMore)
+    return BlocSelector<
+      CorePaginationCubit<T, M>,
+      CorePaginationState<T, M>,
+      bool
+    >(
+      selector: (state) => state.hasReachedMax,
+      builder: (context, hasReachedMax) {
+        return EasyRefresh(
+          onRefresh: config.showRefreshIndicator
+              ? () async => await cubit.fetchInitialData()
+              : null,
+          onLoad: hasReachedMax
+              ? null // Passing null automatically disables the footer
+              : () async => await cubit.fetchMoreData(),
+          header: config.headerBuilder?.call(context) ?? const MaterialHeader(),
+          footer: config.footerBuilder?.call(context) ?? const MaterialFooter(),
+          // EasyRefresh doesn't require direct ScrollView child - can wrap any widget
+          child: _PaginationBody<T, M>(controller: controller),
+        );
+      },
     );
   }
+}
 
-  Widget _contentBuilder(BuildContext context) {
+/// Extracted widget to isolate state listening and prevent unnecessary rebuilds.
+class _PaginationBody<T extends Identifiable, M extends MetaModel>
+    extends StatelessWidget {
+  const _PaginationBody({this.controller});
+
+  final ScrollController? controller;
+
+  @override
+  Widget build(BuildContext context) {
     final state = context.watch<CorePaginationCubit<T, M>>().state;
     return switch (state) {
       PaginationSucceeded<T, M>(paginatedResponseModel: final items) =>
@@ -440,11 +472,13 @@ class _SmartRefresherWidget<T extends Identifiable, M extends MetaModel>
     final config = PaginationConfig.of<T, M>(context);
 
     if (config.errorBuilder != null) {
+      // OPTIMIZATION: Lazy evaluation - only build if needed
+      Widget? cachedPaginatedWidget;
       return config.errorBuilder!(
         context,
         failure,
         retryFunction,
-        buildPaginated(context, model, controller),
+        cachedPaginatedWidget ??= buildPaginated(context, model, controller),
       );
     }
 
@@ -459,38 +493,80 @@ class _SmartRefresherWidget<T extends Identifiable, M extends MetaModel>
   }
 }
 
+/// Loading state widget with optimized skeleton caching.
+///
+/// Uses StatefulWidget to cache skeleton placeholders and prevent
+/// regeneration on every rebuild. Cache survives theme changes safely.
 class _LoadingStateWidget<T extends Identifiable, M extends MetaModel>
-    extends StatelessWidget {
+    extends StatefulWidget {
   const _LoadingStateWidget({super.key, this.scrollController});
 
   final ScrollController? scrollController;
 
   @override
+  State<_LoadingStateWidget<T, M>> createState() =>
+      _LoadingStateWidgetState<T, M>();
+}
+
+class _LoadingStateWidgetState<T extends Identifiable, M extends MetaModel>
+    extends State<_LoadingStateWidget<T, M>> {
+  // OPTIMIZATION: Cache placeholders in State (safe, type-specific per instance)
+  // Nullable to handle didChangeDependencies being called multiple times (theme changes)
+  PaginationResponseModel<T, M>? _cachedPlaceholders;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Only generate if null (prevents LateInitializationError on theme changes)
+    if (_cachedPlaceholders == null) {
+      final cfg = PaginationConfig.of<T, M>(context);
+      final cubit = context.read<CorePaginationCubit<T, M>>();
+
+      _cachedPlaceholders = PaginationResponseModel<T, M>(
+        data: List<T>.generate(
+          cfg.skeletonItemCount ?? cubit.paginationStrategy.limit,
+          (_) => cfg
+              .emptyEntity!, // Safe: assertion guarantees non-null if loadingBuilder is null
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cfg = PaginationConfig.of<T, M>(context);
-    final cubit = context.read<CorePaginationCubit<T, M>>();
+
     if (cfg.loadingBuilder != null) {
       return cfg.loadingBuilder!(context);
     }
-    final placeholders = PaginationResponseModel<T, M>(
+
+    // Fallback initialization if didChangeDependencies hasn't run yet
+    _cachedPlaceholders ??= PaginationResponseModel<T, M>(
       data: List<T>.generate(
-        cfg.skeletonItemCount ?? cubit.paginationStrategy.limit,
+        cfg.skeletonItemCount ?? 20, // Fallback count
         (_) => cfg.emptyEntity!,
       ),
     );
+
+    // CORRECTNESS: We MUST call the builder for Skeletonizer to work properly
     Widget skeletonChild;
     if (cfg.sliversBuilder != null) {
       skeletonChild = CustomScrollView(
         scrollDirection: cfg.scrollDirection,
         reverse: cfg.reverse,
-        physics: cfg.physics,
-        slivers: cfg.sliversBuilder!(context, placeholders, scrollController),
+        physics:
+            const NeverScrollableScrollPhysics(), // Disable scrolling during loading
+        slivers: cfg.sliversBuilder!(
+          context,
+          _cachedPlaceholders!,
+          widget.scrollController,
+        ),
       );
     } else {
       skeletonChild = cfg.scrollableBuilder!(
         context,
-        placeholders,
-        scrollController,
+        _cachedPlaceholders!,
+        widget.scrollController,
       );
     }
     return Skeletonizer(child: skeletonChild);

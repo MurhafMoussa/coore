@@ -53,17 +53,23 @@ class _CoreScrollableContentWithFabState
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
-      final shouldShow = _scrollController.offset > fabThreshold;
-      _isFabVisible.value = shouldShow;
-    });
+    _scrollController.addListener(_updateFabVisibility);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_updateFabVisibility);
     _scrollController.dispose();
     _isFabVisible.dispose();
     super.dispose();
+  }
+
+  void _updateFabVisibility() {
+    // Only access offset if clients are attached to prevent errors during disposal
+    if (!_scrollController.hasClients) return;
+
+    final shouldShow = _scrollController.offset > fabThreshold;
+    _isFabVisible.value = shouldShow;
   }
 
   void _scrollToTop() {
@@ -84,16 +90,20 @@ class _CoreScrollableContentWithFabState
         ValueListenableBuilder<bool>(
           valueListenable: _isFabVisible,
           builder: (context, isVisible, child) {
-            return isVisible
-                ? Positioned(
-                    right: 16,
-                    bottom: 16,
-                    child: FloatingActionButton(
-                      onPressed: _scrollToTop,
-                      child: const Icon(Icons.arrow_upward),
-                    ),
-                  )
-                : const SizedBox.shrink();
+            return Positioned(
+              right: 16,
+              bottom: 16,
+              child: AnimatedScale(
+                scale: isVisible ? 1.0 : 0.0,
+                duration: widget.scrollDuration,
+                curve: widget.scrollCurve,
+                child: FloatingActionButton(
+                  heroTag: null,
+                  onPressed: _scrollToTop,
+                  child: const Icon(Icons.arrow_upward),
+                ),
+              ),
+            );
           },
         ),
       ],

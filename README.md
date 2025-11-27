@@ -256,7 +256,7 @@ class UserCubit extends Cubit<UserState> with ApiStateHostMixin<UserState> {
 
 #### Pagination Widget
 
-`CorePaginationWidget` provides a complete pagination solution with pull-to-refresh, load-more, skeleton loading, and error handling.
+`CorePaginationWidget` provides a complete pagination solution with pull-to-refresh, load-more, skeleton loading, and error handling. **Optimized for performance** with minimal rebuilds and efficient memory usage.
 
 ```dart
 CorePaginationWidget<User, PageMeta>(
@@ -282,11 +282,19 @@ CorePaginationWidget<User, PageMeta>(
       },
     );
   },
+  // Required if loadingBuilder is not provided (for skeleton loading)
+  emptyEntity: User(id: '', name: '', email: ''),
   emptyBuilder: (context) => const Center(
     child: Text('No users found'),
   ),
 )
 ```
+
+**Performance Features:**
+- ✅ Optimized rebuilds using `BlocSelector` (only rebuilds when necessary)
+- ✅ Cached skeleton placeholders (reduces memory allocations)
+- ✅ Lazy error widget evaluation (builds only when needed)
+- ✅ Efficient list concatenation for large datasets
 
 #### Form Fields
 

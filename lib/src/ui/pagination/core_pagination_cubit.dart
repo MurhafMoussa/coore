@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:coore/lib.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 part 'core_pagination_cubit.freezed.dart';
 part 'core_pagination_state.dart';
@@ -12,7 +11,6 @@ part 'core_pagination_state.dart';
 /// Manages:
 /// - Pagination state (loading/success/error)
 /// - Automatic batch fetching
-/// - Refresh control
 /// - Pagination strategy (page/skip/cursor)
 /// - Error handling with retry capabilities
 ///
@@ -35,7 +33,6 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
     this.reverse = false,
   }) : _paginationFunction = paginationFunction,
        super(CorePaginationState<T, M>.loading()) {
-    _refreshController = RefreshController();
     _paginationFunction = paginationFunction;
   }
 
@@ -50,7 +47,8 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
     int batch,
     int limit, {
     String? requestId,
-  }) _paginationFunction;
+  })
+  _paginationFunction;
 
   /// Active pagination strategy implementation
   final PaginationStrategy paginationStrategy;
@@ -58,15 +56,10 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// Reverse loading order (useful for chat/messaging interfaces)
   final bool reverse;
 
-  late final RefreshController _refreshController;
-
-  /// Exposed refresh controller for integration with pull-to-refresh widgets
-  RefreshController get refreshController => _refreshController;
-
   /// Fetches the first page of data:
   /// - Resets pagination state
   /// - Handles initial loading state
-
+  /// - Returns Future that completes when network request finishes
   @mustCallSuper
   Future<void> fetchInitialData() async {
     if (!isClosed) _resetState();
@@ -78,6 +71,7 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// - Handles pagination increment
   /// - Manages loading states
   /// - Blocks duplicate/concurrent requests
+  /// - Returns Future that completes when network request finishes
   @mustCallSuper
   Future<void> fetchMoreData() async {
     if (_shouldBlockRequest) return;
@@ -92,6 +86,7 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// - Executes pagination function
   /// - Routes to success/error handlers
   /// - Maintains initial/non-initial context
+  /// - Completes Future when done (for EasyRefresh)
   Future<void> _fetchNetworkData({required bool isInitial}) async {
     // Register request for cancellation support
     _currentRequestId = getIt<CancelRequestManager>().registerRequest();
@@ -122,7 +117,6 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// Error handling pipeline:
   /// - Updates state with error details
   /// - Provides retry function in state
-  /// - Manages refresh controller state
   void _handleFailure(Failure failure, bool isInitial) {
     emit(
       CorePaginationState.failed(
@@ -131,14 +125,12 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
         retryFunction: isInitial ? fetchInitialData : fetchMoreData,
       ),
     );
-
-    _refreshController.loadFailed();
   }
 
   /// Success handling pipeline:
   /// - Merges new items with existing state
   /// - Determines pagination completion
-  /// - Updates refresh controller
+  /// - Updates pagination strategy
   void _handleSuccess(
     PaginationResponseModel<T, M> paginatedResponseModel,
     bool isInitial,
@@ -151,10 +143,9 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
         paginatedResponseModel: isInitial
             ? paginatedResponseModel
             : state.paginatedResponseModel.copyWith(
-                data: [
-                  ...state.paginatedResponseModel.data,
-                  ...paginatedResponseModel.data,
-                ],
+                // OPTIMIZATION: Use List.from()..addAll() for better performance with large lists
+                data: List<T>.from(state.paginatedResponseModel.data)
+                  ..addAll(paginatedResponseModel.data),
               ),
         hasReachedMax: hasReachedMax,
       ),
@@ -164,15 +155,10 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   }
 
   /// Post-success state updates:
-  /// - Updates refresh controller status
   /// - Increments pagination strategy
   /// - Handles end-of-list detection
   void _updatePaginationState(bool hasReachedMax) {
-    _refreshController.refreshCompleted();
-    if (hasReachedMax) {
-      _refreshController.loadNoData();
-    } else {
-      _refreshController.loadComplete();
+    if (!hasReachedMax) {
       paginationStrategy.increment();
     }
   }
@@ -187,7 +173,6 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
 
   @override
   Future<void> close() {
-    _refreshController.dispose();
     // Cancel ongoing request if exists
     if (_currentRequestId != null) {
       getIt<CancelRequestManager>().cancelRequest(_currentRequestId!);
