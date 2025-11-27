@@ -11,9 +11,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:logger/logger.dart' as logger;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:talker_dio_logger/talker_dio_logger.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 final getIt = GetIt.instance;
 
@@ -23,19 +24,14 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
   getIt
     ..registerLazySingletonAsync(() => DeviceInfoPlugin().deviceInfo)
     ..registerLazySingletonAsync(() => PackageInfo.fromPlatform())
-    ..registerLazySingleton(
-      () => logger.Logger(
-        filter: logger.DevelopmentFilter(),
-        printer: logger.PrettyPrinter(
-          dateTimeFormat: logger.DateTimeFormat.dateAndTime,
-        ),
-        output: logger.ConsoleOutput(),
-        level: logger.Level.all,
+    ..registerLazySingleton<Talker>(
+      () => TalkerFlutter.init(
+        settings: TalkerSettings(enabled: coreEntity.shouldLog),
       ),
     )
     ..registerLazySingleton(_createFlutterSecureStorage)
     ..registerLazySingleton<CoreLogger>(
-      () => CoreLoggerImpl(getIt(), shouldLog: coreEntity.shouldLog),
+      () => CoreLoggerImpl(getIt<Talker>(), shouldLog: coreEntity.shouldLog),
     )
     ..registerLazySingleton(
       () => AuthTokenManager(
@@ -55,9 +51,7 @@ Future<void> setupCoreDependencies(CoreConfigEntity coreEntity) async {
       () => SecureDatabaseImp(getIt()),
     )
     ..registerLazySingleton<NetworkExceptionMapper>(
-      () => DioExceptionMapper(
-        coreEntity.errorConfigEntity.errorModelParser,
-      ),
+      () => DioExceptionMapper(coreEntity.errorConfigEntity.errorModelParser),
     )
     ..registerLazySingleton<CancelRequestManager>(
       () => CancelRequestManagerImpl(),
@@ -134,7 +128,13 @@ Dio _createDio(
 
   if (shouldLog) {
     dio.interceptors.add(
-      LoggingInterceptor(logger: getIt(), maxBodyLength: 10000),
+      LoggingInterceptor(
+        talker: getIt<Talker>(),
+        settings: const TalkerDioLoggerSettings(
+          printRequestHeaders: true,
+          printResponseHeaders: true,
+        ),
+      ),
     );
   }
 
@@ -157,10 +157,11 @@ Dio _createDio(
   }
   dio.interceptors.addAll([...entity.interceptors]);
   if (entity.enableTokenInjection) {
-    late final AuthInterceptor authInterceptor;
+    // Add token injector interceptor (runs first to inject tokens)
+    late final TokenInjectorInterceptor tokenInjector;
     switch (entity.authInterceptorType) {
       case AuthInterceptorType.tokenBased:
-        authInterceptor = TokenAuthInterceptor(getIt(), entity);
+        tokenInjector = BearerTokenInjectorInterceptor(getIt());
         break;
       case AuthInterceptorType.cookieBased:
         final String appDocPath = directory.path;
@@ -169,11 +170,24 @@ Dio _createDio(
           storage: FileStorage('$appDocPath/.cookies/'),
         );
         dio.interceptors.add(CookieManager(jar));
-        authInterceptor = CookieAuthInterceptor(getIt(), entity);
+        tokenInjector = CookieTokenInjectorInterceptor(getIt());
         break;
     }
+    dio.interceptors.add(tokenInjector);
 
-    dio.interceptors.add(authInterceptor);
+    // Add token refresh interceptor (runs on errors to handle 401s)
+    if (entity.enableRefreshTokenBehavior) {
+      late final TokenRefreshInterceptor tokenRefresh;
+      switch (entity.authInterceptorType) {
+        case AuthInterceptorType.tokenBased:
+          tokenRefresh = BearerTokenRefreshInterceptor(getIt(), entity);
+          break;
+        case AuthInterceptorType.cookieBased:
+          tokenRefresh = CookieTokenRefreshInterceptor(getIt(), entity);
+          break;
+      }
+      dio.interceptors.add(tokenRefresh);
+    }
   }
 
   return dio;

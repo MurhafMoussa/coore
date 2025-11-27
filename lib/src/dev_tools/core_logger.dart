@@ -1,6 +1,8 @@
 import 'dart:core';
 
-import 'package:logger/logger.dart';
+import 'package:talker_flutter/talker_flutter.dart';
+
+
 
 /// Abstract logging interface for application-wide logging
 abstract interface class CoreLogger {
@@ -20,43 +22,74 @@ abstract interface class CoreLogger {
   void error(dynamic message, [Object? error, StackTrace? stackTrace]);
 }
 
-/// Concrete implementation using the logger package
+/// Concrete implementation using the Talker package
 class CoreLoggerImpl implements CoreLogger {
-  CoreLoggerImpl(this._logger, {required this.shouldLog});
-  final Logger _logger;
+  CoreLoggerImpl(this._talker, {required this.shouldLog});
+  final Talker _talker;
   final bool shouldLog;
+
   @override
   void debug(dynamic message, [Object? error, StackTrace? stackTrace]) {
     if (shouldLog) {
-      _logger.d(message, error: error, stackTrace: stackTrace);
+      if (error != null && stackTrace != null) {
+        _talker.debug(message, error, stackTrace);
+      } else if (error != null) {
+        _talker.debug(message, error);
+      } else {
+        _talker.debug(message);
+      }
     }
   }
 
   @override
   void error(dynamic message, [Object? error, StackTrace? stackTrace]) {
     if (shouldLog) {
-      _logger.e(message, error: error, stackTrace: stackTrace);
+      if (error != null && stackTrace != null) {
+        _talker.error(message, error, stackTrace);
+      } else if (error != null) {
+        _talker.error(message, error);
+      } else {
+        _talker.error(message);
+      }
     }
   }
 
   @override
   void info(dynamic message, [Object? error, StackTrace? stackTrace]) {
     if (shouldLog) {
-      _logger.i(message, error: error, stackTrace: stackTrace);
+      if (error != null && stackTrace != null) {
+        _talker.info(message, error, stackTrace);
+      } else if (error != null) {
+        _talker.info(message, error);
+      } else {
+        _talker.info(message);
+      }
     }
   }
 
   @override
   void verbose(dynamic message, [Object? error, StackTrace? stackTrace]) {
     if (shouldLog) {
-      _logger.t(message, error: error, stackTrace: stackTrace);
+      if (error != null && stackTrace != null) {
+        _talker.verbose(message, error, stackTrace);
+      } else if (error != null) {
+        _talker.verbose(message, error);
+      } else {
+        _talker.verbose(message);
+      }
     }
   }
 
   @override
   void warning(dynamic message, [Object? error, StackTrace? stackTrace]) {
     if (shouldLog) {
-      _logger.w(message, error: error, stackTrace: stackTrace);
+      if (error != null && stackTrace != null) {
+        _talker.warning(message, error, stackTrace);
+      } else if (error != null) {
+        _talker.warning(message, error);
+      } else {
+        _talker.warning(message);
+      }
     }
   }
 }

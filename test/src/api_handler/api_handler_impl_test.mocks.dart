@@ -70,9 +70,8 @@ class _FakeBaseErrorResponseModel_6 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
-class _FakeNetworkFailure_7 extends _i1.SmartFake
-    implements _i8.Failure {
-  _FakeNetworkFailure_7(Object parent, Invocation parentInvocation)
+class _FakeFailure_7 extends _i1.SmartFake implements _i8.Failure {
+  _FakeFailure_7(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -848,26 +847,15 @@ class MockNetworkExceptionMapper extends _i1.Mock
           as _i8.ErrorModelParser);
 
   @override
-  Map<int, _i8.FailureBuilder> get codeToFailureMap =>
-      (super.noSuchMethod(
-            Invocation.getter(#codeToFailureMap),
-            returnValue: <int, _i8.FailureBuilder>{},
-          )
-          as Map<int, _i8.FailureBuilder>);
-
-  @override
-  _i8.NetworkFailure mapException(
-    Exception? exception,
-    StackTrace? stackTrace,
-  ) =>
+  _i8.Failure mapException(Exception? exception, StackTrace? stackTrace) =>
       (super.noSuchMethod(
             Invocation.method(#mapException, [exception, stackTrace]),
-            returnValue: _FakeNetworkFailure_7(
+            returnValue: _FakeFailure_7(
               this,
               Invocation.method(#mapException, [exception, stackTrace]),
             ),
           )
-          as _i8.NetworkFailure);
+          as _i8.Failure);
 }
 
 /// A class which mocks [CacheStore].

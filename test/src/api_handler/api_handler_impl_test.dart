@@ -1,11 +1,4 @@
 import 'package:coore/coore.dart';
-import 'package:coore/src/api_handler/api_handler_impl.dart';
-import 'package:coore/src/api_handler/cancel_request_manager.dart';
-import 'package:coore/src/api_handler/cancel_request_manager_impl.dart';
-import 'package:coore/src/api_handler/form_data_adapter.dart';
-import 'package:coore/src/dependency_injection/di_container.dart';
-import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
-import 'package:coore/src/error_handling/failures/connection_failure.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -321,7 +314,7 @@ void main() {
   ) async {
     final result = await future;
     expect(result.isLeft(), isTrue);
-      (result as Either<Failure, dynamic>).fold(
+    (result as Either<Failure, dynamic>).fold(
       (Failure failure) {
         expect(failure, equals(expectedFailure));
       },
@@ -342,6 +335,724 @@ void main() {
     final captured = verification.captured;
     expect(captured.length, greaterThan(0));
     return captured.first as Options;
+  }
+
+  // Helper methods for creating DioExceptions
+  DioException createDioException({
+    DioExceptionType type = DioExceptionType.connectionTimeout,
+    int? statusCode,
+    Map<String, dynamic>? responseData,
+  }) {
+    return DioException(
+      requestOptions: RequestOptions(path: '/test'),
+      type: type,
+      response: statusCode != null
+          ? Response(
+              requestOptions: RequestOptions(path: '/test'),
+              statusCode: statusCode,
+              data: responseData,
+            )
+          : null,
+    );
+  }
+
+  // Helper method to mock DioException for any HTTP method
+  void mockDioExceptionForMethod(String method, DioException exception) {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        when(
+          mockDio.get<dynamic>(
+            any,
+            queryParameters: anyNamed('queryParameters'),
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).thenThrow(exception);
+        break;
+      case 'POST':
+        when(
+          mockDio.post<dynamic>(
+            any,
+            data: anyNamed('data'),
+            queryParameters: anyNamed('queryParameters'),
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).thenThrow(exception);
+        break;
+      case 'PUT':
+        when(
+          mockDio.put<dynamic>(
+            any,
+            data: anyNamed('data'),
+            queryParameters: anyNamed('queryParameters'),
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).thenThrow(exception);
+        break;
+      case 'PATCH':
+        when(
+          mockDio.patch<dynamic>(
+            any,
+            data: anyNamed('data'),
+            queryParameters: anyNamed('queryParameters'),
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).thenThrow(exception);
+        break;
+      case 'DELETE':
+        when(
+          mockDio.delete<dynamic>(
+            any,
+            data: anyNamed('data'),
+            queryParameters: anyNamed('queryParameters'),
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+          ),
+        ).thenThrow(exception);
+        break;
+      case 'DOWNLOAD':
+        when(
+          mockDio.download(
+            any,
+            any,
+            queryParameters: anyNamed('queryParameters'),
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+            deleteOnError: anyNamed('deleteOnError'),
+            lengthHeader: anyNamed('lengthHeader'),
+            data: anyNamed('data'),
+            fileAccessMode: anyNamed('fileAccessMode'),
+          ),
+        ).thenThrow(exception);
+        break;
+    }
+  }
+
+  // Helper method to test cancellation for any HTTP method
+  Future<void> testCancellationForMethod(
+    String method, {
+    Map<String, dynamic>? body,
+    FormDataAdapter? formData,
+    String? url,
+    String? downloadPath,
+  }) async {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        mockDioGet(createSuccessResponse());
+        break;
+      case 'POST':
+        mockDioPost(createSuccessResponse());
+        break;
+      case 'PUT':
+        mockDioPut(createSuccessResponse());
+        break;
+      case 'PATCH':
+        mockDioPatch(createSuccessResponse());
+        break;
+      case 'DELETE':
+        mockDioDelete(createSuccessResponse());
+        break;
+      case 'DOWNLOAD':
+        mockDioDownload(createSuccessResponse());
+        break;
+    }
+
+    final cancelManager = getIt<CancelRequestManager>();
+    final requestId = cancelManager.registerRequest();
+
+    switch (method.toUpperCase()) {
+      case 'GET':
+        apiHandler.get<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          requestId: requestId,
+        );
+        break;
+      case 'POST':
+        apiHandler.post<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+          requestId: requestId,
+        );
+        break;
+      case 'PUT':
+        apiHandler.put<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+          requestId: requestId,
+        );
+        break;
+      case 'PATCH':
+        apiHandler.patch<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+          requestId: requestId,
+        );
+        break;
+      case 'DELETE':
+        apiHandler.delete<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          requestId: requestId,
+        );
+        break;
+      case 'DOWNLOAD':
+        apiHandler.download<Map<String, dynamic>>(
+          url ?? 'https://example.com/file',
+          downloadPath ?? '/path/to/save',
+          parser: (json) => json,
+          requestId: requestId,
+        );
+        break;
+    }
+
+    cancelManager.cancelRequest(requestId);
+    expect(cancelManager.getCancelToken(requestId)?.isCancelled, isTrue);
+    cancelManager.unregisterRequest(requestId);
+  }
+
+  // Helper method to test authorization flag for any HTTP method
+  Future<void> testAuthorizationFlagForMethod(
+    String method, {
+    required bool isAuthorized,
+    Map<String, dynamic>? body,
+    FormDataAdapter? formData,
+  }) async {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        mockDioGet(createSuccessResponse());
+        break;
+      case 'POST':
+        mockDioPost(createSuccessResponse());
+        break;
+      case 'PUT':
+        mockDioPut(createSuccessResponse());
+        break;
+      case 'PATCH':
+        mockDioPatch(createSuccessResponse());
+        break;
+      case 'DELETE':
+        mockDioDelete(createSuccessResponse());
+        break;
+      case 'DOWNLOAD':
+        mockDioDownload(createSuccessResponse());
+        break;
+    }
+
+    Future<dynamic> future;
+    switch (method.toUpperCase()) {
+      case 'GET':
+        future = apiHandler.get<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          isAuthorized: isAuthorized,
+        );
+        break;
+      case 'POST':
+        future = apiHandler.post<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+          isAuthorized: isAuthorized,
+        );
+        break;
+      case 'PUT':
+        future = apiHandler.put<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+          isAuthorized: isAuthorized,
+        );
+        break;
+      case 'PATCH':
+        future = apiHandler.patch<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+          isAuthorized: isAuthorized,
+        );
+        break;
+      case 'DELETE':
+        future = apiHandler.delete<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          isAuthorized: isAuthorized,
+        );
+        break;
+      case 'DOWNLOAD':
+        future = apiHandler.download<Map<String, dynamic>>(
+          'https://example.com/file',
+          '/path/to/save',
+          parser: (json) => json,
+          isAuthorized: isAuthorized,
+        );
+        break;
+      default:
+        throw ArgumentError('Unsupported method: $method');
+    }
+
+    await future;
+
+    // Verify authorization flag was set correctly
+    switch (method.toUpperCase()) {
+      case 'GET':
+        verify(
+          mockDio.get<dynamic>(
+            '/test',
+            options: argThat(
+              predicate<Options>(
+                (options) =>
+                    options.extra != null &&
+                    options.extra!['isAuthorized'] == isAuthorized,
+              ),
+              named: 'options',
+            ),
+            cancelToken: anyNamed('cancelToken'),
+          ),
+        ).called(1);
+        break;
+      case 'POST':
+        verify(
+          mockDio.post<dynamic>(
+            '/test',
+            data: anyNamed('data'),
+            queryParameters: anyNamed('queryParameters'),
+            options: argThat(
+              predicate<Options>(
+                (options) =>
+                    options.extra != null &&
+                    options.extra!['isAuthorized'] == isAuthorized,
+              ),
+              named: 'options',
+            ),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).called(1);
+        break;
+      case 'PUT':
+        verify(
+          mockDio.put<dynamic>(
+            '/test',
+            data: anyNamed('data'),
+            queryParameters: anyNamed('queryParameters'),
+            options: argThat(
+              predicate<Options>(
+                (options) =>
+                    options.extra != null &&
+                    options.extra!['isAuthorized'] == isAuthorized,
+              ),
+              named: 'options',
+            ),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).called(1);
+        break;
+      case 'PATCH':
+        verify(
+          mockDio.patch<dynamic>(
+            '/test',
+            data: anyNamed('data'),
+            queryParameters: anyNamed('queryParameters'),
+            options: argThat(
+              predicate<Options>(
+                (options) =>
+                    options.extra != null &&
+                    options.extra!['isAuthorized'] == isAuthorized,
+              ),
+              named: 'options',
+            ),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).called(1);
+        break;
+      case 'DELETE':
+        verify(
+          mockDio.delete<dynamic>(
+            '/test',
+            options: argThat(
+              predicate<Options>(
+                (options) =>
+                    options.extra != null &&
+                    options.extra!['isAuthorized'] == isAuthorized,
+              ),
+              named: 'options',
+            ),
+            cancelToken: anyNamed('cancelToken'),
+          ),
+        ).called(1);
+        break;
+      case 'DOWNLOAD':
+        verify(
+          mockDio.download(
+            'https://example.com/file',
+            '/path/to/save',
+            options: argThat(
+              predicate<Options>(
+                (options) =>
+                    options.extra != null &&
+                    options.extra!['isAuthorized'] == isAuthorized,
+              ),
+              named: 'options',
+            ),
+            cancelToken: anyNamed('cancelToken'),
+          ),
+        ).called(1);
+        break;
+    }
+  }
+
+  // Helper method to test query parameters for any HTTP method
+  Future<void> testQueryParametersForMethod(
+    String method,
+    Map<String, dynamic> queryParams, {
+    Map<String, dynamic>? body,
+  }) async {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        mockDioGet(createSuccessResponse());
+        break;
+      case 'POST':
+        mockDioPost(createSuccessResponse());
+        break;
+      case 'PUT':
+        mockDioPut(createSuccessResponse());
+        break;
+      case 'PATCH':
+        mockDioPatch(createSuccessResponse());
+        break;
+      case 'DELETE':
+        mockDioDelete(createSuccessResponse());
+        break;
+    }
+
+    Future<dynamic> future;
+    switch (method.toUpperCase()) {
+      case 'GET':
+        future = apiHandler.get<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          queryParameters: queryParams,
+        );
+        break;
+      case 'POST':
+        future = apiHandler.post<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          queryParameters: queryParams,
+        );
+        break;
+      case 'PUT':
+        future = apiHandler.put<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          queryParameters: queryParams,
+        );
+        break;
+      case 'PATCH':
+        future = apiHandler.patch<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          queryParameters: queryParams,
+        );
+        break;
+      case 'DELETE':
+        future = apiHandler.delete<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          queryParameters: queryParams,
+        );
+        break;
+      default:
+        throw ArgumentError('Unsupported method: $method');
+    }
+
+    await future;
+
+    // Verify query parameters were passed correctly
+    switch (method.toUpperCase()) {
+      case 'GET':
+        verify(
+          mockDio.get<dynamic>(
+            '/test',
+            queryParameters: queryParams,
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).called(1);
+        break;
+      case 'POST':
+        verify(
+          mockDio.post<dynamic>(
+            '/test',
+            data: anyNamed('data'),
+            queryParameters: queryParams,
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).called(1);
+        break;
+      case 'PUT':
+        verify(
+          mockDio.put<dynamic>(
+            '/test',
+            data: anyNamed('data'),
+            queryParameters: queryParams,
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).called(1);
+        break;
+      case 'PATCH':
+        verify(
+          mockDio.patch<dynamic>(
+            '/test',
+            data: anyNamed('data'),
+            queryParameters: queryParams,
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).called(1);
+        break;
+      case 'DELETE':
+        verify(
+          mockDio.delete<dynamic>(
+            '/test',
+            queryParameters: queryParams,
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+          ),
+        ).called(1);
+        break;
+    }
+  }
+
+  // Helper method to test error handling with failure mapping
+  Future<void> testErrorHandlingForMethod(
+    String method,
+    Failure expectedFailure,
+    DioException dioException, {
+    Map<String, dynamic>? body,
+    FormDataAdapter? formData,
+    String? url,
+    String? downloadPath,
+  }) async {
+    mockDioExceptionForMethod(method, dioException);
+    when(
+      mockExceptionMapper.mapException(dioException, any),
+    ).thenReturn(expectedFailure);
+
+    Future<dynamic> future;
+    switch (method.toUpperCase()) {
+      case 'GET':
+        future = apiHandler.get<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+        );
+        break;
+      case 'POST':
+        future = apiHandler.post<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+        );
+        break;
+      case 'PUT':
+        future = apiHandler.put<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+        );
+        break;
+      case 'PATCH':
+        future = apiHandler.patch<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+        );
+        break;
+      case 'DELETE':
+        future = apiHandler.delete<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+        );
+        break;
+      case 'DOWNLOAD':
+        future = apiHandler.download<Map<String, dynamic>>(
+          url ?? 'https://example.com/file',
+          downloadPath ?? '/path/to/save',
+          parser: (json) => json,
+        );
+        break;
+      default:
+        throw ArgumentError('Unsupported method: $method');
+    }
+
+    await expectFailure(future, expectedFailure);
+  }
+
+  // Helper method to test cancelled DioException
+  Future<void> testCancelledExceptionForMethod(
+    String method, {
+    Map<String, dynamic>? body,
+    FormDataAdapter? formData,
+    String? url,
+    String? downloadPath,
+  }) async {
+    final dioException = createDioException(type: DioExceptionType.cancel);
+    mockDioExceptionForMethod(method, dioException);
+
+    Future<dynamic> future;
+    switch (method.toUpperCase()) {
+      case 'GET':
+        future = apiHandler.get<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+        );
+        break;
+      case 'POST':
+        future = apiHandler.post<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+        );
+        break;
+      case 'PUT':
+        future = apiHandler.put<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+        );
+        break;
+      case 'PATCH':
+        future = apiHandler.patch<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: body,
+          formData: formData,
+        );
+        break;
+      case 'DELETE':
+        future = apiHandler.delete<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+        );
+        break;
+      case 'DOWNLOAD':
+        future = apiHandler.download<Map<String, dynamic>>(
+          url ?? 'https://example.com/file',
+          downloadPath ?? '/path/to/save',
+          parser: (json) => json,
+        );
+        break;
+      default:
+        throw ArgumentError('Unsupported method: $method');
+    }
+
+    await expectLater(future, throwsA(isA<DioException>()));
+  }
+
+  // Helper method to test formData priority over body
+  Future<void> testFormDataPriorityForMethod(String method) async {
+    final mockFormData = createMockFormData();
+    Future<dynamic> future;
+
+    switch (method.toUpperCase()) {
+      case 'POST':
+        mockDioPost(createSuccessResponse());
+        future = apiHandler.post<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: {'should': 'be ignored'},
+          formData: mockFormData,
+        );
+        break;
+      case 'PUT':
+        mockDioPut(createSuccessResponse());
+        future = apiHandler.put<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: {'should': 'be ignored'},
+          formData: mockFormData,
+        );
+        break;
+      case 'PATCH':
+        mockDioPatch(createSuccessResponse());
+        future = apiHandler.patch<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: {'should': 'be ignored'},
+          formData: mockFormData,
+        );
+        break;
+      default:
+        throw ArgumentError('Unsupported method: $method');
+    }
+
+    await future;
+
+    verify(mockFormData.create()).called(1);
+
+    final verifyCall = method.toUpperCase() == 'POST'
+        ? mockDio.post<dynamic>
+        : method.toUpperCase() == 'PUT'
+        ? mockDio.put<dynamic>
+        : mockDio.patch<dynamic>;
+
+    verify(
+      verifyCall(
+        '/test',
+        data: argThat(isNotNull, named: 'data'),
+        options: argThat(
+          predicate<Options>(
+            (options) =>
+                options.contentType == Headers.multipartFormDataContentType,
+          ),
+          named: 'options',
+        ),
+        cancelToken: anyNamed('cancelToken'),
+      ),
+    ).called(1);
   }
 
   group('DioApiHandler', () {
@@ -462,12 +1173,15 @@ void main() {
         ).called(1);
       });
 
-      test('should handle DioException and map to NetworkFailure', () async {
+      test('should handle DioException and map to Failure', () async {
         final dioException = DioException(
           requestOptions: RequestOptions(path: '/test'),
           type: DioExceptionType.connectionTimeout,
         );
-        const networkFailure = RequestTimeoutFailure('Request timed out');
+        const connectionFailure = ConnectionFailure(
+          message: 'Request timed out',
+          code: 'TIMEOUT',
+        );
 
         when(
           mockDio.get<dynamic>(
@@ -481,14 +1195,14 @@ void main() {
 
         when(
           mockExceptionMapper.mapException(dioException, any),
-        ).thenReturn(networkFailure);
+        ).thenReturn(connectionFailure);
 
         final future = apiHandler.get<Map<String, dynamic>>(
           '/test',
           parser: (json) => json,
         );
 
-        await expectFailure(future, networkFailure);
+        await expectFailure(future, connectionFailure);
       });
 
       test('should return Future for cancellation support', () async {
@@ -777,7 +1491,7 @@ void main() {
 
     group('Error handling', () {
       test(
-        'should handle generic Exception and return NoInternetConnectionFailure',
+        'should handle generic Exception and return UnknownFailure',
         () async {
           final exception = Exception('Generic error');
           when(
@@ -798,7 +1512,7 @@ void main() {
 
           expect(result.isLeft(), isTrue);
           result.fold((failure) {
-            expect(failure, isA<ConnectionFailure>());
+            expect(failure, isA<UnknownFailure>());
             expect(failure.message, contains('Generic error'));
           }, (data) => fail('Expected failure but got success: $data'));
         },
@@ -826,6 +1540,271 @@ void main() {
         );
 
         await expectLater(future, throwsA(isA<DioException>()));
+      });
+
+      test('should handle DioException in POST request', () async {
+        const connectionFailure = ConnectionFailure(
+          message: 'Connection failed',
+          code: 'CONNECTION_ERROR',
+        );
+        final dioException = createDioException();
+
+        await testErrorHandlingForMethod(
+          'POST',
+          connectionFailure,
+          dioException,
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should handle DioException in PUT request', () async {
+        const serverFailure = ServerFailure(
+          message: 'Server error',
+          statusCode: 500,
+        );
+        final dioException = createDioException(
+          type: DioExceptionType.badResponse,
+          statusCode: 500,
+        );
+
+        await testErrorHandlingForMethod(
+          'PUT',
+          serverFailure,
+          dioException,
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should handle DioException in PATCH request', () async {
+        const authFailure = AuthFailure(message: 'Unauthorized');
+        final dioException = createDioException(
+          type: DioExceptionType.badResponse,
+          statusCode: 401,
+        );
+
+        await testErrorHandlingForMethod(
+          'PATCH',
+          authFailure,
+          dioException,
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should handle DioException in DELETE request', () async {
+        const serverFailure = ServerFailure(
+          message: 'Not found',
+          statusCode: 404,
+        );
+        final dioException = createDioException(
+          type: DioExceptionType.badResponse,
+          statusCode: 404,
+        );
+
+        await testErrorHandlingForMethod('DELETE', serverFailure, dioException);
+      });
+
+      test('should handle DioException in DOWNLOAD request', () async {
+        const connectionFailure = ConnectionFailure(
+          message: 'Download failed',
+          code: 'DOWNLOAD_ERROR',
+        );
+        final dioException = createDioException();
+
+        await testErrorHandlingForMethod(
+          'DOWNLOAD',
+          connectionFailure,
+          dioException,
+        );
+      });
+
+      test('should handle generic Exception in POST request', () async {
+        final exception = Exception('Generic POST error');
+        when(
+          mockDio.post<dynamic>(
+            any,
+            data: anyNamed('data'),
+            queryParameters: anyNamed('queryParameters'),
+            options: anyNamed('options'),
+            cancelToken: anyNamed('cancelToken'),
+            onSendProgress: anyNamed('onSendProgress'),
+            onReceiveProgress: anyNamed('onReceiveProgress'),
+          ),
+        ).thenThrow(exception);
+
+        final future = apiHandler.post<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+          body: {'key': 'value'},
+        );
+        final result = await future;
+
+        expect(result.isLeft(), isTrue);
+        result.fold((failure) {
+          expect(failure, isA<UnknownFailure>());
+          expect(failure.message, contains('Generic POST error'));
+        }, (data) => fail('Expected failure but got success: $data'));
+      });
+
+      test('should handle cancelled DioException in POST request', () async {
+        await testCancelledExceptionForMethod('POST', body: {'key': 'value'});
+      });
+
+      test('should handle cancelled DioException in PUT request', () async {
+        await testCancelledExceptionForMethod('PUT', body: {'key': 'value'});
+      });
+
+      test('should handle cancelled DioException in PATCH request', () async {
+        await testCancelledExceptionForMethod('PATCH', body: {'key': 'value'});
+      });
+
+      test('should handle cancelled DioException in DELETE request', () async {
+        await testCancelledExceptionForMethod('DELETE');
+      });
+
+      test(
+        'should handle cancelled DioException in DOWNLOAD request',
+        () async {
+          await testCancelledExceptionForMethod('DOWNLOAD');
+        },
+      );
+
+      test('should handle ValidationFailure in POST request', () async {
+        const validationFailure = ValidationFailure(
+          errors: {'email': 'Invalid email format'},
+        );
+        final dioException = createDioException(
+          type: DioExceptionType.badResponse,
+          statusCode: 422,
+        );
+
+        await testErrorHandlingForMethod(
+          'POST',
+          validationFailure,
+          dioException,
+          body: {'email': 'invalid'},
+        );
+      });
+
+      test('should handle UnauthorizedFailure in DELETE request', () async {
+        const unauthorizedFailure = UnauthorizedFailure();
+        final dioException = createDioException(
+          type: DioExceptionType.badResponse,
+          statusCode: 403,
+        );
+
+        await testErrorHandlingForMethod(
+          'DELETE',
+          unauthorizedFailure,
+          dioException,
+        );
+      });
+
+      test('should handle BusinessFailure in PUT request', () async {
+        const businessFailure = BusinessFailure(message: 'Insufficient funds');
+        final dioException = createDioException(
+          type: DioExceptionType.badResponse,
+          statusCode: 200,
+          responseData: {'error': 'Insufficient funds'},
+        );
+
+        await testErrorHandlingForMethod(
+          'PUT',
+          businessFailure,
+          dioException,
+          body: {'amount': 1000},
+        );
+      });
+
+      test(
+        'should handle FormatFailure for invalid response data type',
+        () async {
+          // Response with data that is neither List, Map, nor String
+          final response = Response<dynamic>(
+            data: 12345, // Integer - invalid type
+            statusCode: 200,
+            requestOptions: RequestOptions(path: '/test'),
+          );
+
+          mockDioGet(response);
+
+          final future = apiHandler.get<Map<String, dynamic>>(
+            '/test',
+            parser: (json) => json,
+          );
+
+          final result = await future;
+          expect(result.isLeft(), isTrue);
+          result.fold((failure) {
+            expect(failure, isA<FormatFailure>());
+            expect(failure.message, equals('Invalid response data'));
+          }, (data) => fail('Expected FormatFailure but got success: $data'));
+        },
+      );
+
+      test('should handle null response data', () async {
+        final response = Response<dynamic>(
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/test'),
+        );
+
+        mockDioGet(response);
+
+        final future = apiHandler.get<Map<String, dynamic>>(
+          '/test',
+          parser: (json) => json,
+        );
+
+        final result = await future;
+        expect(result.isLeft(), isTrue);
+        result.fold((failure) {
+          expect(failure, isA<FormatFailure>());
+          expect(failure.message, equals('Invalid response data'));
+        }, (data) => fail('Expected FormatFailure but got success: $data'));
+      });
+
+      test('should prioritize formData over body in POST request', () async {
+        await testFormDataPriorityForMethod('POST');
+      });
+
+      test('should prioritize formData over body in PUT request', () async {
+        await testFormDataPriorityForMethod('PUT');
+      });
+
+      test('should prioritize formData over body in PATCH request', () async {
+        await testFormDataPriorityForMethod('PATCH');
+      });
+
+      test('should handle network timeout in GET request', () async {
+        const connectionFailure = ConnectionFailure(
+          message: 'Request timed out',
+          code: 'TIMEOUT',
+        );
+        final dioException = createDioException(
+          type: DioExceptionType.receiveTimeout,
+        );
+
+        await testErrorHandlingForMethod(
+          'GET',
+          connectionFailure,
+          dioException,
+        );
+      });
+
+      test('should handle network timeout in POST request', () async {
+        const connectionFailure = ConnectionFailure(
+          message: 'Request timed out',
+          code: 'TIMEOUT',
+        );
+        final dioException = createDioException(
+          type: DioExceptionType.sendTimeout,
+        );
+
+        await testErrorHandlingForMethod(
+          'POST',
+          connectionFailure,
+          dioException,
+          body: {'key': 'value'},
+        );
       });
     });
 
@@ -866,6 +1845,26 @@ void main() {
         // Cleanup
         cancelManager.unregisterRequest(requestId);
       });
+
+      test('should support cancellation via requestId for POST', () async {
+        await testCancellationForMethod('POST', body: {'key': 'value'});
+      });
+
+      test('should support cancellation via requestId for PUT', () async {
+        await testCancellationForMethod('PUT', body: {'key': 'value'});
+      });
+
+      test('should support cancellation via requestId for PATCH', () async {
+        await testCancellationForMethod('PATCH', body: {'key': 'value'});
+      });
+
+      test('should support cancellation via requestId for DELETE', () async {
+        await testCancellationForMethod('DELETE');
+      });
+
+      test('should support cancellation via requestId for DOWNLOAD', () async {
+        await testCancellationForMethod('DOWNLOAD');
+      });
     });
 
     group('Parser functionality', () {
@@ -883,7 +1882,8 @@ void main() {
         result.fold(
           (failure) => fail('Expected success but got failure: $failure'),
           (data) {
-            expect(data.id, equals(1));
+            expect(data, isNotNull);
+            expect(data!.id, equals(1));
             expect(data.name, equals('Test'));
           },
         );
@@ -1056,6 +2056,78 @@ void main() {
             cancelToken: anyNamed('cancelToken'),
           ),
         ).called(1);
+      });
+    });
+
+    group('Authorization flag', () {
+      test('should set authorization flag for POST request', () async {
+        await testAuthorizationFlagForMethod(
+          'POST',
+          isAuthorized: true,
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should set authorization flag for PUT request', () async {
+        await testAuthorizationFlagForMethod(
+          'PUT',
+          isAuthorized: true,
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should set authorization flag for PATCH request', () async {
+        await testAuthorizationFlagForMethod(
+          'PATCH',
+          isAuthorized: true,
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should set authorization flag for DELETE request', () async {
+        await testAuthorizationFlagForMethod('DELETE', isAuthorized: true);
+      });
+
+      test('should set authorization flag for DOWNLOAD request', () async {
+        await testAuthorizationFlagForMethod('DOWNLOAD', isAuthorized: true);
+      });
+
+      test('should not set authorization flag when false for POST', () async {
+        await testAuthorizationFlagForMethod(
+          'POST',
+          isAuthorized: false,
+          body: {'key': 'value'},
+        );
+      });
+    });
+
+    group('Query parameters', () {
+      test('should handle query parameters for POST request', () async {
+        await testQueryParametersForMethod(
+          'POST',
+          {'page': 1, 'limit': 10},
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should handle query parameters for PUT request', () async {
+        await testQueryParametersForMethod(
+          'PUT',
+          {'id': 123},
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should handle query parameters for PATCH request', () async {
+        await testQueryParametersForMethod(
+          'PATCH',
+          {'version': 2},
+          body: {'key': 'value'},
+        );
+      });
+
+      test('should handle query parameters for DELETE request', () async {
+        await testQueryParametersForMethod('DELETE', {'id': 456});
       });
     });
   });
