@@ -1,118 +1,112 @@
-import 'package:coore/src/api_handler/models/base_error_response_model.dart';
-import 'package:coore/src/error_handling/exception_mapper/network_exception_mapper.dart';
-import 'package:coore/src/error_handling/failures/network_failure.dart';
+import 'package:coore/coore.dart';
 import 'package:dio/dio.dart';
 
-class DioNetworkExceptionMapper extends NetworkExceptionMapper {
-  DioNetworkExceptionMapper(
-    super.errorParser,
-    super.codeToFailureMap, {
-    this.defaultErrorMessage,
-  }) {
-    _defaultCodeToFailureMap = {
-      405: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          MethodNotAllowedFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-      406: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          NotAcceptableFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-      409: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          ConflictFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-      413: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          PayloadTooLargeFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-      429: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          TooManyRequestsFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-      418: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          TeapotFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-      500: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          InternalServerErrorFailure(
-            _defaultErrorMessage,
-            stackTrace: stackTrace,
-          ),
-
-      502: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          BadGatewayFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-      503: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          ServiceUnavailableFailure(
-            _defaultErrorMessage,
-            stackTrace: stackTrace,
-          ),
-
-      504: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          GatewayTimeoutFailure(_defaultErrorMessage, stackTrace: stackTrace),
-
-      505: (BaseErrorResponseModel error, StackTrace? stackTrace) =>
-          HttpVersionNotSupportedFailure(
-            _defaultErrorMessage,
-            stackTrace: stackTrace,
-          ),
-    };
-    codeToFailureMap.addAll(_defaultCodeToFailureMap);
-  }
-  final String? defaultErrorMessage;
-  late final Map<
-    int,
-    NetworkFailure Function(BaseErrorResponseModel, StackTrace?)
-  >
-  _defaultCodeToFailureMap;
+class DioExceptionMapper extends NetworkExceptionMapper {
+  DioExceptionMapper(super.errorParser);
 
   @override
-  NetworkFailure mapException(Exception exception, StackTrace? stackTrace) {
+  Failure mapException(Object exception, StackTrace? stackTrace) {
+    // 1. If it's not a DioException, it's an unexpected crash.
     if (exception is! DioException) {
-      return NoInternetConnectionFailure(
-        _defaultErrorMessage,
+      return UnknownFailure(
+        message: exception.toString(),
         stackTrace: stackTrace,
+        originalException: exception,
       );
     }
+
+    // 2. Handle specific Dio errors (Timeouts, No Internet)
     switch (exception.type) {
       case DioExceptionType.cancel:
-        return RequestCancelledFailure(
-          'Request cancelled',
-          stackTrace: stackTrace,
-        );
+        return const OperationCancelledFailure(message: 'Request cancelled');
 
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return RequestTimeoutFailure(
-          'Request timed out',
+        return ConnectionFailure(
+          message: 'Request timed out',
+          code: 'TIMEOUT',
           stackTrace: stackTrace,
+          originalException: exception,
         );
 
       case DioExceptionType.unknown:
-        return NoInternetConnectionFailure(
-          'No internet connection',
+      case DioExceptionType.connectionError:
+        return ConnectionFailure(
+          message: 'Unable to connect to server',
+          code: 'NO_INTERNET',
           stackTrace: stackTrace,
+          originalException: exception,
         );
 
       case DioExceptionType.badCertificate:
-        return UnableToProcessFailure(
-          'Invalid or expired SSL certificate',
+        return ConnectionFailure(
+          message: 'Invalid SSL Certificate',
+          code: 'SSL_ERR',
           stackTrace: stackTrace,
+          originalException: exception,
         );
 
-      case DioExceptionType.connectionError:
-        return ConnectionErrorFailure(
-          'Unable to establish a connection with the server',
-          stackTrace: stackTrace,
-        );
-
+      // 3. Handle Server Responses (4xx, 5xx)
       case DioExceptionType.badResponse:
-        return _mapBadResponse(exception.response, stackTrace);
+        return _mapServerResponse(exception.response, stackTrace, exception);
     }
   }
 
-  NetworkFailure _mapBadResponse(Response? response, StackTrace? stackTrace) {
-    final error = errorParser(response);
-    return codeToFailureMap[error.status]?.call(error, stackTrace) ??
-        InvalidStatusCodeFailure('Invalid status code', stackTrace: stackTrace);
-  }
+  Failure _mapServerResponse(
+    Response? response,
+    StackTrace? stackTrace,
+    Object original,
+  ) {
+    if (response == null) {
+      return UnknownFailure(
+        message: 'Empty response from server',
+        stackTrace: stackTrace,
+      );
+    }
 
-  String get _defaultErrorMessage =>
-      defaultErrorMessage ?? 'Error, please try again later';
+    final int statusCode = response.statusCode ?? 500;
+
+    // Parse the backend error message (using your existing parser logic)
+    final errorModel = errorParser(response);
+    final String message = errorModel.developerMessage;
+    final String? requestId = response.headers.value(
+      'x-request-id',
+    ); // Traceability!
+
+    // 4. Handle Specific Status Codes
+    if (statusCode == 401) {
+      return AuthFailure(
+        message: message,
+        stackTrace: stackTrace,
+        originalException: original,
+      );
+    }
+
+    if (statusCode == 403) {
+      return UnauthorizedFailure(
+        message: message,
+        stackTrace: stackTrace,
+        originalException: original,
+      );
+    }
+
+    if (statusCode == 422) {
+      return ValidationFailure(
+        message: message,
+        errors: errorModel.validationErrors,
+        stackTrace: stackTrace,
+        originalException: original,
+      );
+    }
+
+    // 5. Default Server Failure
+    return ServerFailure(
+      message: message,
+      statusCode: statusCode,
+      requestId: requestId,
+      stackTrace: stackTrace,
+      originalException: original,
+    );
+  }
 }
