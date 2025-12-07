@@ -16,10 +16,7 @@ import 'package:mutex/mutex.dart';
 ///  • Retries all pending requests after successful refresh
 ///  • Clears tokens and rejects requests on refresh failure
 abstract class TokenRefreshInterceptor extends Interceptor {
-  TokenRefreshInterceptor(
-    this._tokenManager,
-    this._networkConfigEntity,
-  );
+  TokenRefreshInterceptor(this._tokenManager, this._networkConfigEntity);
 
   final AuthTokenManager _tokenManager;
   final NetworkConfigEntity _networkConfigEntity;
@@ -110,7 +107,8 @@ abstract class TokenRefreshInterceptor extends Interceptor {
       response: Response(
         requestOptions: opts,
         statusCode: statusCode,
-        data: err.response?.data ??
+        data:
+            err.response?.data ??
             {
               'error': {
                 'status': statusCode,
@@ -261,4 +259,3 @@ class CookieTokenRefreshInterceptor extends TokenRefreshInterceptor {
     }
   }
 }
-
