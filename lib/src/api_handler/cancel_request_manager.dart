@@ -3,40 +3,47 @@ import 'package:dio/dio.dart';
 /// An abstract interface for managing request cancellation tokens.
 ///
 /// This service allows any layer in your application to register requests
-/// with unique IDs and cancel them later, without prop drilling cancel tokens.
+/// with static IDs and cancel them later, without prop drilling cancel tokens.
 ///
-/// Usage:
+/// **Usage Pattern:**
+/// Use static string identifiers for each request type. The same [requestId] must be used
+/// in both [ApiStateHandler.handleApiCall] and when calling API handler methods.
+///
 /// ```dart
-/// final cancelManager = getIt<CancelRequestManager>();
+/// // In your Cubit/Bloc
+/// await handler.handleApiCall(
+///   apiCall: (params) => getUserUseCase(params),
+///   params: GetUserParams(id: userId),
+///   requestId: "get_user", // Static ID for this request type
+/// );
 ///
-/// // Register a request
-/// final requestId = cancelManager.registerRequest();
-///
-/// // Use the requestId in your API call
-/// final result = await apiHandler.get('/users', requestId: requestId);
+/// // In your UseCase
+/// ResultFuture<User> call(GetUserParams params) {
+///   return _apiHandler.get(
+///     '/users/${params.id}',
+///     parser: User.fromJson,
+///     requestId: "get_user", // Same static ID
+///   );
+/// }
 ///
 /// // Cancel if needed (from any layer)
-/// cancelManager.cancelRequest(requestId);
-///
-/// // Cleanup after completion
-/// cancelManager.unregisterRequest(requestId);
+/// getIt<CancelRequestManager>().cancelRequest("get_user");
 /// ```
 abstract class CancelRequestManager {
-  /// Generates a unique request ID and creates a cancel token for it.
+  /// Registers a request with the given [requestId] and creates a cancel token for it.
   ///
-  /// Returns the request ID that can be used to cancel the request later.
-  String registerRequest();
+  /// The [requestId] should be a static string identifier for the request type
+  /// (e.g., "get_user", "fetch_posts"). The same ID must be used when calling
+  /// API handler methods to enable cancellation.
+  ///
+  /// This is typically called automatically by [ApiStateHandler] when a [requestId]
+  /// is provided. The token is automatically unregistered when the request completes.
+  void registerRequest(String requestId);
 
   /// Gets the cancel token for a given request ID.
   ///
   /// Returns `null` if the request ID doesn't exist.
   CancelToken? getCancelToken(String requestId);
-
-  /// Gets or creates a cancel token for a given request ID.
-  ///
-  /// If the request ID doesn't exist, creates a new cancel token for it.
-  /// Useful when you want to ensure a token exists before making the request.
-  CancelToken getOrCreateCancelToken(String requestId);
 
   /// Cancels a specific request by its ID.
   ///

@@ -78,8 +78,8 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
   /// This is the primary method of the handler. It performs the following steps:
   /// 1. Checks if the state is already loading; if so, it returns.
   /// 2. Emits a new [CompositeState] with the [ApiState] set to `loading()`.
-  /// 3. If [enableCancellation] is true, registers the request with [CancelRequestManager].
-  /// 4. Executes the provided [apiCall] and passes the request ID if cancellation is enabled.
+  /// 3. If [requestId] is provided, registers the request with [CancelRequestManager].
+  /// 4. Executes the provided [apiCall].
   /// 5. Awaits the result.
   /// 6. If the Cubit is closed, it does nothing.
   /// 7. On success, it emits a `succeeded(data)` state.
@@ -90,22 +90,21 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
   ///
   /// ### Parameters:
   /// - [apiCall]: The async function (e.g., a UseCase) to execute. It must
-  ///   return a [UseCaseFutureResponse] and optionally accept a [requestId] parameter.
+  ///   return a [ResultFuture]. The use case should use the same static [requestId]
+  ///   when calling the API handler methods.
   /// - [params]: The parameters to pass to the [apiCall].
   /// - [onSuccess]: An optional callback executed on success with the [SuccessData].
   /// - [onFailure]: An optional callback executed on failure with the [Failure].
-  /// - [enableCancellation]: If `true`, registers the request with [CancelRequestManager]
-  ///                         and enables cancellation via [cancelRequest]. Defaults to `true`.
+  /// - [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///                string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///                The same [requestId] must be used when calling API handler methods in your
+  ///                use case. If provided, enables cancellation via [cancelRequest].
   Future<void> handleApiCall<T>({
-    required ResultFuture<SuccessData> Function(
-      T params, {
-      String? requestId,
-    })
-    apiCall,
+    required ResultFuture<SuccessData> Function(T params) apiCall,
     required T params,
     void Function(SuccessData data)? onSuccess,
     void Function(Failure failure)? onFailure,
-    bool enableCancellation = true,
+    String? requestId,
   }) async {
     // 1. Get the *current* state
     final currentState = _getState();
@@ -116,13 +115,14 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
     _emit(_setApiState(currentState, const ApiState.loading()));
 
     // 3. Register request if cancellation is enabled
-    if (enableCancellation) {
-      _currentRequestId = getIt<CancelRequestManager>().registerRequest();
+    if (requestId != null) {
+      getIt<CancelRequestManager>().registerRequest(requestId);
+      _currentRequestId = requestId;
     }
 
     try {
       // 4. Execute the call and pass requestId if cancellation is enabled
-      final result = await apiCall(params, requestId: _currentRequestId);
+      final result = await apiCall(params);
 
       // 5. Check if the Cubit is closed
       if (!_isClosed()) {
@@ -143,7 +143,7 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
                     onSuccess: onSuccess,
                     apiCall: apiCall,
                     params: params,
-                    enableCancellation: enableCancellation,
+                    requestId: requestId,
                   ),
                 ),
               ),

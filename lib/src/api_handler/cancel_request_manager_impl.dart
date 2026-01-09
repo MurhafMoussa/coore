@@ -6,25 +6,14 @@ class CancelRequestManagerImpl implements CancelRequestManager {
   /// Map of request IDs to their cancel tokens
   final Map<String, CancelToken> _activeRequests = {};
 
-  /// Counter for generating unique request IDs
-  int _requestCounter = 0;
-
   @override
-  String registerRequest() {
-    final requestId =
-        'req_${_requestCounter++}_${DateTime.now().millisecondsSinceEpoch}';
+  void registerRequest(String requestId) {
     _activeRequests[requestId] = CancelToken();
-    return requestId;
   }
 
   @override
   CancelToken? getCancelToken(String requestId) {
     return _activeRequests[requestId];
-  }
-
-  @override
-  CancelToken getOrCreateCancelToken(String requestId) {
-    return _activeRequests.putIfAbsent(requestId, () => CancelToken());
   }
 
   @override
