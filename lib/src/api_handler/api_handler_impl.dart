@@ -8,10 +8,20 @@ import 'package:fpdart/fpdart.dart';
 /// The [DioApiHandler] accepts a Dio instance and [NetworkExceptionMapper] via constructor injection.
 /// It wraps HTTP calls in a common response handler that returns a [Future] with [Either].
 /// This allows the API layer to use functional error handling and provide clear, user-friendly errors
-/// via [Failure]. Request cancellation is supported through [CancelRequestManager] by
-/// providing an optional [requestId]. Additional options for caching and authorization are
-/// included in the request options. Responses are parsed from JSON using the provided parser
-/// function into the specified type [T].
+/// via [Failure].
+///
+/// **Request Cancellation:**
+/// Request cancellation is supported through [CancelRequestManager] by providing an optional static
+/// [requestId] string identifier. The same [requestId] must be used in both [ApiStateHandler.handleApiCall]
+/// and when calling these methods.
+///
+/// **Retry Configuration:**
+/// Each method supports per-request retry configuration via [enableRetry], [maxRetryAttempts], and
+/// [retryDelay] parameters. Per-request settings take precedence over global settings from
+/// [NetworkConfigEntity]. This allows fine-grained control over retry behavior for individual requests.
+///
+/// Additional options for caching and authorization are included in the request options.
+/// Responses are parsed from JSON using the provided parser function into the specified type [T].
 class DioApiHandler implements ApiHandlerInterface {
   /// Creates a new instance of [DioApiHandler] with the provided Dio instance
   /// and [NetworkExceptionMapper].
@@ -22,13 +32,25 @@ class DioApiHandler implements ApiHandlerInterface {
   final Dio _dio;
   final NetworkExceptionMapper _exceptionMapper;
 
-  /// Builds Dio [Options] with authorization and optional caching.
+  /// Builds Dio [Options] with authorization, optional caching, and per-request retry settings.
   Options _buildOptions({
     required bool isAuthorized,
     bool shouldCache = false, // The forceRefresh parameter is removed
     bool isFormData = false,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
   }) {
     final extra = <String, dynamic>{'isAuthorized': isAuthorized};
+
+    // Add per-request retry settings to extra map for RetryInterceptor
+    extra['enableRetry'] = enableRetry;
+    if (maxRetryAttempts != null) {
+      extra['maxRetryAttempts'] = maxRetryAttempts;
+    }
+    if (retryDelay != null) {
+      extra['retryDelay'] = retryDelay.inMilliseconds;
+    }
 
     // If shouldCache is true, add the cache policy to the extra map.
     // The interceptor will pick this up.
@@ -57,18 +79,20 @@ class DioApiHandler implements ApiHandlerInterface {
   /// it is mapped to a [Failure] using the exception mapper; otherwise, an
   /// [UnknownFailure] is returned.
   ///
-  /// If a [requestId] is provided, the cancel token is retrieved from [CancelRequestManager].
+  /// If a [requestId] is provided, the cancel token is retrieved from [CancelRequestManager]
+  /// using the same static identifier that was registered in [ApiStateHandler.handleApiCall].
   /// The request can be cancelled by calling [CancelRequestManager.cancelRequest] with the
   /// same [requestId]. The request is automatically unregistered after completion.
   ResultFuture<T> _handleResponse<T>({
-    required Future<Response> Function(CancelToken cancelToken) dioMethod,
+    required Future<Response> Function(CancelToken? cancelToken) dioMethod,
     required T Function(Map<String, dynamic> json) parser,
     String? requestId,
   }) async {
     // Get cancel token from CancelRequestManager if requestId provided, otherwise create new one
-    final cancelToken = requestId != null
-        ? getIt<CancelRequestManager>().getOrCreateCancelToken(requestId)
-        : CancelToken();
+    CancelToken? cancelToken;
+    if (requestId != null) {
+      cancelToken = getIt<CancelRequestManager>().getCancelToken(requestId);
+    }
 
     try {
       final response = await dioMethod(cancelToken);
@@ -118,7 +142,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// [shouldCache]: Indicates whether the response should be cached.
   /// [isAuthorized]: Indicates whether the request requires authorization.
-  /// [requestId]: Optional request ID for cancellation support.
+  /// [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///              string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///              The same [requestId] must be used in [ApiStateHandler.handleApiCall].
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
@@ -129,15 +155,21 @@ class DioApiHandler implements ApiHandlerInterface {
     ProgressTrackerCallback? onReceiveProgress,
     bool shouldCache = false,
     bool isAuthorized = true,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   }) {
     return _handleResponse(
-      dioMethod: (CancelToken cancelToken) => _dio.get(
+      dioMethod: (CancelToken? cancelToken) => _dio.get(
         path,
         queryParameters: queryParameters,
         options: _buildOptions(
           isAuthorized: isAuthorized,
           shouldCache: shouldCache,
+          enableRetry: enableRetry,
+          maxRetryAttempts: maxRetryAttempts,
+          retryDelay: retryDelay,
         ),
         onReceiveProgress: onReceiveProgress != null
             ? (count, total) => onReceiveProgress(count / total)
@@ -159,7 +191,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onSendProgress]: Optional callback to track the progress of the data being sent.
   /// [onReceiveProgress]: Optional callback to track the progress of the data being received.
   /// [isAuthorized]: Indicates whether the request requires authorization.
-  /// [requestId]: Optional request ID for cancellation support.
+  /// [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///              string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///              The same [requestId] must be used in [ApiStateHandler.handleApiCall].
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
@@ -172,10 +206,13 @@ class DioApiHandler implements ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = true,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   }) {
     return _handleResponse(
-      dioMethod: (CancelToken cancelToken) {
+      dioMethod: (CancelToken? cancelToken) {
         return _dio.post(
           path,
           data: formData != null ? formData.create() : body,
@@ -183,6 +220,9 @@ class DioApiHandler implements ApiHandlerInterface {
           options: _buildOptions(
             isAuthorized: isAuthorized,
             isFormData: formData != null,
+            enableRetry: enableRetry,
+            maxRetryAttempts: maxRetryAttempts,
+            retryDelay: retryDelay,
           ),
           onSendProgress: onSendProgress != null
               ? (count, total) => onSendProgress(count / total)
@@ -204,7 +244,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [parser]: A function to parse the JSON response into type [T].
   /// [queryParameters]: Optional query parameters to append to the URL.
   /// [isAuthorized]: Indicates whether the request requires authorization.
-  /// [requestId]: Optional request ID for cancellation support.
+  /// [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///              string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///              The same [requestId] must be used in [ApiStateHandler.handleApiCall].
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
@@ -213,13 +255,21 @@ class DioApiHandler implements ApiHandlerInterface {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
     bool isAuthorized = true,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   }) {
     return _handleResponse(
-      dioMethod: (CancelToken cancelToken) => _dio.delete(
+      dioMethod: (CancelToken? cancelToken) => _dio.delete(
         path,
         queryParameters: queryParameters,
-        options: _buildOptions(isAuthorized: isAuthorized),
+        options: _buildOptions(
+          isAuthorized: isAuthorized,
+          enableRetry: enableRetry,
+          maxRetryAttempts: maxRetryAttempts,
+          retryDelay: retryDelay,
+        ),
         cancelToken: cancelToken,
       ),
       parser: parser,
@@ -237,7 +287,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onSendProgress]: Optional callback to track the progress of the data being sent.
   /// [onReceiveProgress]: Optional callback to track the progress of the data being received.
   /// [isAuthorized]: Indicates whether the request requires authorization.
-  /// [requestId]: Optional request ID for cancellation support.
+  /// [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///              string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///              The same [requestId] must be used in [ApiStateHandler.handleApiCall].
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
@@ -250,10 +302,13 @@ class DioApiHandler implements ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = true,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   }) {
     return _handleResponse(
-      dioMethod: (CancelToken cancelToken) {
+      dioMethod: (CancelToken? cancelToken) {
         final data = formData != null ? formData.create() : body;
         return _dio.put(
           path,
@@ -262,6 +317,9 @@ class DioApiHandler implements ApiHandlerInterface {
           options: _buildOptions(
             isAuthorized: isAuthorized,
             isFormData: formData != null,
+            enableRetry: enableRetry,
+            maxRetryAttempts: maxRetryAttempts,
+            retryDelay: retryDelay,
           ),
           onSendProgress: onSendProgress != null
               ? (count, total) => onSendProgress(count / total)
@@ -287,7 +345,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onSendProgress]: Optional callback to track the progress of the data being sent.
   /// [onReceiveProgress]: Optional callback to track the progress of the data being received.
   /// [isAuthorized]: Indicates whether the request requires authorization.
-  /// [requestId]: Optional request ID for cancellation support.
+  /// [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///              string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///              The same [requestId] must be used in [ApiStateHandler.handleApiCall].
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
@@ -300,10 +360,13 @@ class DioApiHandler implements ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = true,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   }) {
     return _handleResponse(
-      dioMethod: (CancelToken cancelToken) {
+      dioMethod: (CancelToken? cancelToken) {
         final data = formData != null ? formData.create() : body;
         return _dio.patch(
           path,
@@ -312,6 +375,9 @@ class DioApiHandler implements ApiHandlerInterface {
           options: _buildOptions(
             isAuthorized: isAuthorized,
             isFormData: formData != null,
+            enableRetry: enableRetry,
+            maxRetryAttempts: maxRetryAttempts,
+            retryDelay: retryDelay,
           ),
           onSendProgress: onSendProgress != null
               ? (count, total) => onSendProgress(count / total)
@@ -335,7 +401,9 @@ class DioApiHandler implements ApiHandlerInterface {
   /// [onReceiveProgress]: Optional callback to track the progress of the download.
   /// [queryParameters]: Optional query parameters to append to the URL.
   /// [isAuthorized]: Indicates whether the download request requires authorization.
-  /// [requestId]: Optional request ID for cancellation support.
+  /// [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///              string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///              The same [requestId] must be used in [ApiStateHandler.handleApiCall].
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
@@ -347,14 +415,20 @@ class DioApiHandler implements ApiHandlerInterface {
     Map<String, dynamic>? queryParameters,
     bool isAuthorized = true,
     String? requestId,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
   }) {
     return _handleResponse(
-      dioMethod: (CancelToken cancelToken) => _dio.download(
+      dioMethod: (CancelToken? cancelToken) => _dio.download(
         url,
         downloadDestinationPath,
         queryParameters: queryParameters,
         options: _buildOptions(
           isAuthorized: isAuthorized,
+          enableRetry: enableRetry,
+          maxRetryAttempts: maxRetryAttempts,
+          retryDelay: retryDelay,
         ).copyWith(responseType: ResponseType.stream),
         onReceiveProgress: onReceiveProgress != null
             ? (count, total) => onReceiveProgress(count / total)

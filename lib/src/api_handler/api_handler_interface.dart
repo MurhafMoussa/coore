@@ -7,9 +7,18 @@ import 'package:fpdart/fpdart.dart';
 ///
 /// Returns a [Future] that resolves to either a [Failure] on error or a value
 /// of type [T] on success. The response is parsed from JSON using the provided
-/// [parser] function. Requests can be cancelled by providing a [requestId] and
-/// using [CancelRequestManager] to cancel them. This pattern helps in creating
-/// robust error handling mechanisms in the API layer.
+/// [parser] function.
+///
+/// **Request Cancellation:**
+/// Requests can be cancelled by providing a static [requestId] string identifier and using
+/// [CancelRequestManager] to cancel them. The same [requestId] must be used in both
+/// [ApiStateHandler.handleApiCall] and when calling these methods.
+///
+/// **Retry Configuration:**
+/// Each method supports per-request retry configuration via [enableRetry], [maxRetryAttempts],
+/// and [retryDelay] parameters. Per-request settings take precedence over global settings from
+/// [NetworkConfigEntity], allowing fine-grained control over retry behavior for individual requests.
+/// This pattern helps in creating robust error handling mechanisms in the API layer.
 abstract interface class ApiHandlerInterface {
   /// Sends an HTTP GET request to the specified [path].
   ///
@@ -19,8 +28,16 @@ abstract interface class ApiHandlerInterface {
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [shouldCache]: Indicates if the response should be cached. Defaults to false.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
-  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
-  ///                can be cancelled via [CancelRequestManager].
+  /// - [enableRetry]: Whether to enable retry for this request. Defaults to true.
+  ///                  If false, this request will not be retried even if global retry is enabled.
+  /// - [maxRetryAttempts]: Maximum number of retry attempts for this request. If null,
+  ///                       uses the global setting from [NetworkConfigEntity].
+  /// - [retryDelay]: Delay between retry attempts for this request. If null,
+  ///                 uses the global setting from [NetworkConfigEntity].
+  /// - [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///                string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///                The same [requestId] must be used in [ApiStateHandler.handleApiCall].
+  ///                If provided, the request can be cancelled via [CancelRequestManager].
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
@@ -31,6 +48,9 @@ abstract interface class ApiHandlerInterface {
     ProgressTrackerCallback? onReceiveProgress,
     bool shouldCache = false,
     bool isAuthorized = false,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   });
 
@@ -45,8 +65,16 @@ abstract interface class ApiHandlerInterface {
   /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
-  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
-  ///                can be cancelled via [CancelRequestManager].
+  /// - [enableRetry]: Whether to enable retry for this request. Defaults to true.
+  ///                  If false, this request will not be retried even if global retry is enabled.
+  /// - [maxRetryAttempts]: Maximum number of retry attempts for this request. If null,
+  ///                       uses the global setting from [NetworkConfigEntity].
+  /// - [retryDelay]: Delay between retry attempts for this request. If null,
+  ///                 uses the global setting from [NetworkConfigEntity].
+  /// - [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///                string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///                The same [requestId] must be used in [ApiStateHandler.handleApiCall].
+  ///                If provided, the request can be cancelled via [CancelRequestManager].
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
@@ -59,6 +87,9 @@ abstract interface class ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   });
 
@@ -68,8 +99,16 @@ abstract interface class ApiHandlerInterface {
   /// - [parser]: A function to parse the JSON response into type [T].
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
-  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
-  ///                can be cancelled via [CancelRequestManager].
+  /// - [enableRetry]: Whether to enable retry for this request. Defaults to true.
+  ///                  If false, this request will not be retried even if global retry is enabled.
+  /// - [maxRetryAttempts]: Maximum number of retry attempts for this request. If null,
+  ///                       uses the global setting from [NetworkConfigEntity].
+  /// - [retryDelay]: Delay between retry attempts for this request. If null,
+  ///                 uses the global setting from [NetworkConfigEntity].
+  /// - [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///                string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///                The same [requestId] must be used in [ApiStateHandler.handleApiCall].
+  ///                If provided, the request can be cancelled via [CancelRequestManager].
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
@@ -78,6 +117,9 @@ abstract interface class ApiHandlerInterface {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
     bool isAuthorized = false,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   });
 
@@ -92,8 +134,16 @@ abstract interface class ApiHandlerInterface {
   /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
-  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
-  ///                can be cancelled via [CancelRequestManager].
+  /// - [enableRetry]: Whether to enable retry for this request. Defaults to true.
+  ///                  If false, this request will not be retried even if global retry is enabled.
+  /// - [maxRetryAttempts]: Maximum number of retry attempts for this request. If null,
+  ///                       uses the global setting from [NetworkConfigEntity].
+  /// - [retryDelay]: Delay between retry attempts for this request. If null,
+  ///                 uses the global setting from [NetworkConfigEntity].
+  /// - [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///                string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///                The same [requestId] must be used in [ApiStateHandler.handleApiCall].
+  ///                If provided, the request can be cancelled via [CancelRequestManager].
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
@@ -106,6 +156,9 @@ abstract interface class ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   });
 
@@ -120,8 +173,16 @@ abstract interface class ApiHandlerInterface {
   /// - [onSendProgress]: Optional callback to monitor the progress of the data being sent.
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the data being received.
   /// - [isAuthorized]: Indicates if the request requires authorization. Defaults to false.
-  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
-  ///                can be cancelled via [CancelRequestManager].
+  /// - [enableRetry]: Whether to enable retry for this request. Defaults to true.
+  ///                  If false, this request will not be retried even if global retry is enabled.
+  /// - [maxRetryAttempts]: Maximum number of retry attempts for this request. If null,
+  ///                       uses the global setting from [NetworkConfigEntity].
+  /// - [retryDelay]: Delay between retry attempts for this request. If null,
+  ///                 uses the global setting from [NetworkConfigEntity].
+  /// - [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///                string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///                The same [requestId] must be used in [ApiStateHandler.handleApiCall].
+  ///                If provided, the request can be cancelled via [CancelRequestManager].
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
@@ -134,6 +195,9 @@ abstract interface class ApiHandlerInterface {
     ProgressTrackerCallback? onSendProgress,
     ProgressTrackerCallback? onReceiveProgress,
     bool isAuthorized = false,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   });
 
@@ -145,8 +209,16 @@ abstract interface class ApiHandlerInterface {
   /// - [onReceiveProgress]: Optional callback to monitor the progress of the download.
   /// - [queryParameters]: Optional query parameters to append to the URL.
   /// - [isAuthorized]: Indicates if the download request requires authorization. Defaults to false.
-  /// - [requestId]: Optional request ID for cancellation support. If provided, the request
-  ///                can be cancelled via [CancelRequestManager].
+  /// - [enableRetry]: Whether to enable retry for this request. Defaults to true.
+  ///                  If false, this request will not be retried even if global retry is enabled.
+  /// - [maxRetryAttempts]: Maximum number of retry attempts for this request. If null,
+  ///                       uses the global setting from [NetworkConfigEntity].
+  /// - [retryDelay]: Delay between retry attempts for this request. If null,
+  ///                 uses the global setting from [NetworkConfigEntity].
+  /// - [requestId]: Optional static request ID for cancellation support. Use a consistent
+  ///                string identifier for each request type (e.g., "get_user", "fetch_posts").
+  ///                The same [requestId] must be used in [ApiStateHandler.handleApiCall].
+  ///                If provided, the request can be cancelled via [CancelRequestManager].
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success, which could be the file path or a success message.
@@ -157,6 +229,9 @@ abstract interface class ApiHandlerInterface {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
     bool isAuthorized = false,
+    bool enableRetry = true,
+    int? maxRetryAttempts,
+    Duration? retryDelay,
     String? requestId,
   });
 }
