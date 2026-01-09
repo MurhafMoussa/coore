@@ -24,7 +24,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  ResultFuture<T?> get<T>(
+  ResultFuture<T> get<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -50,7 +50,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  ResultFuture<T?> post<T>(
+  ResultFuture<T> post<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -73,7 +73,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  ResultFuture<T?> delete<T>(
+  ResultFuture<T> delete<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -97,7 +97,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  ResultFuture<T?> put<T>(
+  ResultFuture<T> put<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -125,7 +125,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success.
-  ResultFuture<T?> patch<T>(
+  ResultFuture<T> patch<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -150,7 +150,7 @@ abstract interface class ApiHandlerInterface {
   ///
   /// Returns a [Future] that resolves to either a [Failure] on error, or a value
   /// of type [T] on success, which could be the file path or a success message.
-  ResultFuture<T?> download<T>(
+  ResultFuture<T> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,

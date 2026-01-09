@@ -60,7 +60,7 @@ class DioApiHandler implements ApiHandlerInterface {
   /// If a [requestId] is provided, the cancel token is retrieved from [CancelRequestManager].
   /// The request can be cancelled by calling [CancelRequestManager.cancelRequest] with the
   /// same [requestId]. The request is automatically unregistered after completion.
-  ResultFuture<T?> _handleResponse<T>({
+  ResultFuture<T> _handleResponse<T>({
     required Future<Response> Function(CancelToken cancelToken) dioMethod,
     required T Function(Map<String, dynamic> json) parser,
     String? requestId,
@@ -122,7 +122,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  ResultFuture<T?> get<T>(
+  ResultFuture<T> get<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -163,7 +163,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  ResultFuture<T?> post<T>(
+  ResultFuture<T> post<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -208,7 +208,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  ResultFuture<T?> delete<T>(
+  ResultFuture<T> delete<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
@@ -241,7 +241,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  ResultFuture<T?> put<T>(
+  ResultFuture<T> put<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -291,7 +291,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  ResultFuture<T?> patch<T>(
+  ResultFuture<T> patch<T>(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
@@ -339,7 +339,7 @@ class DioApiHandler implements ApiHandlerInterface {
   ///
   /// Returns a [Future] containing either a [Failure] on error or a value of type [T] on success.
   @override
-  ResultFuture<T?> download<T>(
+  ResultFuture<T> download<T>(
     String url,
     String downloadDestinationPath, {
     ProgressTrackerCallback? onReceiveProgress,
