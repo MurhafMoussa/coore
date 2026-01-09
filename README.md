@@ -162,6 +162,46 @@ apiHandler.get('/users', requestId: 'fetch-users', ...);
 cancelManager.cancelRequest('fetch-users');
 ```
 
+#### Per-Request Retry Configuration
+
+Coore supports both global retry settings (configured in `NetworkConfigEntity`) and per-request retry configuration. Per-request settings take precedence over global settings, allowing fine-grained control over retry behavior.
+
+```dart
+// Disable retry for a specific request
+final result = await apiHandler.get<List<User>>(
+  '/users',
+  parser: (json) => [...],
+  enableRetry: false, // This request won't retry even if global retry is enabled
+);
+
+// Custom retry settings for a specific request
+final result = await apiHandler.post<Map<String, dynamic>>(
+  '/data',
+  parser: (json) => json,
+  body: {'key': 'value'},
+  enableRetry: true,
+  maxRetryAttempts: 2, // Only 2 retries instead of global default
+  retryDelay: Duration(seconds: 5), // 5 second delay instead of global default
+);
+
+// Use global retry settings (default behavior)
+final result = await apiHandler.get<User>(
+  '/users/123',
+  parser: User.fromJson,
+  // enableRetry defaults to true, uses global maxRetryAttempts and retryDelay
+);
+```
+
+**Retry Parameters:**
+- `enableRetry` (default: `true`) - Whether to enable retry for this request. If `false`, the request won't retry even if global retry is enabled.
+- `maxRetryAttempts` (default: `null`) - Maximum number of retry attempts. If `null`, uses the global setting from `NetworkConfigEntity`.
+- `retryDelay` (default: `null`) - Delay between retry attempts. If `null`, uses the global `retryInterval` from `NetworkConfigEntity`.
+
+**When Requests Are Retried:**
+- Connection timeout, send timeout, or receive timeout
+- Network connectivity issues (`SocketException`)
+- Server errors (status codes configured in `NetworkConfigEntity.retryOnStatusCodes`, typically 5xx)
+
 #### POST Request with Form Data
 
 ```dart
@@ -371,8 +411,8 @@ class UserCubit extends Cubit<UserState> with ApiStateHostMixin<UserState> {
 
 **Benefits:**
 - ✅ Automatic loading/success/failure state management
-- ✅ Built-in request cancellation
-- ✅ Retry functionality
+- ✅ Built-in request cancellation with static request IDs
+- ✅ Per-request retry configuration (disable or customize retry per request)
 - ✅ Automatic cleanup on Cubit disposal
 
 ---
