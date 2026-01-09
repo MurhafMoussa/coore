@@ -42,7 +42,9 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// The data fetching function signature:
   /// - batch: Current pagination index (page number/skip value)
   /// - limit: Number of items per page
-  /// - requestId: Optional request ID for cancellation support
+  /// - requestId: Optional static request ID for cancellation support. Use a consistent
+  ///              string identifier for each pagination request type (e.g., "fetch_posts").
+  ///              The same [requestId] must be used when calling API handler methods.
   ResultFuture<PaginationResponseModel<T, M>> Function(
     int batch,
     int limit, {
@@ -87,15 +89,21 @@ class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
   /// - Routes to success/error handlers
   /// - Maintains initial/non-initial context
   /// - Completes Future when done (for EasyRefresh)
-  Future<void> _fetchNetworkData({required bool isInitial}) async {
+  Future<void> _fetchNetworkData({
+    required bool isInitial,
+    String? requestId,
+  }) async {
     // Register request for cancellation support
-    _currentRequestId = getIt<CancelRequestManager>().registerRequest();
+    if (requestId != null) {
+      getIt<CancelRequestManager>().registerRequest(requestId);
+      _currentRequestId = requestId;
+    }
 
     try {
       final result = await _paginationFunction(
         paginationStrategy.nextBatch,
         paginationStrategy.limit,
-        requestId: _currentRequestId,
+        requestId: requestId,
       );
 
       if (!isClosed) {

@@ -6,7 +6,8 @@ abstract class ResultFutureUseCase<Output, Input> extends UseCase {
 
   /// Executes the use case with optional request cancellation support.
   ///
-  /// [requestId]: Optional request ID for cancellation support. If provided, the request
-  ///              can be cancelled via [CancelRequestManager].
+  /// To enable cancellation, use a static [requestId] string identifier when calling
+  /// API handler methods (e.g., "get_user", "fetch_posts"). The same [requestId] must
+  /// be used in [ApiStateHandler.handleApiCall] to enable cancellation via [CancelRequestManager].
   ResultFuture<Output> call(Input input);
 }
