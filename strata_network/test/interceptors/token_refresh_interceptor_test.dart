@@ -3,13 +3,15 @@ import 'package:mocktail/mocktail.dart';
 import 'package:strata_network/strata_network.dart';
 import 'package:test/test.dart';
 
+class MockDio extends Mock implements Dio {}
 class MockTokenManager extends Mock implements TokenManagerInterface {}
 class MockErrorInterceptorHandler extends Mock implements ErrorInterceptorHandler {}
 
 class TestTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
-  TestTokenRefreshInterceptor(
-    super.tokenManager,
-    super.networkConfigEntity, {
+  TestTokenRefreshInterceptor({
+    required super.dio,
+    required super.tokenManager,
+    required super.networkConfigEntity,
     super.onUnauthenticated,
     required this.refreshResultSupplier,
   });
@@ -30,11 +32,13 @@ void main() {
   });
 
   group('TokenRefreshInterceptorInterface Tests', () {
+    late MockDio mockDio;
     late MockTokenManager mockTokenManager;
     late MockErrorInterceptorHandler mockHandler;
     late NetworkConfigEntity config;
 
     setUp(() {
+      mockDio = MockDio();
       mockTokenManager = MockTokenManager();
       mockHandler = MockErrorInterceptorHandler();
 
@@ -54,8 +58,9 @@ void main() {
       bool onUnauthCalled = false;
 
       final interceptor = TestTokenRefreshInterceptor(
-        mockTokenManager,
-        config,
+        dio: mockDio,
+        tokenManager: mockTokenManager,
+        networkConfigEntity: config,
         onUnauthenticated: () {
           onUnauthCalled = true;
         },
@@ -85,8 +90,9 @@ void main() {
       bool onUnauthCalled = false;
 
       final interceptor = TestTokenRefreshInterceptor(
-        mockTokenManager,
-        config,
+        dio: mockDio,
+        tokenManager: mockTokenManager,
+        networkConfigEntity: config,
         onUnauthenticated: () {
           onUnauthCalled = true;
         },

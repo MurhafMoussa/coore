@@ -5,34 +5,59 @@ import 'package:equatable/equatable.dart';
 enum AuthInterceptorType { tokenBased, cookieBased }
 
 /// Configuration options for `strata_network` HTTP client and interceptors.
-class const NetworkConfigEntity({
-  required final String baseUrl,
-  required final List<String> excludedPaths,
-  required final String refreshTokenApiEndpoint,
-  required final String accessTokenKey,
-  required final String refreshTokenKey,
-  final AuthInterceptorType authInterceptorType = AuthInterceptorType.cookieBased,
-  final Duration connectTimeout = const Duration(seconds: 60),
-  final Duration sendTimeout = const Duration(seconds: 60),
-  final Duration receiveTimeout = const Duration(seconds: 60),
-  final Map<String, dynamic> defaultQueryParams = const {},
-  final Map<String, String> staticHeaders = const {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  },
-  final List<Interceptor> interceptors = const [],
-  final String defaultContentType = 'application/json',
-  final int maxRetries = 3,
-  final Duration retryInterval = const Duration(seconds: 3),
-  final List<int> retryOnStatusCodes = const [500, 502, 503, 504],
-  final bool enableCache = false,
-  final Duration cacheDuration = const Duration(minutes: 5),
-  final bool enableRetry = true,
-  final bool followRedirects = true,
-  final int maxRedirects = 5,
-  final bool enableTokenInjection = true,
-  final bool enableRefreshTokenBehavior = true,
-}) extends Equatable {
+class NetworkConfigEntity extends Equatable {
+  const NetworkConfigEntity({
+    required this.baseUrl,
+    required this.excludedPaths,
+    required this.refreshTokenApiEndpoint,
+    required this.accessTokenKey,
+    required this.refreshTokenKey,
+    this.authInterceptorType = AuthInterceptorType.cookieBased,
+    this.connectTimeout = const Duration(seconds: 60),
+    this.sendTimeout = const Duration(seconds: 60),
+    this.receiveTimeout = const Duration(seconds: 60),
+    this.defaultQueryParams = const {},
+    this.staticHeaders = const {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    this.interceptors = const [],
+    this.defaultContentType = 'application/json',
+    this.maxRetries = 3,
+    this.retryInterval = const Duration(seconds: 3),
+    this.retryOnStatusCodes = const [500, 502, 503, 504],
+    this.enableCache = false,
+    this.cacheDuration = const Duration(minutes: 5),
+    this.enableRetry = true,
+    this.followRedirects = true,
+    this.maxRedirects = 5,
+    this.enableTokenInjection = true,
+    this.enableRefreshTokenBehavior = true,
+  });
+
+  final String baseUrl;
+  final List<String> excludedPaths;
+  final String refreshTokenApiEndpoint;
+  final String accessTokenKey;
+  final String refreshTokenKey;
+  final AuthInterceptorType authInterceptorType;
+  final Duration connectTimeout;
+  final Duration sendTimeout;
+  final Duration receiveTimeout;
+  final Map<String, dynamic> defaultQueryParams;
+  final Map<String, String> staticHeaders;
+  final List<Interceptor> interceptors;
+  final String defaultContentType;
+  final int maxRetries;
+  final Duration retryInterval;
+  final List<int> retryOnStatusCodes;
+  final bool enableCache;
+  final Duration cacheDuration;
+  final bool enableRetry;
+  final bool followRedirects;
+  final int maxRedirects;
+  final bool enableTokenInjection;
+  final bool enableRefreshTokenBehavior;
 
   @override
   List<Object?> get props => [

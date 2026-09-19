@@ -1,3 +1,5 @@
+import 'dart:async';
+
 /// Abstract contract for managing access and refresh authentication tokens.
 abstract class TokenManagerInterface {
   /// Asynchronously retrieves the access token.
@@ -15,6 +17,12 @@ abstract class TokenManagerInterface {
   /// Optional callback invoked when authentication token refresh fails.
   void Function()? onUnauthenticated;
 
+  /// Stream emitting events when unauthenticated state is triggered.
+  Stream<void> get unauthenticatedStream;
+
   /// Emits the unauthenticated event.
   void notifyUnauthenticated();
+
+  /// Disposes resources held by the token manager.
+  Future<void> dispose();
 }

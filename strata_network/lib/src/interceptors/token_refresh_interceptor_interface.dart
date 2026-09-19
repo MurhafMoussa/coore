@@ -1,18 +1,23 @@
 import 'dart:collection';
+
 import 'package:dio/dio.dart';
-import 'package:get_it/get_it.dart';
 import 'package:mutex/mutex.dart';
 
-import '../api_handler/api_handler_interface.dart';
 import '../auth/token_manager_interface.dart';
 import '../config/network_config_entity.dart';
 
 /// Abstract interceptor responsible for handling token refresh on 401 errors.
-abstract class TokenRefreshInterceptorInterface(
-  final TokenManagerInterface _tokenManager,
-  final NetworkConfigEntity _networkConfigEntity, {
-  this.onUnauthenticated,
-}) extends Interceptor {
+abstract class TokenRefreshInterceptorInterface extends Interceptor {
+  TokenRefreshInterceptorInterface({
+    required this.dio,
+    required this.tokenManager,
+    required this.networkConfigEntity,
+    this.onUnauthenticated,
+  });
+
+  final Dio dio;
+  final TokenManagerInterface tokenManager;
+  final NetworkConfigEntity networkConfigEntity;
   final void Function()? onUnauthenticated;
 
   final Mutex _refreshMutex = Mutex();
@@ -32,17 +37,18 @@ abstract class TokenRefreshInterceptorInterface(
   }
 
   bool _shouldHandle401(DioException err) {
-    if (!_networkConfigEntity.enableRefreshTokenBehavior) {
+    if (!networkConfigEntity.enableRefreshTokenBehavior) {
       return false;
     }
     final requestOptions = err.requestOptions;
     final isUnauthorized = err.response?.statusCode == 401;
-    final requiresAuthorization = requestOptions.extra['isAuthorized'] == true;
+    final requiresAuthorization =
+        requestOptions.extra['isAuthorized'] == true;
     final isNotRetryAttempt = requestOptions.extra['isRetry'] != true;
     final isNotRefreshTokenPath = !requestOptions.path.contains(
-      _networkConfigEntity.refreshTokenApiEndpoint,
+      networkConfigEntity.refreshTokenApiEndpoint,
     );
-    final isNotExcludedPath = !_networkConfigEntity.excludedPaths.any(
+    final isNotExcludedPath = !networkConfigEntity.excludedPaths.any(
       (path) => requestOptions.path.contains(path),
     );
     return isUnauthorized &&
@@ -68,9 +74,9 @@ abstract class TokenRefreshInterceptorInterface(
         }
 
         if (!success) {
-          await _tokenManager.clearTokens();
+          await tokenManager.clearTokens();
           onUnauthenticated?.call();
-          _tokenManager.notifyUnauthenticated();
+          tokenManager.notifyUnauthenticated();
         }
 
         while (_pending.isNotEmpty) {
@@ -89,10 +95,9 @@ abstract class TokenRefreshInterceptorInterface(
     RequestOptions requestOptions,
     ErrorInterceptorHandler handler,
   ) async {
-    final dio = GetIt.instance<Dio>();
     requestOptions.extra['isRetry'] = true;
     try {
-      final resp = await dio.fetch<Map<String, dynamic>>(requestOptions);
+      final resp = await dio.fetch<dynamic>(requestOptions);
       handler.resolve(resp);
     } on DioException catch (e) {
       handler.reject(e);
@@ -139,73 +144,71 @@ abstract class TokenRefreshInterceptorInterface(
 }
 
 /// Token refresh interceptor for Bearer token authorization headers.
-class BearerTokenRefreshInterceptor(
-  super.tokenManager,
-  super.networkConfigEntity, {
-  super.onUnauthenticated,
-}) extends TokenRefreshInterceptorInterface {
+class BearerTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
+  BearerTokenRefreshInterceptor({
+    required super.dio,
+    required super.tokenManager,
+    required super.networkConfigEntity,
+    super.onUnauthenticated,
+  });
 
   @override
   Future<bool> handleRefresh(DioException err) async {
-    final rt = await _tokenManager.refreshToken;
+    final rt = await tokenManager.refreshToken;
     if (rt.isEmpty) return false;
 
-    final api = GetIt.instance<ApiHandlerInterface>();
-    final result = await api.post(
-      _networkConfigEntity.refreshTokenApiEndpoint,
-      parser: (json) => json,
-      body: {_networkConfigEntity.refreshTokenKey: rt},
-    );
+    try {
+      final response = await dio.post<Map<String, dynamic>>(
+        networkConfigEntity.refreshTokenApiEndpoint,
+        data: {networkConfigEntity.refreshTokenKey: rt},
+      );
+      final data = response.data;
+      if (data == null) return false;
 
-    return result.fold(
-      (failure) => false,
-      (Map<String, dynamic> data) async {
-        final accessToken =
-            getNestedValue(data, _networkConfigEntity.accessTokenKey)
-                as String?;
-        final refreshToken =
-            getNestedValue(data, _networkConfigEntity.refreshTokenKey)
-                as String?;
-        await _tokenManager.setTokens(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        );
-        return true;
-      },
-    );
+      final accessToken =
+          getNestedValue(data, networkConfigEntity.accessTokenKey) as String?;
+      final refreshToken =
+          getNestedValue(data, networkConfigEntity.refreshTokenKey) as String?;
+      await tokenManager.setTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }
 
 /// Token refresh interceptor for cookie-based authorization.
-class CookieTokenRefreshInterceptor(
-  super.tokenManager,
-  super.networkConfigEntity, {
-  super.onUnauthenticated,
-}) extends TokenRefreshInterceptorInterface {
+class CookieTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
+  CookieTokenRefreshInterceptor({
+    required super.dio,
+    required super.tokenManager,
+    required super.networkConfigEntity,
+    super.onUnauthenticated,
+  });
 
   @override
   Future<bool> handleRefresh(DioException err) async {
-    final api = GetIt.instance<ApiHandlerInterface>();
-    final result = await api.post(
-      _networkConfigEntity.refreshTokenApiEndpoint,
-      parser: (json) => json,
-    );
+    try {
+      final response = await dio.post<Map<String, dynamic>>(
+        networkConfigEntity.refreshTokenApiEndpoint,
+      );
+      final data = response.data;
+      if (data == null) return false;
 
-    return result.fold(
-      (failure) => false,
-      (Map<String, dynamic> data) async {
-        final refreshToken =
-            getNestedValue(data, _networkConfigEntity.refreshTokenKey)
-                as String?;
-        final accessToken =
-            getNestedValue(data, _networkConfigEntity.accessTokenKey)
-                as String?;
-        await _tokenManager.setTokens(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        );
-        return true;
-      },
-    );
+      final refreshToken =
+          getNestedValue(data, networkConfigEntity.refreshTokenKey) as String?;
+      final accessToken =
+          getNestedValue(data, networkConfigEntity.accessTokenKey) as String?;
+      await tokenManager.setTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

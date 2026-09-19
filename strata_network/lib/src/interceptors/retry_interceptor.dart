@@ -1,12 +1,21 @@
 import 'dart:io';
+import 'dart:math';
+
 import 'package:dio/dio.dart';
-import 'package:get_it/get_it.dart';
+
 import '../config/network_config_entity.dart';
 
-/// Interceptor that automatically retries transient HTTP request failures.
-class RetryInterceptor(
-  final NetworkConfigEntity _networkConfigEntity,
-) extends Interceptor {
+/// Interceptor that automatically retries transient HTTP request failures with exponential backoff and jitter.
+class RetryInterceptor extends Interceptor {
+  RetryInterceptor({
+    required this.dio,
+    required this.networkConfigEntity,
+    Random? random,
+  }) : _random = random ?? Random();
+
+  final Dio dio;
+  final NetworkConfigEntity networkConfigEntity;
+  final Random _random;
 
   @override
   Future<void> onError(
@@ -17,13 +26,13 @@ class RetryInterceptor(
 
     final int currentRetry = options.extra['retry_count'] as int? ?? 0;
     final enableRetry = options.extra['enableRetry'] as bool? ??
-        _networkConfigEntity.enableRetry;
+        networkConfigEntity.enableRetry;
     final maxRetryAttempts = options.extra['maxRetryAttempts'] as int? ??
-        _networkConfigEntity.maxRetries;
+        networkConfigEntity.maxRetries;
     final retryDelayMs = options.extra['retryDelay'] as int?;
-    final retryDelay = retryDelayMs != null
+    final baseInterval = retryDelayMs != null
         ? Duration(milliseconds: retryDelayMs)
-        : _networkConfigEntity.retryInterval;
+        : networkConfigEntity.retryInterval;
 
     final shouldRetry = _shouldRetry(
       err: err,
@@ -34,12 +43,11 @@ class RetryInterceptor(
 
     if (shouldRetry) {
       options.extra['retry_count'] = currentRetry + 1;
-      await Future<void>.delayed(retryDelay);
+      final delay = _calculateDelay(baseInterval, currentRetry);
+      await Future<void>.delayed(delay);
 
       try {
-        final response = await GetIt.instance<Dio>().fetch<Map<String, dynamic>>(
-          options,
-        );
+        final response = await dio.fetch<dynamic>(options);
         handler.resolve(response);
       } on DioException catch (e) {
         handler.next(e);
@@ -47,6 +55,13 @@ class RetryInterceptor(
     } else {
       handler.next(err);
     }
+  }
+
+  Duration _calculateDelay(Duration baseInterval, int attempt) {
+    final factor = 1 << attempt;
+    final baseMs = baseInterval.inMilliseconds * factor;
+    final jitterMs = (_random.nextDouble() * baseMs * 0.25).round();
+    return Duration(milliseconds: baseMs + jitterMs);
   }
 
   bool _shouldRetry({
@@ -70,7 +85,7 @@ class RetryInterceptor(
     }
 
     if (err.response != null &&
-        _networkConfigEntity.retryOnStatusCodes.contains(
+        networkConfigEntity.retryOnStatusCodes.contains(
           err.response!.statusCode,
         )) {
       return true;

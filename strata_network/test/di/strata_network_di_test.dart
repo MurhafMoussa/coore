@@ -3,6 +3,18 @@ import 'package:get_it/get_it.dart';
 import 'package:strata_network/strata_network.dart';
 import 'package:test/test.dart';
 
+class _TestErrorResponseModel extends BaseErrorResponseModel {
+  _TestErrorResponseModel()
+      : super(
+          status: 500,
+          developerMessage: 'Error',
+          timestamp: DateTime.now(),
+        );
+
+  @override
+  Map<String, String> get validationErrors => {};
+}
+
 void main() {
   group('StrataNetworkDiExtension Tests', () {
     late GetIt getIt;
@@ -20,7 +32,10 @@ void main() {
         refreshTokenKey: 'refresh_token',
       );
 
-      getIt.registerStrataNetwork(config: config);
+      getIt.registerStrataNetwork(
+        config: config,
+        errorParser: (response) => _TestErrorResponseModel(),
+      );
 
       expect(getIt.isRegistered<NetworkConfigEntity>(), isTrue);
       expect(getIt.isRegistered<CancelRequestManagerInterface>(), isTrue);

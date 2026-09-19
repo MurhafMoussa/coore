@@ -2,13 +2,16 @@ import 'package:dio/dio.dart';
 import 'package:strata_core/strata_core.dart';
 
 /// Interceptor logging HTTP requests and responses using [CoreLoggerInterface].
-class LoggingInterceptor({
-  final CoreLoggerInterface _logger = const NoOpCoreLogger(),
-}) extends Interceptor {
+class LoggingInterceptor extends Interceptor {
+  LoggingInterceptor({
+    this.logger = const NoOpCoreLogger(),
+  });
+
+  final CoreLoggerInterface logger;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    _logger.debug('HTTP GET/POST Request: ${options.method} ${options.path}');
+    logger.debug('HTTP ${options.method} Request: ${options.path}');
     super.onRequest(options, handler);
   }
 
@@ -17,7 +20,7 @@ class LoggingInterceptor({
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    _logger.debug(
+    logger.debug(
       'HTTP Response [${response.statusCode}]: ${response.requestOptions.path}',
     );
     super.onResponse(response, handler);
@@ -25,7 +28,7 @@ class LoggingInterceptor({
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    _logger.error(
+    logger.error(
       'HTTP Error [${err.response?.statusCode}]: ${err.requestOptions.path}',
       err,
       err.stackTrace,

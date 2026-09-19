@@ -1,20 +1,32 @@
+import 'dart:async';
+
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:strata_core/strata_core.dart';
+
 import 'token_manager_interface.dart';
 
-/// Default implementation of [TokenManagerInterface] backed by optional [SensitiveStorageInterface].
-class DefaultTokenManager({
-  SensitiveStorageInterface? sensitiveStorage,
-  this.secureStorageEnabled = false,
-  this.onUnauthenticated,
-}) implements TokenManagerInterface {
-  // ignore: prefer_initializing_formals
-  this : _sensitiveStorage = sensitiveStorage;
+/// Default implementation of [TokenManagerInterface] backed by optional [SensitiveStorageInterface]
+/// and optional [CookieJar].
+class DefaultTokenManager implements TokenManagerInterface {
+  DefaultTokenManager({
+    this.sensitiveStorage,
+    this.secureStorageEnabled = false,
+    this.onUnauthenticated,
+    this.cookieJar,
+  });
 
-  final SensitiveStorageInterface? _sensitiveStorage;
+  final SensitiveStorageInterface? sensitiveStorage;
+  final CookieJar? cookieJar;
   final bool secureStorageEnabled;
+
+  final StreamController<void> _unauthenticatedController =
+      StreamController<void>.broadcast();
 
   @override
   void Function()? onUnauthenticated;
+
+  @override
+  Stream<void> get unauthenticatedStream => _unauthenticatedController.stream;
 
   String? _accessToken;
   String? _refreshToken;
@@ -22,11 +34,14 @@ class DefaultTokenManager({
   @override
   void notifyUnauthenticated() {
     onUnauthenticated?.call();
+    if (!_unauthenticatedController.isClosed) {
+      _unauthenticatedController.add(null);
+    }
   }
 
   @override
   Future<String> get accessToken async {
-    final storage = _sensitiveStorage;
+    final storage = sensitiveStorage;
     if (secureStorageEnabled && storage != null) {
       if (_accessToken != null && _accessToken!.isNotEmpty) {
         return _accessToken!;
@@ -45,7 +60,7 @@ class DefaultTokenManager({
 
   @override
   Future<String> get refreshToken async {
-    final storage = _sensitiveStorage;
+    final storage = sensitiveStorage;
     if (secureStorageEnabled && storage != null) {
       if (_refreshToken != null && _refreshToken!.isNotEmpty) {
         return _refreshToken!;
@@ -67,7 +82,7 @@ class DefaultTokenManager({
     _accessToken = accessToken;
     _refreshToken = refreshToken;
 
-    final storage = _sensitiveStorage;
+    final storage = sensitiveStorage;
     if (secureStorageEnabled && storage != null) {
       if (accessToken != null && accessToken.isNotEmpty) {
         await storage.save('accessToken', accessToken);
@@ -83,10 +98,20 @@ class DefaultTokenManager({
     _accessToken = null;
     _refreshToken = null;
 
-    final storage = _sensitiveStorage;
+    final storage = sensitiveStorage;
     if (secureStorageEnabled && storage != null) {
       await storage.delete('accessToken');
       await storage.delete('refreshToken');
     }
+
+    final jar = cookieJar;
+    if (jar != null) {
+      await jar.deleteAll();
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _unauthenticatedController.close();
   }
 }

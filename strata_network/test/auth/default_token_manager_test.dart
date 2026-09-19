@@ -1,3 +1,4 @@
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:strata_core/strata_core.dart';
@@ -5,6 +6,8 @@ import 'package:strata_network/strata_network.dart';
 import 'package:test/test.dart';
 
 class MockSensitiveStorage extends Mock implements SensitiveStorageInterface {}
+
+class MockCookieJar extends Mock implements CookieJar {}
 
 void main() {
   group('DefaultTokenManager Tests', () {
@@ -69,13 +72,25 @@ void main() {
       expect(await manager.refreshToken, equals(''));
     });
 
-    test('notifyUnauthenticated invokes onUnauthenticated callback', () {
+    test('clearTokens clears cookieJar if provided', () async {
+      final mockCookieJar = MockCookieJar();
+      when(() => mockCookieJar.deleteAll()).thenAnswer((_) async {});
+
+      final manager = DefaultTokenManager(cookieJar: mockCookieJar);
+      await manager.clearTokens();
+
+      verify(() => mockCookieJar.deleteAll()).called(1);
+    });
+
+    test('notifyUnauthenticated invokes onUnauthenticated callback and emits on unauthenticatedStream', () async {
       bool unauthCalled = false;
       final manager = DefaultTokenManager(
         onUnauthenticated: () {
           unauthCalled = true;
         },
       );
+
+      expect(manager.unauthenticatedStream, emits(null));
 
       manager.notifyUnauthenticated();
       expect(unauthCalled, isTrue);
