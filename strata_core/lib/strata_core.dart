@@ -1,10 +1,18 @@
 library strata_core;
 
 export 'src/dev_tools/core_logger_interface.dart';
+export 'src/di/strata_core_di.dart';
 export 'src/error_handling/failures/failures.dart';
 export 'src/models/identifiable.dart';
 export 'src/models/pagination_response_model.dart';
 export 'src/navigation/navigation_service_interface.dart';
+export 'src/network/network_status_interface.dart';
+export 'src/platform/device_info_entity.dart';
+export 'src/platform/platform_service_interface.dart';
 export 'src/state_management/api_state.dart';
 export 'src/storage/sensitive_storage_interface.dart';
 export 'src/typedefs/result_typedefs.dart';
+export 'src/use_cases/result_future_use_case.dart';
+export 'src/use_cases/result_stream_use_case.dart';
+export 'src/use_cases/unawaited_use_case.dart';
+export 'src/use_cases/usecase.dart';

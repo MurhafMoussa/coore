@@ -3,6 +3,8 @@ export 'src/constants/border_radius_manager.dart';
 export 'src/constants/padding_manager.dart';
 export 'src/constants/sizes_manager.dart';
 export 'src/constants/spacing_manager.dart';
+export 'src/di/strata_ui_di.dart';
+export 'src/extensions/context_extensions.dart';
 export 'src/forms/core_pin_code_field.dart';
 export 'src/forms/core_textfield.dart';
 export 'src/pagination/core_pagination_widget.dart';

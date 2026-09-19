@@ -1,0 +1,35 @@
+name: strata
+description: Strata framework orchestrator meta-package exporting all sub-packages and providing dependency injection initialization.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  dio: ^5.8.0+1
+  equatable: ^2.0.7
+  flutter:
+    sdk: flutter
+  flutter_secure_storage: ^9.2.4
+  get_it: ^9.0.5
+  go_router: ^17.0.0
+  strata_core:
+    path: ../strata_core
+  strata_navigation:
+    path: ../strata_navigation
+  strata_network:
+    path: ../strata_network
+  strata_state:
+    path: ../strata_state
+  strata_storage:
+    path: ../strata_storage
+  strata_ui:
+    path: ../strata_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4

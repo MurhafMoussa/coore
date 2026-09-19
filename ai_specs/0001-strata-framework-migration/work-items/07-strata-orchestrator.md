@@ -13,12 +13,12 @@ Implement the `strata` orchestrator meta-package exporting all 6 sub-packages fo
 - `StrataInitializer.reset()` resets GetIt singletons for test teardowns.
 
 ## Acceptance criteria
-- [ ] Meta-package `strata` is created exporting all sub-packages.
-- [ ] Each sub-package exposes a GetIt registration extension method.
-- [ ] `StrataInitializer.initialize()` awaits `getIt.allReady()` before returning.
-- [ ] `StrataInitializer.reset()` cleans up GetIt singletons between test runs.
-- [ ] Unit test verifies async initialization awaiting `allReady()` and clean reset behavior.
-- [ ] Monorepo dependency audit test verifies sub-package dependency isolation.
+- [x] Meta-package `strata` is created exporting all sub-packages.
+- [x] Each sub-package exposes a GetIt registration extension method.
+- [x] `StrataInitializer.initialize()` awaits `getIt.allReady()` before returning.
+- [x] `StrataInitializer.reset()` cleans up GetIt singletons between test runs.
+- [x] Unit test verifies async initialization awaiting `allReady()` and clean reset behavior.
+- [x] Monorepo dependency audit test verifies sub-package dependency isolation.
 
 ## Covers
 - User Stories: 1, 6

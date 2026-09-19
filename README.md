@@ -1,99 +1,57 @@
-# 🎯 Coore
+# 🎯 Strata Framework (formerly Coore)
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.10+-blue.svg)](https://flutter.dev/)
 [![Dart](https://img.shields.io/badge/Dart-3.10+-blue.svg)](https://dart.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-**Enterprise-grade Flutter infrastructure package** built on Clean Architecture principles with functional error handling and centralized configuration.
+**Strata** is an enterprise Melos monorepo modularized into 7 focused packages designed for maximum flexibility, zero unnecessary framework lock-in, functional error handling, and robust async dependency injection.
 
 ---
 
-## ✨ Features
+## 📦 Strata Monorepo Packages
 
-- 🏗️ **Clean Architecture** - Strict separation of concerns with feature-first organization
-- 🔄 **Functional Error Handling** - Type-safe error handling with `fpdart`'s `Either` monad
-- 🌐 **Networking** - Dio-based API handler with automatic token refresh and request cancellation
-- 📊 **State Management** - Simplified BLoC/Cubit patterns with automatic API state handling
-- 🎨 **UI Components** - Production-ready widgets for pagination, forms, images, and theming
-- 🧭 **Navigation** - GoRouter integration with type-safe route generation support
-- 💾 **Storage** - Local (Hive) and secure (FlutterSecureStorage) database abstractions
-- ⚙️ **Centralized Configuration** - Single entry point for app-wide setup
-
----
-
-## 📦 Installation
-
-Add `coore` to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  coore: ^1.0.0
-```
-
-Then run:
-
-```bash
-flutter pub get
-```
+| Package | Purpose | Dependencies |
+| :--- | :--- | :--- |
+| **`strata_core`** | Domain entities, failures, logger contracts, sensitive storage interfaces, `ApiState<T>`, and `UseCase` contracts. | Pure Dart (`equatable`, `fpdart`, `get_it`) |
+| **`strata_network`** | Dio HTTP client wrapper, token lifecycle management, and request cancellation. | `strata_core`, `dio`, `mutex` |
+| **`strata_storage`** | Secure persistence adapters (`FlutterSecureSensitiveStorage`) and database directory helpers. | `strata_core`, `flutter_secure_storage` |
+| **`strata_state`** | BLoC state utilities, `ApiStateHostMixin`, `ApiStateHandler`, and `ApiStateBuilder`. | `strata_core`, `flutter_bloc` |
+| **`strata_navigation`** | GoRouter configuration wrappers, route guards, and `NavigationServiceInterface`. | `strata_core`, `go_router` |
+| **`strata_ui`** | Decoupled UI components (`CorePaginationWidget`, form fields, image widgets, context extensions). | `strata_core`, `flutter` |
+| **`strata`** | Orchestrator meta-package exporting all 6 sub-packages and single-line setup via `StrataInitializer`. | All sub-packages |
 
 ---
 
 ## 🚀 Quick Start
 
-### Critical Setup: Initialize Core Dependencies
-
-**Coore requires initialization before `runApp()`**. This single call configures networking, theming, localization, and environment settings.
+Initialize all Strata sub-packages with `StrataInitializer`:
 
 ```dart
-import 'package:coore/coore.dart';
+import 'package:strata/strata.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize all core dependencies
-  await CoreConfig.initializeCoreDependencies(
-    CoreConfigEntity(
-      currentEnvironment: CoreEnvironment.development,
-      networkConfigEntity: NetworkConfigEntity(
-        baseUrl: 'https://api.example.com',
-        connectTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        authInterceptorType: AuthInterceptorType.tokenBased,
-      ),
-      localizationConfigEntity: LocalizationConfigEntity(
-        defaultLocale: const Locale('en'),
-        supportedLocales: const [Locale('en'), Locale('ar')],
-        localizationsDelegates: [
-          // Your localization delegates
-        ],
-      ),
-      themeConfigEntity: ThemeConfigEntity(
-        lightTheme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-      ),
+
+  final strataConfig = StrataConfigEntity(
+    networkConfig: const NetworkConfigEntity(
+      baseUrl: 'https://api.example.com',
+      excludedPaths: ['/login', '/register'],
+      refreshTokenApiEndpoint: '/auth/refresh',
+      accessTokenKey: 'access_token',
+      refreshTokenKey: 'refresh_token',
+    ),
+    navigationConfig: NavigationConfigEntity(
+      routes: $appRoutes,
+      initialLocation: '/',
     ),
   );
-  
-  runApp(MyApp());
+
+  // Single-line framework initialization (awaits getIt.allReady())
+  await StrataInitializer.initialize(strataConfig);
+
+  runApp(const MyApp());
 }
-```
-
-**After project setup** (e.g., after initializing Hive boxes), initialize navigation:
-
-```dart
-await CoreConfig.initializeCoreDependenciesAfterProjectSetup(
-  CoreConfigAfterProjectSetupEntity(
-    navigationConfigEntity: NavigationConfigEntity(
-      routes: $appRoutes, // Generated by go_router_builder
-      redirect: (context, state) {
-        // Your redirect logic
-        return null;
-      },
-    ),
-  ),
-);
 ```
 
 ---
