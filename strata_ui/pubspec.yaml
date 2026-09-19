@@ -1,0 +1,29 @@
+name: strata_ui
+description: Reusable decoupled UI components and theme abstractions for the Strata framework.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  cached_network_image: ^3.4.1
+  carousel_slider: ^5.1.1
+  easy_refresh: ^3.4.0
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.2.0
+  gap: ^3.0.1
+  pinput: ^6.0.0
+  readmore: ^3.0.0
+  shimmer: ^3.0.0
+  skeletonizer: ^2.1.0+1
+  strata_core:
+    path: ../strata_core
+  typed_form_fields: ^2.0.2
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

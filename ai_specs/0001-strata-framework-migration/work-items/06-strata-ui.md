@@ -13,10 +13,10 @@ Implement `strata_ui` containing reusable UI components (`CorePaginationWidget`,
 - Navigation and state actions are handled by passing callbacks (`onItemTap`, `onRefresh`, etc.).
 
 ## Acceptance criteria
-- [ ] `strata_ui` sub-package is created.
-- [ ] UI components (`CorePaginationWidget`, custom form fields, `CoreImage`, theme/spacing) are extracted.
-- [ ] Package dependency check confirms zero references to `flutter_bloc` or `go_router`.
-- [ ] Widget tests verify component rendering and event callback triggers.
+- [x] `strata_ui` sub-package is created.
+- [x] UI components (`CorePaginationWidget`, custom form fields, `CoreImage`, theme/spacing) are extracted.
+- [x] Package dependency check confirms zero references to `flutter_bloc` or `go_router`.
+- [x] Widget tests verify component rendering and event callback triggers.
 
 ## Covers
 - User Stories: 1
