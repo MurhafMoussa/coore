@@ -1,9 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:strata_core/strata_core.dart';
-import '../api_handler/models/base_error_response_model.dart';
 
-/// Callback for progress tracking.
-typedef ProgressTrackerCallback = void Function(double progress);
+import '../api_handler/models/base_error_response_model.dart';
 
 /// Function signature for parsing network error models from Dio responses.
 typedef ErrorModelParser = BaseErrorResponseModel Function(

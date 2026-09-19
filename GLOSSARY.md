@@ -39,3 +39,11 @@ _Avoid_: ApiStateController
 **DisposableApiStateHandlerInterface**:
 The contract in `strata_state` implemented by `ApiStateHandler` for managing disposable state delegates within BLoC/Cubit state hosts without using the legacy `IApiStateHandler` name.
 _Avoid_: IApiStateHandler, ApiStateHandlerInterface
+
+**ApiRequestOptions**:
+The immutable configuration class in `strata_network` passed to `ApiHandlerInterface` containing per-request headers, retry options, authorization flags, and progress callbacks.
+_Avoid_: RequestOptions, DioOptions, NetworkRequestOptions
+
+**NetworkFormData**:
+The framework-agnostic multipart data structure in `strata_network` encapsulating form fields and `NetworkFile` instances without leaking Dio types to host applications.
+_Avoid_: FormDataAdapter, DioFormData

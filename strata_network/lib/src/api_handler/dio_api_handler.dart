@@ -1,59 +1,69 @@
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:get_it/get_it.dart';
 import 'package:strata_core/strata_core.dart';
 
 import '../error_handling/network_exception_mapper_interface.dart';
 import 'api_handler_interface.dart';
 import 'cancel_request_manager_interface.dart';
-import 'form_data_adapter.dart';
+import 'models/models.dart';
 
 /// Dio implementation of [ApiHandlerInterface].
 class DioApiHandler(
   final Dio _dio,
-  final NetworkExceptionMapperInterface _exceptionMapper, {
-  final CancelRequestManagerInterface? cancelRequestManager,
-}) implements ApiHandlerInterface {
-  this : _cancelRequestManager = cancelRequestManager;
-
-  final CancelRequestManagerInterface? _cancelRequestManager;
-
-  CancelRequestManagerInterface get _effectiveCancelRequestManager {
-    final manager = _cancelRequestManager;
-    if (manager != null) {
-      return manager;
-    }
-    return GetIt.instance<CancelRequestManagerInterface>();
-  }
-
-  Options _buildOptions({
-    required bool isAuthorized,
-    bool shouldCache = false,
+  final NetworkExceptionMapperInterface _exceptionMapper,
+  final CancelRequestManagerInterface _cancelRequestManager,
+) implements ApiHandlerInterface {
+  Options _buildOptions(
+    ApiRequestOptions? options, {
     bool isFormData = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
   }) {
-    final extra = <String, dynamic>{'isAuthorized': isAuthorized};
+    final opts = options ?? const ApiRequestOptions();
+    final extra = <String, dynamic>{
+      'isAuthorized': opts.isAuthorized,
+      'enableRetry': opts.enableRetry,
+    };
 
-    extra['enableRetry'] = enableRetry;
-    if (maxRetryAttempts != null) {
-      extra['maxRetryAttempts'] = maxRetryAttempts;
+    if (opts.maxRetryAttempts != null) {
+      extra['maxRetryAttempts'] = opts.maxRetryAttempts;
     }
-    if (retryDelay != null) {
-      extra['retryDelay'] = retryDelay.inMilliseconds;
+    if (opts.retryDelay != null) {
+      extra['retryDelay'] = opts.retryDelay!.inMilliseconds;
     }
-
-    if (shouldCache) {
+    if (opts.shouldCache) {
       extra['shouldCache'] = true;
+    }
+    if (opts.extra != null) {
+      extra.addAll(opts.extra!);
     }
 
     return Options(
+      headers: opts.headers,
       extra: extra,
       contentType: isFormData
           ? Headers.multipartFormDataContentType
           : Headers.jsonContentType,
     );
+  }
+
+  Future<FormData> _convertToDioFormData(NetworkFormData formData) async {
+    final dioFormData = FormData();
+
+    for (final entry in formData.fields.entries) {
+      dioFormData.fields.add(MapEntry(entry.key, entry.value.toString()));
+    }
+
+    for (final file in formData.files) {
+      final dioFile = await MultipartFile.fromFile(
+        file.filePath,
+        filename: file.filename,
+        contentType: file.contentType != null
+            ? DioMediaType.parse(file.contentType!)
+            : null,
+      );
+      dioFormData.files.add(MapEntry(file.fieldName, dioFile));
+    }
+
+    return dioFormData;
   }
 
   ResultFuture<T> _handleResponse<T>({
@@ -63,7 +73,7 @@ class DioApiHandler(
   }) async {
     CancelToken? cancelToken;
     if (requestId != null) {
-      cancelToken = _effectiveCancelRequestManager.registerRequest(requestId);
+      cancelToken = _cancelRequestManager.registerRequest(requestId);
     }
 
     try {
@@ -99,7 +109,7 @@ class DioApiHandler(
       );
     } finally {
       if (requestId != null && cancelToken != null) {
-        _effectiveCancelRequestManager.unregisterToken(requestId, cancelToken);
+        _cancelRequestManager.unregisterToken(requestId, cancelToken);
       }
     }
   }
@@ -109,32 +119,22 @@ class DioApiHandler(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-    ProgressTrackerCallback? onReceiveProgress,
-    bool shouldCache = false,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   }) {
+    final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
       dioMethod: (CancelToken? cancelToken) => _dio.get(
         path,
         queryParameters: queryParameters,
-        options: _buildOptions(
-          isAuthorized: isAuthorized,
-          shouldCache: shouldCache,
-          enableRetry: enableRetry,
-          maxRetryAttempts: maxRetryAttempts,
-          retryDelay: retryDelay,
-        ),
-        onReceiveProgress: onReceiveProgress != null
-            ? (count, total) => onReceiveProgress(count / total)
+        options: _buildOptions(opts),
+        onReceiveProgress: opts.onReceiveProgress != null
+            ? (count, total) =>
+                opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
             : null,
         cancelToken: cancelToken,
       ),
       parser: parser,
-      requestId: requestId,
+      requestId: opts.requestId,
     );
   }
 
@@ -143,40 +143,34 @@ class DioApiHandler(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
-    FormDataAdapter? formData,
+    NetworkFormData? formData,
     Map<String, dynamic>? queryParameters,
-    ProgressTrackerCallback? onSendProgress,
-    ProgressTrackerCallback? onReceiveProgress,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   }) {
+    final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
-      dioMethod: (CancelToken? cancelToken) {
+      dioMethod: (CancelToken? cancelToken) async {
+        final dynamic requestData = formData != null
+            ? await _convertToDioFormData(formData)
+            : body;
         return _dio.post(
           path,
-          data: formData != null ? formData.create() : body,
+          data: requestData,
           queryParameters: queryParameters,
-          options: _buildOptions(
-            isAuthorized: isAuthorized,
-            isFormData: formData != null,
-            enableRetry: enableRetry,
-            maxRetryAttempts: maxRetryAttempts,
-            retryDelay: retryDelay,
-          ),
-          onSendProgress: onSendProgress != null
-              ? (count, total) => onSendProgress(count / total)
+          options: _buildOptions(opts, isFormData: formData != null),
+          onSendProgress: opts.onSendProgress != null
+              ? (count, total) =>
+                  opts.onSendProgress!(total > 0 ? count / total : 0.0)
               : null,
-          onReceiveProgress: onReceiveProgress != null
-              ? (count, total) => onReceiveProgress(count / total)
+          onReceiveProgress: opts.onReceiveProgress != null
+              ? (count, total) =>
+                  opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
               : null,
           cancelToken: cancelToken,
         );
       },
       parser: parser,
-      requestId: requestId,
+      requestId: opts.requestId,
     );
   }
 
@@ -185,26 +179,18 @@ class DioApiHandler(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   }) {
+    final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
       dioMethod: (CancelToken? cancelToken) => _dio.delete(
         path,
         queryParameters: queryParameters,
-        options: _buildOptions(
-          isAuthorized: isAuthorized,
-          enableRetry: enableRetry,
-          maxRetryAttempts: maxRetryAttempts,
-          retryDelay: retryDelay,
-        ),
+        options: _buildOptions(opts),
         cancelToken: cancelToken,
       ),
       parser: parser,
-      requestId: requestId,
+      requestId: opts.requestId,
     );
   }
 
@@ -213,41 +199,34 @@ class DioApiHandler(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
+    NetworkFormData? formData,
     Map<String, dynamic>? queryParameters,
-    FormDataAdapter? formData,
-    ProgressTrackerCallback? onSendProgress,
-    ProgressTrackerCallback? onReceiveProgress,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   }) {
+    final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
-      dioMethod: (CancelToken? cancelToken) {
-        final data = formData != null ? formData.create() : body;
+      dioMethod: (CancelToken? cancelToken) async {
+        final dynamic requestData = formData != null
+            ? await _convertToDioFormData(formData)
+            : body;
         return _dio.put(
           path,
-          data: data,
+          data: requestData,
           queryParameters: queryParameters,
-          options: _buildOptions(
-            isAuthorized: isAuthorized,
-            isFormData: formData != null,
-            enableRetry: enableRetry,
-            maxRetryAttempts: maxRetryAttempts,
-            retryDelay: retryDelay,
-          ),
-          onSendProgress: onSendProgress != null
-              ? (count, total) => onSendProgress(count / total)
+          options: _buildOptions(opts, isFormData: formData != null),
+          onSendProgress: opts.onSendProgress != null
+              ? (count, total) =>
+                  opts.onSendProgress!(total > 0 ? count / total : 0.0)
               : null,
-          onReceiveProgress: onReceiveProgress != null
-              ? (count, total) => onReceiveProgress(count / total)
+          onReceiveProgress: opts.onReceiveProgress != null
+              ? (count, total) =>
+                  opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
               : null,
           cancelToken: cancelToken,
         );
       },
       parser: parser,
-      requestId: requestId,
+      requestId: opts.requestId,
     );
   }
 
@@ -256,41 +235,34 @@ class DioApiHandler(
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
+    NetworkFormData? formData,
     Map<String, dynamic>? queryParameters,
-    FormDataAdapter? formData,
-    ProgressTrackerCallback? onSendProgress,
-    ProgressTrackerCallback? onReceiveProgress,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   }) {
+    final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
-      dioMethod: (CancelToken? cancelToken) {
-        final data = formData != null ? formData.create() : body;
+      dioMethod: (CancelToken? cancelToken) async {
+        final dynamic requestData = formData != null
+            ? await _convertToDioFormData(formData)
+            : body;
         return _dio.patch(
           path,
-          data: data,
+          data: requestData,
           queryParameters: queryParameters,
-          options: _buildOptions(
-            isAuthorized: isAuthorized,
-            isFormData: formData != null,
-            enableRetry: enableRetry,
-            maxRetryAttempts: maxRetryAttempts,
-            retryDelay: retryDelay,
-          ),
-          onSendProgress: onSendProgress != null
-              ? (count, total) => onSendProgress(count / total)
+          options: _buildOptions(opts, isFormData: formData != null),
+          onSendProgress: opts.onSendProgress != null
+              ? (count, total) =>
+                  opts.onSendProgress!(total > 0 ? count / total : 0.0)
               : null,
-          onReceiveProgress: onReceiveProgress != null
-              ? (count, total) => onReceiveProgress(count / total)
+          onReceiveProgress: opts.onReceiveProgress != null
+              ? (count, total) =>
+                  opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
               : null,
           cancelToken: cancelToken,
         );
       },
       parser: parser,
-      requestId: requestId,
+      requestId: opts.requestId,
     );
   }
 
@@ -299,32 +271,24 @@ class DioApiHandler(
     String url,
     String downloadDestinationPath, {
     required T Function(Map<String, dynamic> json) parser,
-    ProgressTrackerCallback? onReceiveProgress,
     Map<String, dynamic>? queryParameters,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   }) {
+    final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
       dioMethod: (CancelToken? cancelToken) => _dio.download(
         url,
         downloadDestinationPath,
         queryParameters: queryParameters,
-        options: _buildOptions(
-          isAuthorized: isAuthorized,
-          enableRetry: enableRetry,
-          maxRetryAttempts: maxRetryAttempts,
-          retryDelay: retryDelay,
-        ).copyWith(responseType: ResponseType.stream),
-        onReceiveProgress: onReceiveProgress != null
-            ? (count, total) => onReceiveProgress(count / total)
+        options: _buildOptions(opts).copyWith(responseType: ResponseType.stream),
+        onReceiveProgress: opts.onReceiveProgress != null
+            ? (count, total) =>
+                opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
             : null,
         cancelToken: cancelToken,
       ),
       parser: parser,
-      requestId: requestId,
+      requestId: opts.requestId,
     );
   }
 }

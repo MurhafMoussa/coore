@@ -73,7 +73,7 @@ extension StrataNetworkDiExtension on GetIt {
         () => DioApiHandler(
           get<Dio>(),
           get<NetworkExceptionMapperInterface>(),
-          cancelRequestManager: get<CancelRequestManagerInterface>(),
+          get<CancelRequestManagerInterface>(),
         ),
       );
     }

@@ -1,6 +1,5 @@
 import 'package:strata_core/strata_core.dart';
-import '../error_handling/network_exception_mapper_interface.dart';
-import 'form_data_adapter.dart';
+import 'models/models.dart';
 
 /// Abstract contract for handling API requests with functional programming [ResultFuture<T>].
 abstract interface class ApiHandlerInterface {
@@ -9,13 +8,7 @@ abstract interface class ApiHandlerInterface {
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-    ProgressTrackerCallback? onReceiveProgress,
-    bool shouldCache = false,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   });
 
   /// Sends an HTTP POST request to [path].
@@ -23,15 +16,9 @@ abstract interface class ApiHandlerInterface {
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
-    FormDataAdapter? formData,
+    NetworkFormData? formData,
     Map<String, dynamic>? queryParameters,
-    ProgressTrackerCallback? onSendProgress,
-    ProgressTrackerCallback? onReceiveProgress,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   });
 
   /// Sends an HTTP DELETE request to [path].
@@ -39,11 +26,7 @@ abstract interface class ApiHandlerInterface {
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? queryParameters,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   });
 
   /// Sends an HTTP PUT request to [path].
@@ -51,15 +34,9 @@ abstract interface class ApiHandlerInterface {
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
+    NetworkFormData? formData,
     Map<String, dynamic>? queryParameters,
-    FormDataAdapter? formData,
-    ProgressTrackerCallback? onSendProgress,
-    ProgressTrackerCallback? onReceiveProgress,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   });
 
   /// Sends an HTTP PATCH request to [path].
@@ -67,15 +44,9 @@ abstract interface class ApiHandlerInterface {
     String path, {
     required T Function(Map<String, dynamic> json) parser,
     Map<String, dynamic>? body,
+    NetworkFormData? formData,
     Map<String, dynamic>? queryParameters,
-    FormDataAdapter? formData,
-    ProgressTrackerCallback? onSendProgress,
-    ProgressTrackerCallback? onReceiveProgress,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   });
 
   /// Downloads a file from [url] and saves it to [downloadDestinationPath].
@@ -83,12 +54,7 @@ abstract interface class ApiHandlerInterface {
     String url,
     String downloadDestinationPath, {
     required T Function(Map<String, dynamic> json) parser,
-    ProgressTrackerCallback? onReceiveProgress,
     Map<String, dynamic>? queryParameters,
-    bool isAuthorized = false,
-    bool enableRetry = true,
-    int? maxRetryAttempts,
-    Duration? retryDelay,
-    String? requestId,
+    ApiRequestOptions? options,
   });
 }

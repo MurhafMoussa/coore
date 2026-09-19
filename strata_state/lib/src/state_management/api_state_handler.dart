@@ -117,7 +117,7 @@ class ApiStateHandler<CompositeState, SuccessData>
 
   void _logWarning(String message) {
     if (_logger != null) {
-      _logger!.warning(message);
+      _logger.warning(message);
     } else if (GetIt.I.isRegistered<CoreLoggerInterface>()) {
       GetIt.I<CoreLoggerInterface>().warning(message);
     }
