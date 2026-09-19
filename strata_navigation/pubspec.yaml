@@ -1,0 +1,25 @@
+name: strata_navigation
+description: GoRouter configuration wrappers, route guards, ScreenParams, and NavigationServiceInterface implementation for Strata framework.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  equatable: ^2.0.7
+  flutter:
+    sdk: flutter
+  get_it: ^9.0.5
+  go_router: ^17.0.0
+  strata_core:
+    path: ../strata_core
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+
+flutter:
