@@ -12,10 +12,10 @@ Implement `strata_storage` sub-package providing `FlutterSecureSensitiveStorage`
 - Must NOT expose `NoSqlDatabaseInterface` or wrap database CRUD operations. App features retain direct native database access.
 
 ## Acceptance criteria
-- [ ] `strata_storage` sub-package is created.
-- [ ] `FlutterSecureSensitiveStorage` implements `SensitiveStorageInterface` with error handling converting exceptions to `StorageFailure`.
-- [ ] Key rotation and path/box setup helpers are provided without hiding database drivers.
-- [ ] Unit and integration tests verify `FlutterSecureSensitiveStorage` read, save, delete, deleteAll, and containsKey behavior.
+- [x] `strata_storage` sub-package is created.
+- [x] `FlutterSecureSensitiveStorage` implements `SensitiveStorageInterface` with error handling converting exceptions to `StorageFailure`.
+- [x] Key rotation and path/box setup helpers are provided without hiding database drivers.
+- [x] Unit and integration tests verify `FlutterSecureSensitiveStorage` read, save, delete, deleteAll, and containsKey behavior.
 
 ## Covers
 - User Stories: 2
