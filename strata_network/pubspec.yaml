@@ -1,0 +1,21 @@
+name: strata_network
+description: Dio HTTP client wrapper, token lifecycle management, and cancellation tracking for Strata framework.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  dio: ^5.8.0+1
+  equatable: ^2.0.7
+  fpdart: ^1.1.0
+  get_it: ^9.0.5
+  mutex: ^3.1.0
+  strata_core:
+    path: ../strata_core
+
+dev_dependencies:
+  lints: ^3.0.0
+  mocktail: ^1.0.4
+  test: ^1.24.0

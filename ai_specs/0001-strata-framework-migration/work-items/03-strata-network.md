@@ -16,11 +16,11 @@ Implement `strata_network` containing `ApiHandlerInterface`, `DioApiHandler`, `T
   - `void unregisterToken(String requestId, CancelToken token)` (removes specific token)
 
 ## Acceptance criteria
-- [ ] `strata_network` sub-package is created depending on `strata_core` and `dio`.
-- [ ] `TokenRefreshInterceptorInterface` clears tokens and emits `onUnauthenticated` on 400/401 refresh failure.
-- [ ] `DefaultCancelRequestManager` supports concurrent requests under identical `requestId` without overwriting active tokens.
-- [ ] Unit tests for `TokenRefreshInterceptorInterface` pass for HTTP 400/401 refresh scenarios.
-- [ ] Unit tests for `DefaultCancelRequestManager` confirm independent token registration, cancellation, and unregistration.
+- [x] `strata_network` sub-package is created depending on `strata_core` and `dio`.
+- [x] `TokenRefreshInterceptorInterface` clears tokens and emits `onUnauthenticated` on 400/401 refresh failure.
+- [x] `DefaultCancelRequestManager` supports concurrent requests under identical `requestId` without overwriting active tokens.
+- [x] Unit tests for `TokenRefreshInterceptorInterface` pass for HTTP 400/401 refresh scenarios.
+- [x] Unit tests for `DefaultCancelRequestManager` confirm independent token registration, cancellation, and unregistration.
 
 ## Covers
 - User Stories: 1, 3, 4
