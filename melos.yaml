@@ -7,3 +7,4 @@ packages:
 command:
   bootstrap:
     usePubGet: true
+sdkPath: .fvm/flutter_sdk

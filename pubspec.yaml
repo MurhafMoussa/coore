@@ -4,7 +4,7 @@ version: 0.1.0
 publish_to: none
 
 environment:
-  sdk: ^3.5.0
+  sdk: ">=3.13.1 <4.0.0"
 
 workspace:
   - strata
@@ -19,5 +19,5 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  melos: ^6.0.0
+  melos: ^8.6.0
 

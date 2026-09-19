@@ -1,4 +1,4 @@
-library strata;
+library;
 
 export 'package:strata_core/strata_core.dart';
 export 'package:strata_navigation/strata_navigation.dart';

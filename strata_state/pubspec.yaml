@@ -2,22 +2,23 @@ name: strata_state
 description: BLoC state utilities and ApiStateHandler lifecycle management for Strata framework.
 version: 0.1.0
 publish_to: none
+resolution: workspace
 
 environment:
-  sdk: ^3.0.0
+  sdk: ">=3.13.1 <4.0.0"
   flutter: ">=3.0.0"
 
 dependencies:
-  device_info_plus: ^12.2.0
-  equatable: ^2.0.7
+  device_info_plus: ^13.2.0
+  equatable: ^3.0.0
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
   fpdart: ^1.1.0
   get_it: ^9.0.5
-  hydrated_bloc: ^10.0.0
-  package_info_plus: ^9.0.0
-  skeletonizer: ^2.1.0+1
+  hydrated_bloc: ^11.0.0
+  package_info_plus: ^10.2.1
+  skeletonizer: ^3.0.0
   strata_core:
     path: ../strata_core
 
