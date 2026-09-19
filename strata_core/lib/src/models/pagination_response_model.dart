@@ -15,6 +15,16 @@ class PaginationResponseModel<T, M extends MetaModel> {
   final List<T> data;
   final M? meta;
 
+  PaginationResponseModel<T, M> copyWith({
+    List<T>? data,
+    M? meta,
+  }) {
+    return PaginationResponseModel<T, M>(
+      data: data ?? this.data,
+      meta: meta ?? this.meta,
+    );
+  }
+
   factory PaginationResponseModel.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic> json) fromJsonT, {

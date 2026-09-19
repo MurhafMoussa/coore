@@ -8,7 +8,7 @@ import 'package:strata_ui/strata_ui.dart';
 
 import '../config/strata_config_entity.dart';
 
-/// Orchestrates dependency injection initialization for all Strata sub-packages.
+/// Orchestrates dependency injection initialization for all Strata framework sub-packages.
 class StrataInitializer {
   const StrataInitializer._();
 
@@ -41,7 +41,10 @@ class StrataInitializer {
       );
     }
 
-    sl.registerStrataState();
+    sl.registerStrataState(
+      themeConfig: config.themeConfig,
+      localizationConfig: config.localizationConfig,
+    );
     sl.registerStrataUi();
 
     await sl.allReady();

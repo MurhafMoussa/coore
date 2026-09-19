@@ -1,0 +1,46 @@
+import 'dart:async';
+
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:strata_core/strata_core.dart';
+
+/// Concrete implementation of [NetworkStatusInterface] using [InternetConnection].
+class NetworkStatusImp implements NetworkStatusInterface {
+  NetworkStatusImp(this._internetConnection, this._logger) {
+    _init();
+  }
+
+  final InternetConnection _internetConnection;
+  final CoreLoggerInterface _logger;
+  final StreamController<ConnectionStatus> _controller =
+      StreamController<ConnectionStatus>.broadcast();
+  StreamSubscription<InternetStatus>? _subscription;
+
+  @override
+  Stream<ConnectionStatus> get connectionStream => _controller.stream;
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    _controller.close();
+  }
+
+  @override
+  Future<bool> get isConnected async =>
+      _internetConnection.hasInternetAccess;
+
+  Future<void> _init() async {
+    _subscription =
+        _internetConnection.onStatusChange.listen((status) {
+          switch (status) {
+            case InternetStatus.connected:
+              _controller.add(ConnectionStatus.connected);
+              break;
+            case InternetStatus.disconnected:
+              _controller.add(ConnectionStatus.disconnected);
+              break;
+          }
+        })..onError((Object? e, StackTrace s) {
+          _logger.error('Something went wrong in NetworkStatus', e, s);
+        });
+  }
+}

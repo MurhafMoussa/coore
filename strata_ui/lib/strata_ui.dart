@@ -8,7 +8,6 @@ export 'src/extensions/context_extensions.dart';
 export 'src/forms/core_pin_code_field.dart';
 export 'src/forms/core_textfield.dart';
 export 'src/pagination/core_pagination_widget.dart';
-export 'src/pagination/pagination_strategy.dart';
 export 'src/responsive/responsive_functions.dart';
 export 'src/widgets/core_carousel.dart';
 export 'src/widgets/core_default_error_widget.dart';

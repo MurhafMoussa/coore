@@ -6,7 +6,6 @@ import 'package:strata_core/strata_core.dart';
 import '../constants/padding_manager.dart';
 import '../widgets/core_default_error_widget.dart';
 import '../widgets/core_scrollable_content_with_fab.dart';
-import 'pagination_strategy.dart';
 
 class PaginationConfig<T extends Identifiable, M extends MetaModel>
     extends InheritedWidget {

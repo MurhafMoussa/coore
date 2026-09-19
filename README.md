@@ -615,47 +615,42 @@ final token = await secureDb.read('token');
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture & Strata Sub-Packages
 
-Coore enforces **Clean Architecture** with a **feature-first** organization:
+The framework is organized into decoupled, single-responsibility sub-packages under the `strata` umbrella:
 
-```
-lib/
-├── src/
-│   ├── api_handler/          # Networking layer
-│   ├── state_management/      # BLoC state management
-│   ├── ui/                    # UI components
-│   ├── config/                # Configuration & DI
-│   ├── error_handling/        # Error handling & failures
-│   ├── local_storage/         # Data persistence
-│   └── navigation/            # Routing
-```
-
-### Key Principles
-
-1. **Separation of Concerns** - Each module has a single responsibility
-2. **Dependency Injection** - GetIt-based service locator pattern
-3. **Functional Error Handling** - `Either<Failure, T>` for type-safe error handling
-4. **Immutable State** - Freezed-based state classes
-5. **Type Safety** - Strong typing throughout the API
+* **`strata_core`**: Pure Dart contracts, failures, extensions (`DateTimeX`, `StringExtensions`, `FileExtension`, `IntExtensions`, `OneAKindList`), logger interface, pagination models, and `ValueTester`.
+* **`strata_network`**: Dio HTTP client, token management, cancellation tracking, and network connectivity service (`NetworkStatusImp`).
+* **`strata_state`**: BLoC & state management, `ApiStateHandler`, `ApiStateBuilder`, persistent Cubits using **HydratedBloc** (`ThemeCubit`, `LocalizationCubit`, `PlatformCubit`), `NetworkStatusCubit`, `CorePaginationCubit`, and Value Selectors (`SingleSelectorCubit`, `MultiSelectorCubit`).
+* **`strata_ui`**: Reusable UI components, form fields (`CoreTextField`, `CorePinCodeField`), widgets (`CoreImage`, `CoreCarousel`, `CoreDefaultErrorWidget`), UI wrappers (`ThemeWrapper`, `LocalizationWrapper`, `NetworkStatusWrapper`), and responsive layout utilities.
+* **`strata_storage`**: Encrypted and secure storage integrations (`FlutterSecureSensitiveStorage`).
+* **`strata_navigation`**: `go_router` abstractions, route guards, and navigation services.
+* **`strata`**: Meta-package orchestrating `StrataInitializer` and exporting all sub-packages.
 
 ---
 
-## 🔧 Available Services
+## 🔧 Available Services & Components
 
-After initialization, the following services are available via `getIt`:
+After initializing via `StrataInitializer.initialize()`, the following components and services are available:
 
-- `ApiHandlerInterface` - HTTP client
-- `CancelRequestManager` - Request cancellation
-- `NetworkStatusInterface` - Network connectivity monitoring
-- `NoSqlDatabaseInterface` - Local storage (Hive) - Requires `param1: 'boxName'`
-- `SecureDatabaseInterface` - Secure storage
-- `ThemeCubit` - Theme management
-- `LocalizationCubit` - Localization management
-- `PlatformCubit` - Platform information
-- `CoreLogger` - Logging service
-- `CoreRouter` - Router manager
-- `GoRouter` - Router instance
+* **Hydrated State Management (`strata_state`)**:
+  * `ThemeCubit` - Persisted theme management (`ThemeMode.light` / `ThemeMode.dark`)
+  * `LocalizationCubit` - Persisted locale management (`Locale`)
+  * `PlatformCubit` - Persisted device/platform information (`DeviceInfoEntity`)
+  * `NetworkStatusCubit` - Real-time connectivity state
+  * `CorePaginationCubit` - Generic paginated data fetching and lifecycle management
+  * `SingleSelectorCubit` / `MultiSelectorCubit` - Selection management
+* **Networking & Connectivity (`strata_network`)**:
+  * `ApiHandlerInterface` - HTTP client
+  * `NetworkStatusImp` - Network connectivity monitoring (`NetworkStatusInterface`)
+  * `CancelRequestManagerInterface` - Request cancellation tracking
+* **UI Wrappers & Widgets (`strata_ui` & `strata_state`)**:
+  * `ThemeWrapper` - Reactive theme builder
+  * `LocalizationWrapper` - Reactive locale builder
+  * `NetworkStatusWrapper` - Network status change listener & banner builder
+* **Platform Service (`strata_state` / `strata_core`)**:
+  * `PlatformServiceImpl` - Platform and device info collector (`PlatformServiceInterface`)
+  * `DeviceInfoEntity` - Cross-platform device metadata model
 
 ---
 

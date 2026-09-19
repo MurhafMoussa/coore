@@ -3,12 +3,15 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:strata_navigation/strata_navigation.dart';
 import 'package:strata_network/strata_network.dart';
+import 'package:strata_state/strata_state.dart';
 
 /// Configuration entity for initializing the Strata framework.
 class StrataConfigEntity extends Equatable {
   const StrataConfigEntity({
     this.networkConfig,
     this.navigationConfig,
+    this.themeConfig,
+    this.localizationConfig,
     this.secureStorage,
     this.errorParser,
     this.customDio,
@@ -21,6 +24,12 @@ class StrataConfigEntity extends Equatable {
 
   /// Navigation configuration settings for `strata_navigation`.
   final NavigationConfigEntity? navigationConfig;
+
+  /// Theme configuration settings for `ThemeCubit`.
+  final ThemeConfigEntity? themeConfig;
+
+  /// Localization configuration settings for `LocalizationCubit`.
+  final LocalizationConfigEntity? localizationConfig;
 
   /// Custom secure storage instance for `strata_storage`.
   final FlutterSecureStorage? secureStorage;
@@ -41,6 +50,8 @@ class StrataConfigEntity extends Equatable {
   List<Object?> get props => [
         networkConfig,
         navigationConfig,
+        themeConfig,
+        localizationConfig,
         secureStorage,
         errorParser,
         customDio,
