@@ -57,7 +57,7 @@ class ApiStateBuilder<CompositeState, SuccessData> extends StatelessWidget {
   /// shimmer effect.
   final Widget Function(BuildContext context)? loadingBuilder;
 
-  /// An optional builder for the [ApiState.failed] state.
+  /// An optional builder for the [ApiState.failure] state.
   ///
   /// Defaults to [CoreDefaultErrorWidget].
   final Widget Function(
@@ -67,7 +67,7 @@ class ApiStateBuilder<CompositeState, SuccessData> extends StatelessWidget {
   )?
   errorBuilder;
 
-  /// The builder for the [ApiState.succeeded] state.
+  /// The builder for the [ApiState.success] state.
   ///
   /// This builder receives the [SuccessData] (e.g., a `User` object)
   /// directly, not the full [CompositeState].
@@ -96,31 +96,26 @@ class ApiStateBuilder<CompositeState, SuccessData> extends StatelessWidget {
         // 6. Use Dart's pattern matching to render the correct UI
         return switch (apiState) {
           // On success, pass the data directly to successBuilder
-          Succeeded(:final successValue) => successBuilder(
+          ApiStateSuccess(:final value) => successBuilder(
             context,
-            successValue,
+            value,
           ),
           // On failure, use errorBuilder or the default
-          Failed(:final failureObject, :final retryFunction) =>
+          ApiStateFailure(:final failure, :final retryFunction) =>
             errorBuilder?.call(
                   context,
-                  failureObject.getOrElse(
-                    () => const UnknownFailure(message: 'Unknown failure'),
-                  ),
+                  failure,
                   retryFunction,
                 ) ??
                 CoreDefaultErrorWidget(
-                  message: failureObject
-                      .getOrElse(
-                        () => const UnknownFailure(message: 'Unknown failure'),
-                      )
-                      .message,
+                  message: failure.message,
                   onRetry: retryFunction,
                 ),
           // On initial, use initialBuilder or the default
-          Initial() => initialBuilder?.call(context) ?? const SizedBox.shrink(),
+          ApiStateInitial() =>
+            initialBuilder?.call(context) ?? const SizedBox.shrink(),
           // On loading, use loadingBuilder or the default
-          Loading() =>
+          ApiStateLoading() =>
             loadingBuilder?.call(context) ??
                 DefaultLoadingWidget<SuccessData>(
                   emptyEntity: emptyEntity,

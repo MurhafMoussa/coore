@@ -82,8 +82,8 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
   /// 4. Executes the provided [apiCall].
   /// 5. Awaits the result.
   /// 6. If the Cubit is closed, it does nothing.
-  /// 7. On success, it emits a `succeeded(data)` state.
-  /// 8. On failure, it emits a `failed(failure)` state with a built-in [retryFunction].
+  /// 7. On success, it emits a `success(data)` state.
+  /// 8. On failure, it emits a `failure(failure)` state with a built-in [retryFunction].
   ///
   /// ### Type Parameters:
   /// - [T]: The type of the parameters object to be passed to the [apiCall].
@@ -135,7 +135,7 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
             _emit(
               _setApiState(
                 latestState,
-                ApiState.failed(
+                ApiState.failure(
                   failure,
                   // The retry function recursively calls this method with the same params
                   retryFunction: () => handleApiCall(
@@ -151,7 +151,7 @@ class ApiStateHandler<CompositeState, SuccessData> implements IApiStateHandler {
             onFailure?.call(failure);
           },
           (success) {
-            _emit(_setApiState(latestState, ApiState.succeeded(success)));
+            _emit(_setApiState(latestState, ApiState.success(success)));
             onSuccess?.call(success);
           },
         );

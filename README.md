@@ -349,8 +349,8 @@ Coore simplifies API state management with `ApiStateHostMixin` and `ApiStateHand
 sealed class ApiState<T> with _$ApiState<T> {
   const factory ApiState.initial() = Initial;
   const factory ApiState.loading() = Loading;
-  const factory ApiState.succeeded(T successValue) = Succeeded;
-  const factory ApiState.failed(Failure failure, {VoidCallback? retryFunction}) = Failed;
+  const factory ApiState.success(T data) = Success;
+  const factory ApiState.failure(Failure failure, {VoidCallback? retryFunction}) = Failure;
 }
 ```
 
