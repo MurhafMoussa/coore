@@ -21,7 +21,7 @@ class IdParam extends Equatable {
   factory IdParam.fromJson(Map<String, dynamic> json) =>
       IdParam(id: json['id'] as String? ?? '');
 
-  Map<String, dynamic> toJson() => {'id': id};
+  Map<String, dynamic> toJson({String? idKey}) => {idKey ?? 'id': id};
 
   @override
   List<Object?> get props => [id];
