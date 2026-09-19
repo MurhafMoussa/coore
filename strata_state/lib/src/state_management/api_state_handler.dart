@@ -10,21 +10,14 @@ class ApiStateHandler<CompositeState, SuccessData>
     implements DisposableApiStateHandlerInterface {
   /// Creates a new [ApiStateHandler].
   ApiStateHandler({
-    required void Function(CompositeState) emit,
-    required CompositeState Function() getState,
-    required bool Function() isClosed,
-    required ApiState<SuccessData> Function(CompositeState) getApiState,
-    required CompositeState Function(CompositeState, ApiState<SuccessData>)
-        setApiState,
-    CoreLoggerInterface? logger,
-    void Function(String requestId)? onCancelRequest,
-  })  : _emit = emit,
-        _getState = getState,
-        _isClosed = isClosed,
-        _getApiState = getApiState,
-        _setApiState = setApiState,
-        _logger = logger,
-        _onCancelRequest = onCancelRequest;
+    required this._emit,
+    required this._getState,
+    required this._isClosed,
+    required this._getApiState,
+    required this._setApiState,
+    this._logger,
+    this._onCancelRequest,
+  });
 
   final void Function(CompositeState) _emit;
   final CompositeState Function() _getState;
