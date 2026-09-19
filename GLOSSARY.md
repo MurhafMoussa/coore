@@ -35,3 +35,7 @@ _Avoid_: CoreState, BlocApiState
 **ApiStateHandler**:
 The composite delegate in `strata_state` managing loading/success/failure/retry lifecycles for an `ApiState` field within a BLoC/Cubit state.
 _Avoid_: ApiStateController
+
+**DisposableApiStateHandlerInterface**:
+The contract in `strata_state` implemented by `ApiStateHandler` for managing disposable state delegates within BLoC/Cubit state hosts without using the legacy `IApiStateHandler` name.
+_Avoid_: IApiStateHandler, ApiStateHandlerInterface

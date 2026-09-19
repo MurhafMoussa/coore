@@ -14,12 +14,12 @@ Implement `strata_state` containing `ApiStateHostMixin`, `DisposableApiStateHand
 - `handleApiCall(force: false)` when `currentState.isLoading` is true logs diagnostic warning via `CoreLoggerInterface`.
 
 ## Acceptance criteria
-- [ ] `strata_state` sub-package is created depending on `strata_core` and `flutter_bloc`.
-- [ ] `DisposableApiStateHandlerInterface` replaces legacy `IApiStateHandler`.
-- [ ] `handleApiCall` accepts `force: bool = false`.
-- [ ] `force: true` executes API calls during `isLoading` state.
-- [ ] `force: false` logs diagnostic warning during `isLoading` state instead of silently swallowing calls.
-- [ ] Unit tests for `handleApiCall(force: true)` and `handleApiCall(force: false)` pass with 100% coverage.
+- [x] `strata_state` sub-package is created depending on `strata_core` and `flutter_bloc`.
+- [x] `DisposableApiStateHandlerInterface` replaces legacy `IApiStateHandler`.
+- [x] `handleApiCall` accepts `force: bool = false`.
+- [x] `force: true` executes API calls during `isLoading` state.
+- [x] `force: false` logs diagnostic warning during `isLoading` state instead of silently swallowing calls.
+- [x] Unit tests for `handleApiCall(force: true)` and `handleApiCall(force: false)` pass with 100% coverage.
 
 ## Covers
 - User Stories: 1, 5
