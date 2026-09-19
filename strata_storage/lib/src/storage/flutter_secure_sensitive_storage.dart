@@ -3,13 +3,9 @@ import 'package:fpdart/fpdart.dart';
 import 'package:strata_core/strata_core.dart';
 
 /// Implementation of [SensitiveStorageInterface] backed by [FlutterSecureStorage].
-class FlutterSecureSensitiveStorage implements SensitiveStorageInterface {
-  /// Creates a [FlutterSecureSensitiveStorage] instance.
-  const FlutterSecureSensitiveStorage({
-    FlutterSecureStorage secureStorage = const FlutterSecureStorage(),
-  }) : _secureStorage = secureStorage;
-
-  final FlutterSecureStorage _secureStorage;
+class const FlutterSecureSensitiveStorage({
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(),
+}) implements SensitiveStorageInterface {
 
   @override
   ResultFuture<String?> read(String key) async {

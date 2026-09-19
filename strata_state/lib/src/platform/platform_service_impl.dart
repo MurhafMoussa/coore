@@ -6,11 +6,10 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:strata_core/strata_core.dart';
 
 /// Implementation of platform service that provides device and platform information.
-class PlatformServiceImpl implements PlatformServiceInterface {
-  PlatformServiceImpl(this._deviceInfo, this._packageInfo);
-
-  final BaseDeviceInfo _deviceInfo;
-  final PackageInfo _packageInfo;
+class PlatformServiceImpl(
+  final BaseDeviceInfo _deviceInfo,
+  final PackageInfo _packageInfo,
+) implements PlatformServiceInterface {
 
   @override
   DeviceInfoEntity getDeviceInfo() {

@@ -2,12 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:strata_core/strata_core.dart';
 
 /// Interceptor logging HTTP requests and responses using [CoreLoggerInterface].
-class LoggingInterceptor extends Interceptor {
-  LoggingInterceptor({
-    CoreLoggerInterface logger = const NoOpCoreLogger(),
-  }) : _logger = logger;
-
-  final CoreLoggerInterface _logger;
+class LoggingInterceptor({
+  final CoreLoggerInterface _logger = const NoOpCoreLogger(),
+}) extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {

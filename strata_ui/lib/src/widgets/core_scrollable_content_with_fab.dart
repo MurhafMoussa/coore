@@ -2,19 +2,14 @@ import 'package:flutter/material.dart';
 import '../constants/animation_params_manager.dart';
 import '../responsive/responsive_functions.dart';
 
-class CoreScrollableContentWithFab extends StatefulWidget {
-  const CoreScrollableContentWithFab({
-    super.key,
-    required this.scrollableBuilder,
-    this.padding,
-    this.scrollDuration = AnimationParamsManager.scrollToTopDuration,
-    this.scrollCurve = AnimationParamsManager.animateToCurve,
-  });
-
-  final Widget Function(ScrollController controller) scrollableBuilder;
-  final EdgeInsets? padding;
-  final Duration scrollDuration;
-  final Curve scrollCurve;
+class const CoreScrollableContentWithFab({
+  super.key,
+  required final Widget Function(ScrollController controller)
+      scrollableBuilder,
+  final EdgeInsets? padding,
+  final Duration scrollDuration = AnimationParamsManager.scrollToTopDuration,
+  final Curve scrollCurve = AnimationParamsManager.animateToCurve,
+}) extends StatefulWidget {
 
   @override
   State<CoreScrollableContentWithFab> createState() =>

@@ -11,170 +11,96 @@ typedef VisibilityToggleBuilder = Widget Function(
   ValueChanged<bool> setObscured,
 );
 
-class CoreTextField extends StatefulWidget {
-  const CoreTextField({
-    super.key,
-    required this.name,
-    this.enabled = true,
-    this.obscureText = false,
-    this.switchBetweenPrefixAndSuffix = false,
-    this.expands = false,
-    this.readOnly = false,
-    this.enableClear = false,
-    this.enableSuggestions = true,
-    this.showCursor = true,
-    this.decoration,
-    this.keyboardType,
-    this.textInputAction,
-    this.autoFillHints,
-    this.focusNode,
-    this.maxLines = 1,
-    this.minLines,
-    this.maxLength,
-    this.maxLengthEnforcement,
-    this.autovalidateMode = AutovalidateMode.onUserInteraction,
-    this.initialText,
-    this.textAlignVertical = TextAlignVertical.center,
-    this.textCapitalization = TextCapitalization.none,
-    this.textAlign = TextAlign.start,
-    this.counterBuilder,
-    this.onTap,
-    this.onTapOutside,
-    this.onEditingComplete,
-    this.customClearIcon,
-    this.inputFormatters,
-    this.prefixIcon,
-    this.suffixIcon,
-    this.hintText,
-    this.labelText,
-    this.style,
-    this.errorBuilder,
-    this.showRequiredStar = false,
-    this.requiredStarColor,
-    this.requiredStarWidget,
-    this.requiredIndicatorBuilder,
-    this.cursorColor,
-    this.cursorWidth = 2.0,
-    this.cursorHeight,
-    this.cursorRadius,
-    this.prefixWidget,
-    this.suffixWidget,
-    this.scrollPadding = const EdgeInsets.all(20),
-    this.scrollPhysics,
-    this.strutStyle,
-    this.textDirection,
-    this.autocorrect = true,
-    this.smartDashesType,
-    this.smartQuotesType,
-    this.selectionControls,
-    this.onSubmitted,
-    this.onAppPrivateCommand,
-    this.mouseCursor,
-    this.obscuringCharacter = '•',
-    this.contextMenuBuilder,
-    this.magnifierConfiguration,
-    this.undoController,
-    this.restorationId,
-    this.stylusHandwritingEnabled = true,
-    this.enableIMEPersonalizedLearning = true,
-    this.spellCheckConfiguration,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
-    this.debounceTime,
-    this.transformValue,
-    this.formatText,
-    this.autofocus = false,
-    this.visibilityToggleBuilder,
-    this.visibilityIconBuilder,
-    this.onVisibilityChanged,
-    this.onChanged,
-  }) : assert(
-          !expands || (maxLines == null && minLines == null),
-          'When expands is true, maxLines and minLines must both be null.',
-        );
-
-  final String name;
-  final bool enabled;
-  final bool expands;
-  final bool readOnly;
-  final bool enableClear;
-  final bool enableSuggestions;
-  final bool showCursor;
-  final InputDecoration? decoration;
-  final VisibilityToggleBuilder? visibilityToggleBuilder;
-  final TextInputType? keyboardType;
-  final TextInputAction? textInputAction;
-  final Iterable<String>? autoFillHints;
-  final bool obscureText;
-  final List<TextInputFormatter>? inputFormatters;
-  final FocusNode? focusNode;
-  final int? maxLines;
-  final int? minLines;
-  final int? maxLength;
-  final AutovalidateMode autovalidateMode;
-  final TextAlign textAlign;
-  final TextAlignVertical? textAlignVertical;
-  final Widget Function(BuildContext context, bool isObscured)?
-      visibilityIconBuilder;
-  final void Function(BuildContext context, bool isObscured)?
-      onVisibilityChanged;
-  final TextCapitalization textCapitalization;
-  final String? initialText;
-  final VoidCallback? onTap;
-  final VoidCallback? onEditingComplete;
-  final void Function(PointerDownEvent)? onTapOutside;
-  final Icon? customClearIcon;
-  final bool switchBetweenPrefixAndSuffix;
+class const CoreTextField({
+  super.key,
+  required final String name,
+  final bool enabled = true,
+  final bool obscureText = false,
+  final bool switchBetweenPrefixAndSuffix = false,
+  final bool expands = false,
+  final bool readOnly = false,
+  final bool enableClear = false,
+  final bool enableSuggestions = true,
+  final bool showCursor = true,
+  final InputDecoration? decoration,
+  final TextInputType? keyboardType,
+  final TextInputAction? textInputAction,
+  final Iterable<String>? autoFillHints,
+  final FocusNode? focusNode,
+  final int? maxLines = 1,
+  final int? minLines,
+  final int? maxLength,
+  final MaxLengthEnforcement? maxLengthEnforcement,
+  final AutovalidateMode autovalidateMode = AutovalidateMode.onUserInteraction,
+  final String? initialText,
+  final TextAlignVertical textAlignVertical = TextAlignVertical.center,
+  final TextCapitalization textCapitalization = TextCapitalization.none,
+  final TextAlign textAlign = TextAlign.start,
   final Widget? Function(
     BuildContext, {
     required int currentLength,
     required bool isFocused,
     required int? maxLength,
-  })? counterBuilder;
-  final Widget? suffixIcon;
-  final Widget? prefixIcon;
-  final String? labelText;
-  final String? hintText;
-  final TextStyle? style;
-  final Widget Function(BuildContext context, String? errorText)? errorBuilder;
-  final bool showRequiredStar;
-  final Color? requiredStarColor;
-  final Widget? requiredStarWidget;
+  })?
+  counterBuilder,
+  final VoidCallback? onTap,
+  final void Function(PointerDownEvent)? onTapOutside,
+  final VoidCallback? onEditingComplete,
+  final Icon? customClearIcon,
+  final List<TextInputFormatter>? inputFormatters,
+  final Widget? prefixIcon,
+  final Widget? suffixIcon,
+  final String? hintText,
+  final String? labelText,
+  final TextStyle? style,
+  final Widget Function(BuildContext context, String? errorText)? errorBuilder,
+  final bool showRequiredStar = false,
+  final Color? requiredStarColor,
+  final Widget? requiredStarWidget,
   final Widget Function(BuildContext context, String labelText)?
-      requiredIndicatorBuilder;
-  final Color? cursorColor;
-  final double cursorWidth;
-  final double? cursorHeight;
-  final Radius? cursorRadius;
-  final Widget? prefixWidget;
-  final Widget? suffixWidget;
-  final EdgeInsets scrollPadding;
-  final ScrollPhysics? scrollPhysics;
-  final StrutStyle? strutStyle;
-  final TextDirection? textDirection;
-  final bool autocorrect;
-  final SmartDashesType? smartDashesType;
-  final SmartQuotesType? smartQuotesType;
-  final TextSelectionControls? selectionControls;
-  final ValueChanged<String>? onSubmitted;
-  final AppPrivateCommandCallback? onAppPrivateCommand;
-  final MouseCursor? mouseCursor;
-  final String obscuringCharacter;
-  final EditableTextContextMenuBuilder? contextMenuBuilder;
-  final TextMagnifierConfiguration? magnifierConfiguration;
-  final UndoHistoryController? undoController;
-  final String? restorationId;
-  final bool stylusHandwritingEnabled;
-  final bool enableIMEPersonalizedLearning;
-  final SpellCheckConfiguration? spellCheckConfiguration;
-  final ui.BoxHeightStyle selectionHeightStyle;
-  final ui.BoxWidthStyle selectionWidthStyle;
-  final MaxLengthEnforcement? maxLengthEnforcement;
-  final bool autofocus;
-  final Duration? debounceTime;
-  final String Function(String value)? transformValue;
-  final String Function(String value)? formatText;
-  final ValueChanged<String?>? onChanged;
+  requiredIndicatorBuilder,
+  final Color? cursorColor,
+  final double cursorWidth = 2.0,
+  final double? cursorHeight,
+  final Radius? cursorRadius,
+  final Widget? prefixWidget,
+  final Widget? suffixWidget,
+  final EdgeInsets scrollPadding = const EdgeInsets.all(20),
+  final ScrollPhysics? scrollPhysics,
+  final StrutStyle? strutStyle,
+  final TextDirection? textDirection,
+  final bool autocorrect = true,
+  final SmartDashesType? smartDashesType,
+  final SmartQuotesType? smartQuotesType,
+  final TextSelectionControls? selectionControls,
+  final ValueChanged<String>? onSubmitted,
+  final AppPrivateCommandCallback? onAppPrivateCommand,
+  final MouseCursor? mouseCursor,
+  final String obscuringCharacter = '•',
+  final EditableTextContextMenuBuilder? contextMenuBuilder,
+  final TextMagnifierConfiguration? magnifierConfiguration,
+  final UndoHistoryController? undoController,
+  final String? restorationId,
+  final bool stylusHandwritingEnabled = true,
+  final bool enableIMEPersonalizedLearning = true,
+  final SpellCheckConfiguration? spellCheckConfiguration,
+  final ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
+  final ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
+  final Duration? debounceTime,
+  final String Function(String value)? transformValue,
+  final String Function(String value)? formatText,
+  final bool autofocus = false,
+  final VisibilityToggleBuilder? visibilityToggleBuilder,
+  final Widget Function(BuildContext context, bool isObscured)?
+  visibilityIconBuilder,
+  final void Function(BuildContext context, bool isObscured)?
+  onVisibilityChanged,
+  final ValueChanged<String?>? onChanged,
+}) extends StatefulWidget {
+  this : assert(
+          !expands || (maxLines == null && minLines == null),
+          'When expands is true, maxLines and minLines must both be null.',
+        );
 
   @override
   State<CoreTextField> createState() => _CoreTextFieldState();

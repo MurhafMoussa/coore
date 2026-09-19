@@ -3,11 +3,9 @@ import 'package:dio/dio.dart';
 import '../auth/token_manager_interface.dart';
 
 /// Interceptor responsible for injecting authentication headers/credentials into requests.
-abstract class TokenInjectorInterceptor extends Interceptor {
-  TokenInjectorInterceptor(TokenManagerInterface tokenManager)
-      : _tokenManager = tokenManager;
-
-  final TokenManagerInterface _tokenManager;
+abstract class TokenInjectorInterceptor(
+  final TokenManagerInterface _tokenManager,
+) extends Interceptor {
 
   @override
   Future<void> onRequest(
@@ -47,13 +45,14 @@ abstract class TokenInjectorInterceptor extends Interceptor {
 }
 
 /// Injects Bearer authorization header into authorized requests.
-class BearerTokenInjectorInterceptor extends TokenInjectorInterceptor {
-  BearerTokenInjectorInterceptor(super.tokenManager);
-}
+class BearerTokenInjectorInterceptor(
+  super.tokenManager,
+) extends TokenInjectorInterceptor;
 
 /// Injects Bearer token and enables cookie credentials for requests.
-class CookieTokenInjectorInterceptor extends TokenInjectorInterceptor {
-  CookieTokenInjectorInterceptor(super.tokenManager);
+class CookieTokenInjectorInterceptor(
+  super.tokenManager,
+) extends TokenInjectorInterceptor {
 
   @override
   Future<void> onRequest(

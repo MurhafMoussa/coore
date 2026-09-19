@@ -7,16 +7,12 @@ import '../theme/theme_cubit.dart';
 
 /// A wrapper widget that provides [ThemeCubit] to the widget tree
 /// and builds UI components controlled by the cubit's theme state.
-class ThemeWrapper extends StatelessWidget {
-  const ThemeWrapper({
-    super.key,
-    required this.builder,
-    this.themeCubit,
-  });
-
-  final Widget Function(BuildContext context, ThemeConfigEntity themeConfig)
-      builder;
-  final ThemeCubit? themeCubit;
+class const ThemeWrapper({
+  super.key,
+  required final Widget Function(BuildContext context, ThemeConfigEntity themeConfig)
+      builder,
+  final ThemeCubit? themeCubit,
+}) extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {

@@ -2,20 +2,22 @@ import 'package:strata_core/strata_core.dart';
 import 'token_manager_interface.dart';
 
 /// Default implementation of [TokenManagerInterface] backed by optional [SensitiveStorageInterface].
-class DefaultTokenManager implements TokenManagerInterface {
-  DefaultTokenManager({
-    SensitiveStorageInterface? sensitiveStorage,
-    this.secureStorageEnabled = false,
-    this.onUnauthenticated,
-  }) : _sensitiveStorage = sensitiveStorage;
+class DefaultTokenManager({
+  SensitiveStorageInterface? sensitiveStorage,
+  this.secureStorageEnabled = false,
+  this.onUnauthenticated,
+}) implements TokenManagerInterface {
+  // ignore: prefer_initializing_formals
+  this : _sensitiveStorage = sensitiveStorage;
 
   final SensitiveStorageInterface? _sensitiveStorage;
   final bool secureStorageEnabled;
-  String? _accessToken;
-  String? _refreshToken;
 
   @override
   void Function()? onUnauthenticated;
+
+  String? _accessToken;
+  String? _refreshToken;
 
   @override
   void notifyUnauthenticated() {

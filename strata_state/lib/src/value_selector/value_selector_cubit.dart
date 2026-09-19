@@ -4,13 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'value_selector_state.dart';
 
 /// Abstract base class for managing the selection of values.
-abstract class ValueSelectorCubit<T> extends Cubit<ValueSelectorState<T>> {
-  ValueSelectorCubit({
-    required this.values,
-    required this.valueSetter,
-    required this.enableUnselect,
-    List<T>? defaultSelectedValues,
-  }) : super(ValueSelectorState(defaultSelectedValues ?? []));
+abstract class ValueSelectorCubit<T>({
+  required this.values,
+  required this.valueSetter,
+  required this.enableUnselect,
+  List<T>? defaultSelectedValues,
+}) extends Cubit<ValueSelectorState<T>> {
+  this : super(ValueSelectorState(defaultSelectedValues ?? []));
 
   final List<T> values;
   final ValueSetter<List<T>> valueSetter;

@@ -4,13 +4,14 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:strata_core/strata_core.dart';
 
 /// Concrete implementation of [NetworkStatusInterface] using [InternetConnection].
-class NetworkStatusImp implements NetworkStatusInterface {
-  NetworkStatusImp(this._internetConnection, this._logger) {
+class NetworkStatusImp(
+  final InternetConnection _internetConnection,
+  final CoreLoggerInterface _logger,
+) implements NetworkStatusInterface {
+  this {
     _init();
   }
 
-  final InternetConnection _internetConnection;
-  final CoreLoggerInterface _logger;
   final StreamController<ConnectionStatus> _controller =
       StreamController<ConnectionStatus>.broadcast();
   StreamSubscription<InternetStatus>? _subscription;

@@ -6,17 +6,12 @@ import '../localization/localization_cubit.dart';
 
 /// A wrapper widget that provides [LocalizationCubit] to the widget tree
 /// and builds UI components controlled by the cubit's locale state.
-class LocalizationWrapper extends StatelessWidget {
-  const LocalizationWrapper({
-    super.key,
-    required this.builder,
-    this.listener,
-    this.localizationCubit,
-  });
-
-  final BlocWidgetBuilder<Locale> builder;
-  final BlocWidgetListener<Locale>? listener;
-  final LocalizationCubit? localizationCubit;
+class const LocalizationWrapper({
+  super.key,
+  required final BlocWidgetBuilder<Locale> builder,
+  final BlocWidgetListener<Locale>? listener,
+  final LocalizationCubit? localizationCubit,
+}) extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {

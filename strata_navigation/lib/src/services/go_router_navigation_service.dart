@@ -2,8 +2,10 @@ import 'package:go_router/go_router.dart';
 import 'package:strata_core/strata_core.dart';
 
 /// Default GoRouter implementation of [NavigationServiceInterface].
-class GoRouterNavigationService implements NavigationServiceInterface {
-  GoRouterNavigationService({required GoRouter router}) : _router = router;
+class GoRouterNavigationService({required GoRouter router})
+    implements NavigationServiceInterface {
+  // ignore: prefer_initializing_formals
+  this : _router = router;
 
   final GoRouter _router;
 

@@ -6,45 +6,17 @@ import 'package:strata_network/strata_network.dart';
 import 'package:strata_state/strata_state.dart';
 
 /// Configuration entity for initializing the Strata framework.
-class StrataConfigEntity extends Equatable {
-  const StrataConfigEntity({
-    this.networkConfig,
-    this.navigationConfig,
-    this.themeConfig,
-    this.localizationConfig,
-    this.secureStorage,
-    this.errorParser,
-    this.customDio,
-    this.onUnauthenticated,
-    this.shouldLogNavigation = false,
-  });
-
-  /// Network configuration settings for `strata_network`.
-  final NetworkConfigEntity? networkConfig;
-
-  /// Navigation configuration settings for `strata_navigation`.
-  final NavigationConfigEntity? navigationConfig;
-
-  /// Theme configuration settings for `ThemeCubit`.
-  final ThemeConfigEntity? themeConfig;
-
-  /// Localization configuration settings for `LocalizationCubit`.
-  final LocalizationConfigEntity? localizationConfig;
-
-  /// Custom secure storage instance for `strata_storage`.
-  final FlutterSecureStorage? secureStorage;
-
-  /// Custom error parser for network responses.
-  final ErrorModelParser? errorParser;
-
-  /// Custom Dio instance.
-  final Dio? customDio;
-
-  /// Callback executed when an unauthenticated response occurs.
-  final void Function()? onUnauthenticated;
-
-  /// Flag indicating whether navigation logging should be enabled.
-  final bool shouldLogNavigation;
+class const StrataConfigEntity({
+  final NetworkConfigEntity? networkConfig,
+  final NavigationConfigEntity? navigationConfig,
+  final ThemeConfigEntity? themeConfig,
+  final LocalizationConfigEntity? localizationConfig,
+  final FlutterSecureStorage? secureStorage,
+  final ErrorModelParser? errorParser,
+  final Dio? customDio,
+  final void Function()? onUnauthenticated,
+  final bool shouldLogNavigation = false,
+}) extends Equatable {
 
   @override
   List<Object?> get props => [

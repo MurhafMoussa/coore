@@ -4,19 +4,10 @@ import 'package:fpdart/fpdart.dart';
 import 'package:strata_core/strata_core.dart';
 
 /// Container for encryption key rotation results.
-class StorageKeyRotationResult {
-  /// Creates a [StorageKeyRotationResult].
-  const StorageKeyRotationResult({
-    required this.oldKeyBytes,
-    required this.newKeyBytes,
-  });
-
-  /// Previous encryption key bytes (null if no previous key was set).
-  final List<int>? oldKeyBytes;
-
-  /// Newly generated encryption key bytes.
-  final List<int> newKeyBytes;
-}
+class const StorageKeyRotationResult({
+  required final List<int>? oldKeyBytes,
+  required final List<int> newKeyBytes,
+});
 
 /// Helper utilities for encryption key management and rotation in [SensitiveStorageInterface].
 class StorageEncryptionKeyHelper {

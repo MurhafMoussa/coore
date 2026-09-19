@@ -6,19 +6,13 @@ import 'package:strata_core/strata_core.dart';
 import '../network/network_status_cubit.dart';
 
 /// A widget that wraps the app and provides network status callbacks.
-class NetworkStatusWrapper extends StatelessWidget {
-  const NetworkStatusWrapper({
-    super.key,
-    required this.child,
-    this.onConnect,
-    this.onDisconnect,
-    this.networkStatusCubit,
-  });
-
-  final Widget child;
-  final VoidCallback? onConnect;
-  final VoidCallback? onDisconnect;
-  final NetworkStatusCubit? networkStatusCubit;
+class const NetworkStatusWrapper({
+  super.key,
+  required final Widget child,
+  final VoidCallback? onConnect,
+  final VoidCallback? onDisconnect,
+  final NetworkStatusCubit? networkStatusCubit,
+}) extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {

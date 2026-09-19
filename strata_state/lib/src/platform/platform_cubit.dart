@@ -2,8 +2,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:strata_core/strata_core.dart';
 
 /// Hydrated Cubit for managing persistent platform and device information state.
-class PlatformCubit extends HydratedCubit<DeviceInfoEntity> {
-  PlatformCubit({required this.service}) : super(_initialState) {
+class PlatformCubit({
+  required this.service,
+}) extends HydratedCubit<DeviceInfoEntity> {
+  this : super(_initialState) {
     _initialize();
   }
 

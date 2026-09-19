@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import '../constants/padding_manager.dart';
 
-class CoreDefaultErrorWidget extends StatelessWidget {
-  const CoreDefaultErrorWidget({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
-
-  final String message;
-  final VoidCallback? onRetry;
+class const CoreDefaultErrorWidget({
+  super.key,
+  required final String message,
+  final VoidCallback? onRetry,
+}) extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {

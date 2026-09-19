@@ -4,10 +4,9 @@ import 'package:get_it/get_it.dart';
 import '../config/network_config_entity.dart';
 
 /// Interceptor that automatically retries transient HTTP request failures.
-class RetryInterceptor extends Interceptor {
-  RetryInterceptor(this._networkConfigEntity);
-
-  final NetworkConfigEntity _networkConfigEntity;
+class RetryInterceptor(
+  final NetworkConfigEntity _networkConfigEntity,
+) extends Interceptor {
 
   @override
   Future<void> onError(

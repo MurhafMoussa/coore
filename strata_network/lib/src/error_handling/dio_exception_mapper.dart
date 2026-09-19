@@ -3,10 +3,9 @@ import 'package:strata_core/strata_core.dart';
 import 'network_exception_mapper_interface.dart';
 
 /// Default Dio exception mapper converting [DioException] into [Failure] domain models.
-class DioExceptionMapper implements NetworkExceptionMapperInterface {
-  DioExceptionMapper(this.errorParser);
-
-  final ErrorModelParser errorParser;
+class DioExceptionMapper(
+  final ErrorModelParser errorParser,
+) implements NetworkExceptionMapperInterface {
 
   @override
   Failure mapException(Object exception, StackTrace? stackTrace) {

@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Abstract class for screen parameters.
-abstract class BaseScreenParams extends Equatable {
-  const BaseScreenParams();
-
+abstract class const BaseScreenParams() extends Equatable {
   /// Query parameters map.
   Map<String, dynamic> get queryParams => {};
 

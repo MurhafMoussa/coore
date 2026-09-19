@@ -8,15 +8,11 @@ import '../auth/token_manager_interface.dart';
 import '../config/network_config_entity.dart';
 
 /// Abstract interceptor responsible for handling token refresh on 401 errors.
-abstract class TokenRefreshInterceptorInterface extends Interceptor {
-  TokenRefreshInterceptorInterface(
-    this._tokenManager,
-    this._networkConfigEntity, {
-    this.onUnauthenticated,
-  });
-
-  final TokenManagerInterface _tokenManager;
-  final NetworkConfigEntity _networkConfigEntity;
+abstract class TokenRefreshInterceptorInterface(
+  final TokenManagerInterface _tokenManager,
+  final NetworkConfigEntity _networkConfigEntity, {
+  this.onUnauthenticated,
+}) extends Interceptor {
   final void Function()? onUnauthenticated;
 
   final Mutex _refreshMutex = Mutex();
@@ -143,12 +139,11 @@ abstract class TokenRefreshInterceptorInterface extends Interceptor {
 }
 
 /// Token refresh interceptor for Bearer token authorization headers.
-class BearerTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
-  BearerTokenRefreshInterceptor(
-    super.tokenManager,
-    super.networkConfigEntity, {
-    super.onUnauthenticated,
-  });
+class BearerTokenRefreshInterceptor(
+  super.tokenManager,
+  super.networkConfigEntity, {
+  super.onUnauthenticated,
+}) extends TokenRefreshInterceptorInterface {
 
   @override
   Future<bool> handleRefresh(DioException err) async {
@@ -182,12 +177,11 @@ class BearerTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
 }
 
 /// Token refresh interceptor for cookie-based authorization.
-class CookieTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
-  CookieTokenRefreshInterceptor(
-    super.tokenManager,
-    super.networkConfigEntity, {
-    super.onUnauthenticated,
-  });
+class CookieTokenRefreshInterceptor(
+  super.tokenManager,
+  super.networkConfigEntity, {
+  super.onUnauthenticated,
+}) extends TokenRefreshInterceptorInterface {
 
   @override
   Future<bool> handleRefresh(DioException err) async {

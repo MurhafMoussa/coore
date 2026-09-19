@@ -9,15 +9,13 @@ import 'cancel_request_manager_interface.dart';
 import 'form_data_adapter.dart';
 
 /// Dio implementation of [ApiHandlerInterface].
-class DioApiHandler implements ApiHandlerInterface {
-  DioApiHandler(
-    this._dio,
-    this._exceptionMapper, {
-    CancelRequestManagerInterface? cancelRequestManager,
-  }) : _cancelRequestManager = cancelRequestManager;
+class DioApiHandler(
+  final Dio _dio,
+  final NetworkExceptionMapperInterface _exceptionMapper, {
+  final CancelRequestManagerInterface? cancelRequestManager,
+}) implements ApiHandlerInterface {
+  this : _cancelRequestManager = cancelRequestManager;
 
-  final Dio _dio;
-  final NetworkExceptionMapperInterface _exceptionMapper;
   final CancelRequestManagerInterface? _cancelRequestManager;
 
   CancelRequestManagerInterface get _effectiveCancelRequestManager {

@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-class ValueSelectorState<T> extends Equatable {
-  const ValueSelectorState(this.selectedValues);
-  final List<T> selectedValues;
-
+class const ValueSelectorState<T>(final List<T> selectedValues)
+    extends Equatable {
   @override
   List<Object?> get props => [selectedValues];
 }

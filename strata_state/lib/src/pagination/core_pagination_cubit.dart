@@ -5,18 +5,19 @@ import 'package:strata_core/strata_core.dart';
 import 'core_pagination_state.dart';
 
 /// A generic pagination cubit that handles paginated data fetching and state management.
-class CorePaginationCubit<T extends Identifiable, M extends MetaModel>
-    extends Cubit<CorePaginationState<T, M>> {
-  CorePaginationCubit({
-    required ResultFuture<PaginationResponseModel<T, M>> Function(
-      int batch,
-      int limit, {
-      String? requestId,
-    })
-    paginationFunction,
-    required this.paginationStrategy,
-    this.reverse = false,
-  })  : _paginationFunction = paginationFunction,
+class CorePaginationCubit<T extends Identifiable, M extends MetaModel>({
+  required ResultFuture<PaginationResponseModel<T, M>> Function(
+    int batch,
+    int limit, {
+    String? requestId,
+  })
+  paginationFunction,
+  required this.paginationStrategy,
+  this.reverse = false,
+}) extends Cubit<CorePaginationState<T, M>> {
+  // ignore: prefer_initializing_formals
+  this
+      : _paginationFunction = paginationFunction,
         super(CorePaginationState<T, M>.loading());
 
   ResultFuture<PaginationResponseModel<T, M>> Function(

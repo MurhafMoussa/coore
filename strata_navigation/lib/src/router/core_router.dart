@@ -3,11 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:strata_navigation/src/config/navigation_config_entity.dart';
 
 /// Core router that configures and holds the GoRouter instance.
-class CoreRouter {
-  CoreRouter({
-    required NavigationConfigEntity navigationConfigEntity,
-    bool shouldLog = false,
-  })  : _configEntity = navigationConfigEntity,
+class CoreRouter({
+  required NavigationConfigEntity navigationConfigEntity,
+  bool shouldLog = false,
+}) {
+  this
+      : _configEntity = navigationConfigEntity,
+        // ignore: prefer_initializing_formals
         _shouldLog = shouldLog,
         refreshListenable = navigationConfigEntity.refreshListenable {
     _goRouter = _createRouter();

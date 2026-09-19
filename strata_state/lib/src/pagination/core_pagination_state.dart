@@ -38,66 +38,39 @@ sealed class CorePaginationState<T extends Identifiable, M extends MetaModel>
   bool get isLoading => this is PaginationLoading<T, M>;
 }
 
-final class PaginationInitial<T extends Identifiable, M extends MetaModel>
+final class const PaginationInitial<T extends Identifiable, M extends MetaModel>()
     extends CorePaginationState<T, M> {
-  const PaginationInitial();
-
   @override
   List<Object?> get props => [];
 }
 
-final class PaginationLoading<T extends Identifiable, M extends MetaModel>
+final class const PaginationLoading<T extends Identifiable, M extends MetaModel>()
     extends CorePaginationState<T, M> {
-  const PaginationLoading();
-
   @override
   List<Object?> get props => [];
 }
 
-final class PaginationSucceeded<T extends Identifiable, M extends MetaModel>
-    extends CorePaginationState<T, M> {
-  const PaginationSucceeded({
-    required this.paginatedResponseModel,
-    required this.hasReachedMax,
-  });
-
-  @override
-  final PaginationResponseModel<T, M> paginatedResponseModel;
-  @override
-  final bool hasReachedMax;
-
+final class const PaginationSucceeded<T extends Identifiable, M extends MetaModel>({
+  @override required final PaginationResponseModel<T, M> paginatedResponseModel,
+  @override required final bool hasReachedMax,
+}) extends CorePaginationState<T, M> {
   @override
   List<Object?> get props => [paginatedResponseModel, hasReachedMax];
 }
 
-final class PaginationRetryFailure<T extends Identifiable, M extends MetaModel>
-    extends CorePaginationState<T, M> {
-  const PaginationRetryFailure({
-    required this.failure,
-    required this.paginatedResponseModel,
-  });
-
-  final Failure failure;
-  @override
-  final PaginationResponseModel<T, M> paginatedResponseModel;
-
+final class const PaginationRetryFailure<T extends Identifiable, M extends MetaModel>({
+  required final Failure failure,
+  @override required final PaginationResponseModel<T, M> paginatedResponseModel,
+}) extends CorePaginationState<T, M> {
   @override
   List<Object?> get props => [failure, paginatedResponseModel];
 }
 
-final class PaginationFailed<T extends Identifiable, M extends MetaModel>
-    extends CorePaginationState<T, M> {
-  const PaginationFailed({
-    required this.failure,
-    required this.paginatedResponseModel,
-    this.retryFunction,
-  });
-
-  final Failure failure;
-  @override
-  final PaginationResponseModel<T, M> paginatedResponseModel;
-  final VoidCallback? retryFunction;
-
+final class const PaginationFailed<T extends Identifiable, M extends MetaModel>({
+  required final Failure failure,
+  @override required final PaginationResponseModel<T, M> paginatedResponseModel,
+  final VoidCallback? retryFunction,
+}) extends CorePaginationState<T, M> {
   @override
   List<Object?> get props => [failure, paginatedResponseModel, retryFunction];
 }

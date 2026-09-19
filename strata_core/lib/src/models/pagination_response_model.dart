@@ -2,19 +2,12 @@ abstract class MetaModel {
   const MetaModel();
 }
 
-class NoMetaModel extends MetaModel {
-  const NoMetaModel();
-}
+class const NoMetaModel() extends MetaModel;
 
-class PaginationResponseModel<T, M extends MetaModel> {
-  const PaginationResponseModel({
-    this.data = const [],
-    this.meta,
-  });
-
-  final List<T> data;
-  final M? meta;
-
+class const PaginationResponseModel<T, M extends MetaModel>({
+  final List<T> data = const [],
+  final M? meta,
+}) {
   PaginationResponseModel<T, M> copyWith({
     List<T>? data,
     M? meta,

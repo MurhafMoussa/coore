@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Empty parameter class for requests requiring no arguments.
-class NoParams extends Equatable {
-  const NoParams();
-
+class const NoParams() extends Equatable {
   factory NoParams.fromJson(Map<String, dynamic> json) => const NoParams();
 
   Map<String, dynamic> toJson() => {};
@@ -13,11 +11,7 @@ class NoParams extends Equatable {
 }
 
 /// Simple parameter class holding a single string ID.
-class IdParam extends Equatable {
-  const IdParam({required this.id});
-
-  final String id;
-
+class const IdParam({required final String id}) extends Equatable {
   factory IdParam.fromJson(Map<String, dynamic> json) =>
       IdParam(id: json['id'] as String? ?? '');
 
@@ -34,15 +28,10 @@ abstract class PaginationParams {
 }
 
 /// Default implementation of [PaginationParams].
-class DefaultPaginationParams extends Equatable implements PaginationParams {
-  const DefaultPaginationParams({this.batch = 1, this.limit = 10});
-
-  @override
-  final int batch;
-
-  @override
-  final int limit;
-
+class const DefaultPaginationParams({
+  @override final int batch = 1,
+  @override final int limit = 10,
+}) extends Equatable implements PaginationParams {
   factory DefaultPaginationParams.fromJson(Map<String, dynamic> json) {
     return DefaultPaginationParams(
       batch: json['batch'] as int? ?? 1,

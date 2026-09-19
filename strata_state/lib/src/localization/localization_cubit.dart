@@ -4,9 +4,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import '../config/localization_config_entity.dart';
 
 /// Persistent Hydrated Cubit for localization and locale state management.
-class LocalizationCubit extends HydratedCubit<Locale> {
-  LocalizationCubit({required this.config})
-      : super(config.defaultLocale);
+class LocalizationCubit({
+  required this.config,
+}) extends HydratedCubit<Locale> {
+  this : super(config.defaultLocale);
 
   final LocalizationConfigEntity config;
 

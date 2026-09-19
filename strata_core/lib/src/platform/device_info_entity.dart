@@ -25,19 +25,12 @@ enum PlatformType {
   }
 }
 
-class DeviceInfoEntity extends Equatable {
-  const DeviceInfoEntity({
-    required this.deviceId,
-    required this.buildNumber,
-    required this.versionNumber,
-    required this.platform,
-  });
-
-  final String deviceId;
-  final String buildNumber;
-  final String versionNumber;
-  final PlatformType platform;
-
+class const DeviceInfoEntity({
+  required final String deviceId,
+  required final String buildNumber,
+  required final String versionNumber,
+  required final PlatformType platform,
+}) extends Equatable {
   Map<String, dynamic> toJson() => {
         'deviceId': deviceId,
         'buildNumber': buildNumber,

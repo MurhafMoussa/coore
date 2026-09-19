@@ -2,13 +2,12 @@ import 'value_selector_cubit.dart';
 import 'value_selector_state.dart';
 
 /// A Cubit that manages single-selection of values.
-class SingleSelectorCubit<T> extends ValueSelectorCubit<T> {
-  SingleSelectorCubit({
-    required super.values,
-    required super.valueSetter,
-    super.enableUnselect = true,
-    super.defaultSelectedValues,
-  });
+class SingleSelectorCubit<T>({
+  required super.values,
+  required super.valueSetter,
+  super.enableUnselect = true,
+  super.defaultSelectedValues,
+}) extends ValueSelectorCubit<T> {
 
   @override
   void toggleSelection(T value) {

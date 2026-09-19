@@ -4,9 +4,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import '../config/theme_config_entity.dart';
 
 /// Persistent Hydrated Cubit for theme state management.
-class ThemeCubit extends HydratedCubit<ThemeConfigEntity> {
-  ThemeCubit({ThemeConfigEntity? initialConfig})
-      : super(initialConfig ?? ThemeConfigEntity.defaultConfig());
+class ThemeCubit({
+  ThemeConfigEntity? initialConfig,
+}) extends HydratedCubit<ThemeConfigEntity> {
+  this : super(initialConfig ?? ThemeConfigEntity.defaultConfig());
 
   void setThemeMode(ThemeMode mode) {
     emit(state.copyWith(themeMode: mode, enableAutoSwitch: false));
