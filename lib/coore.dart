@@ -1,3 +1,1 @@
-// Main export file for coore package
-export 'lib.dart';
-
+library coore;
