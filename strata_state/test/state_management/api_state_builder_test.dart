@@ -39,6 +39,9 @@ void main() {
       String? emptyEntity,
     }) {
       return MaterialApp(
+        theme: ThemeData(
+          splashFactory: NoSplash.splashFactory,
+        ),
         home: Scaffold(
           body: ApiStateBuilder<TestBuilderState, String>(
             bloc: cubit,

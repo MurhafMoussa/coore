@@ -1,0 +1,9 @@
+name: strata
+
+packages:
+  - strata
+  - strata_*
+
+command:
+  bootstrap:
+    usePubGet: true
