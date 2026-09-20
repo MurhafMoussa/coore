@@ -1,7 +1,6 @@
 library;
 
 export 'package:strata_core/strata_core.dart';
-export 'package:strata_navigation/strata_navigation.dart';
 export 'package:strata_network/strata_network.dart';
 export 'package:strata_state/strata_state.dart';
 export 'package:strata_storage/strata_storage.dart';

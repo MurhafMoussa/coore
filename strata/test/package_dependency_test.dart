@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('strata Meta-Package Boundary Audit', () {
-    test('pubspec.yaml must depend on all 6 sub-packages', () {
+    test('pubspec.yaml must depend on all 5 sub-packages', () {
       final pubspecFile = File('pubspec.yaml');
       expect(pubspecFile.existsSync(), isTrue, reason: 'pubspec.yaml should exist in strata package');
 
@@ -14,7 +14,6 @@ void main() {
         'strata_network',
         'strata_storage',
         'strata_state',
-        'strata_navigation',
         'strata_ui',
       ];
 
@@ -27,7 +26,7 @@ void main() {
       }
     });
 
-    test('strata.dart must export all 6 sub-packages', () {
+    test('strata.dart must export all 5 sub-packages', () {
       final strataFile = File('lib/strata.dart');
       expect(strataFile.existsSync(), isTrue, reason: 'lib/strata.dart must exist');
 
@@ -38,7 +37,6 @@ void main() {
         "export 'package:strata_network/strata_network.dart';",
         "export 'package:strata_storage/strata_storage.dart';",
         "export 'package:strata_state/strata_state.dart';",
-        "export 'package:strata_navigation/strata_navigation.dart';",
         "export 'package:strata_ui/strata_ui.dart';",
       ];
 

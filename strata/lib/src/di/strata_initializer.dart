@@ -1,6 +1,5 @@
 import 'package:get_it/get_it.dart';
 import 'package:strata_core/strata_core.dart';
-import 'package:strata_navigation/strata_navigation.dart';
 import 'package:strata_network/strata_network.dart';
 import 'package:strata_state/strata_state.dart';
 import 'package:strata_storage/strata_storage.dart';
@@ -21,22 +20,12 @@ class StrataInitializer {
 
     sl.registerStrataCore();
 
-    sl.registerStrataStorage(
-      secureStorage: config.secureStorage,
-    );
+    sl.registerStrataStorage();
 
     if (config.networkConfig != null) {
       sl.registerStrataNetwork(
         config: config.networkConfig!,
         errorParser: config.errorParser,
-      
-      );
-    }
-
-    if (config.navigationConfig != null) {
-      sl.registerStrataNavigation(
-        navigationConfigEntity: config.navigationConfig!,
-        shouldLog: config.shouldLogNavigation,
       );
     }
 

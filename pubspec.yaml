@@ -9,7 +9,6 @@ environment:
 workspace:
   - strata
   - strata_core
-  - strata_navigation
   - strata_network
   - strata_state
   - strata_storage
