@@ -13,11 +13,11 @@ Generalize `PaginationParams` in `strata_network` into a sealed class / union su
 - Request cancellation uses `CancelRequestManagerInterface` with `params.requestId`.
 
 ## Acceptance criteria
-- [ ] `PaginationParams` is refactored into a sealed hierarchy (`DefaultPaginationParams`, `SkipPaginationParams`, `CursorPaginationParams`).
-- [ ] Every `PaginationParams` instance provides an automatic `requestId` string getter.
-- [ ] `CancelRequestManagerInterface` integration handles request cancellation keying using `requestId`.
-- [ ] 100% executable DartDoc documentation with `@example` code snippets is provided for all public network pagination classes.
-- [ ] Unit tests in `strata_network/test/` verify serialization, `requestId` generation, and cancellation manager behavior.
+- [x] `PaginationParams` is refactored into a sealed hierarchy (`DefaultPaginationParams`, `SkipPaginationParams`, `CursorPaginationParams`).
+- [x] Every `PaginationParams` instance provides an automatic `requestId` string getter.
+- [x] `CancelRequestManagerInterface` integration handles request cancellation keying using `requestId`.
+- [x] 100% executable DartDoc documentation with `@example` code snippets is provided for all public network pagination classes.
+- [x] Unit tests in `strata_network/test/` verify serialization, `requestId` generation, and cancellation manager behavior.
 
 ## Covers
 - User Stories: 1, 5

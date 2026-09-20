@@ -63,5 +63,28 @@ void main() {
       expect(manager.activeRequestCount, equals(0));
       expect(manager.hasActiveRequests, isFalse);
     });
+
+    test('PaginatedCancelRequestManagerX extension registers and cancels requests using PaginationParams', () {
+      const defaultParams = DefaultPaginationParams(page: 1, limit: 20);
+      const skipParams = SkipPaginationParams(skip: 10, limit: 10);
+      const cursorParams = CursorPaginationParams(cursor: 'tok_1', limit: 20);
+
+      final token1 = manager.registerPaginationRequest(defaultParams);
+      final token2 = manager.registerPaginationRequest(skipParams);
+      final token3 = manager.registerPaginationRequest(cursorParams);
+
+      expect(manager.activeRequestCount, equals(3));
+
+      manager.cancelPaginationRequest(defaultParams, reason: 'Refreshed');
+      expect(token1.isCancelled, isTrue);
+      expect(token2.isCancelled, isFalse);
+      expect(token3.isCancelled, isFalse);
+
+      manager.cancelPaginationRequest(skipParams);
+      expect(token2.isCancelled, isTrue);
+
+      manager.cancelPaginationRequest(cursorParams);
+      expect(token3.isCancelled, isTrue);
+    });
   });
 }
