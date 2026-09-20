@@ -6,13 +6,11 @@ import '../storage/flutter_secure_sensitive_storage.dart';
 /// Extension on [GetIt] to register `strata_storage` dependencies.
 extension StrataStorageDiExtension on GetIt {
   /// Registers [SensitiveStorageInterface] using [FlutterSecureSensitiveStorage].
-  void registerStrataStorage({
-    FlutterSecureStorage? secureStorage,
-  }) {
+  void registerStrataStorage() {
     if (!isRegistered<SensitiveStorageInterface>()) {
       registerLazySingleton<SensitiveStorageInterface>(
-        () => FlutterSecureSensitiveStorage(
-          secureStorage: secureStorage ?? const FlutterSecureStorage(),
+        () => const FlutterSecureSensitiveStorage(
+          secureStorage: FlutterSecureStorage(),
         ),
       );
     }

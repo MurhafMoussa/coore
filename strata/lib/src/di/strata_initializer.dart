@@ -22,12 +22,10 @@ class StrataInitializer {
 
     sl.registerStrataStorage();
 
-    if (config.networkConfig != null) {
-      sl.registerStrataNetwork(
-        config: config.networkConfig!,
-        errorParser: config.errorParser,
-      );
-    }
+    sl.registerStrataNetwork(
+      config: config.networkConfig,
+      errorParser: config.errorParser,
+    );
 
     sl.registerStrataState(
       themeConfig: config.themeConfig,

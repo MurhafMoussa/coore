@@ -22,7 +22,7 @@ void main() {
 
   group('StrataStorageDiExtension', () {
     test('registers SensitiveStorageInterface with FlutterSecureSensitiveStorage', () {
-      getIt.registerStrataStorage(secureStorage: mockSecureStorage);
+      getIt.registerStrataStorage();
 
       expect(getIt.isRegistered<SensitiveStorageInterface>(), isTrue);
       final instance = getIt<SensitiveStorageInterface>();

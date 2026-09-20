@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:strata/strata.dart';
@@ -42,6 +43,15 @@ void main() {
 
       final config = StrataConfigEntity(
         networkConfig: networkConfig,
+        themeConfig: const ThemeConfigEntity(
+          themeMode: ThemeMode.system,
+          enableAutoSwitch: false,
+        ),
+        localizationConfig: const LocalizationConfigEntity(
+          defaultLocale: Locale('en'),
+          supportedLocales: [Locale('en')],
+          localizationsDelegates: [],
+        ),
         errorParser: _testErrorParser,
       );
 
@@ -62,19 +72,24 @@ void main() {
       expect(getIt.isRegistered<ApiHandlerInterface>(), isTrue);
     });
 
-    test('initialize supports storage-only config without network', () async {
-      final config = StrataConfigEntity(
-        errorParser: _testErrorParser,
-      );
-
-      await StrataInitializer.initialize(config, getIt: getIt);
-
-      expect(getIt.isRegistered<SensitiveStorageInterface>(), isTrue);
-      expect(getIt.isRegistered<NetworkConfigEntity>(), isFalse);
-    });
-
     test('reset cleans up GetIt registrations between runs', () async {
       final config = StrataConfigEntity(
+        networkConfig: const NetworkConfigEntity(
+          baseUrl: 'https://api.example.com',
+          excludedPaths: [],
+          refreshTokenApiEndpoint: '/refresh',
+          accessTokenKey: 'access_token',
+          refreshTokenKey: 'refresh_token',
+        ),
+        themeConfig: const ThemeConfigEntity(
+          themeMode: ThemeMode.system,
+          enableAutoSwitch: false,
+        ),
+        localizationConfig: const LocalizationConfigEntity(
+          defaultLocale: Locale('en'),
+          supportedLocales: [Locale('en')],
+          localizationsDelegates: [],
+        ),
         errorParser: _testErrorParser,
       );
 
@@ -87,9 +102,41 @@ void main() {
 
     test('StrataConfigEntity supports equality comparison', () {
       final config1 = StrataConfigEntity(
+        networkConfig: const NetworkConfigEntity(
+          baseUrl: 'https://api.example.com',
+          excludedPaths: [],
+          refreshTokenApiEndpoint: '/refresh',
+          accessTokenKey: 'access_token',
+          refreshTokenKey: 'refresh_token',
+        ),
+        themeConfig: const ThemeConfigEntity(
+          themeMode: ThemeMode.system,
+          enableAutoSwitch: false,
+        ),
+        localizationConfig: const LocalizationConfigEntity(
+          defaultLocale: Locale('en'),
+          supportedLocales: [Locale('en')],
+          localizationsDelegates: [],
+        ),
         errorParser: _testErrorParser,
       );
       final config2 = StrataConfigEntity(
+        networkConfig: const NetworkConfigEntity(
+          baseUrl: 'https://api.example.com',
+          excludedPaths: [],
+          refreshTokenApiEndpoint: '/refresh',
+          accessTokenKey: 'access_token',
+          refreshTokenKey: 'refresh_token',
+        ),
+        themeConfig: const ThemeConfigEntity(
+          themeMode: ThemeMode.system,
+          enableAutoSwitch: false,
+        ),
+        localizationConfig: const LocalizationConfigEntity(
+          defaultLocale: Locale('en'),
+          supportedLocales: [Locale('en')],
+          localizationsDelegates: [],
+        ),
         errorParser: _testErrorParser,
       );
 
