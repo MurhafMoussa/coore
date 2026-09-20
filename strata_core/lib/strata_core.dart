@@ -1,6 +1,7 @@
 library strata_core;
 
 export 'src/dev_tools/core_logger_interface.dart';
+export 'src/dev_tools/talker_core_logger.dart';
 export 'src/di/strata_core_di.dart';
 export 'src/environment/core_environment.dart';
 export 'src/error_handling/failures/failures.dart';

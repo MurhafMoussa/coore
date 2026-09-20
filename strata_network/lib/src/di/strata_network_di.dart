@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:get_it/get_it.dart';
 import 'package:strata_core/strata_core.dart';
+import 'package:talker/talker.dart';
+import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 import '../api_handler/api_handler_interface.dart';
 import '../api_handler/cancel_request_manager_interface.dart';
@@ -13,7 +15,6 @@ import '../auth/token_manager_interface.dart';
 import '../config/network_config_entity.dart';
 import '../error_handling/dio_exception_mapper.dart';
 import '../error_handling/network_exception_mapper_interface.dart';
-import '../interceptors/logging_interceptor.dart';
 import '../interceptors/retry_interceptor.dart';
 import '../interceptors/token_injector_interceptor.dart';
 import '../interceptors/token_refresh_interceptor_interface.dart';
@@ -77,10 +78,23 @@ extension StrataNetworkDiExtension on GetIt {
           ),
         );
 
-        final logger = isRegistered<CoreLoggerInterface>()
-            ? get<CoreLoggerInterface>()
-            : const NoOpCoreLogger();
-        dio.interceptors.add(LoggingInterceptor(logger: logger));
+        if (config.enableLogging) {
+          final talker = isRegistered<CoreLoggerInterface>() &&
+                  get<CoreLoggerInterface>() is TalkerCoreLogger
+              ? (get<CoreLoggerInterface>() as TalkerCoreLogger).talker
+              : (isRegistered<Talker>() ? get<Talker>() : null);
+
+          dio.interceptors.add(
+            TalkerDioLogger(
+              talker: talker,
+              settings: config.talkerDioLoggerSettings ??
+                  const TalkerDioLoggerSettings(
+                    printRequestData: true,
+                    printResponseData: true,
+                  ),
+            ),
+          );
+        }
 
         if (config.authInterceptorType == AuthInterceptorType.cookieBased &&
             isRegistered<CookieJar>()) {

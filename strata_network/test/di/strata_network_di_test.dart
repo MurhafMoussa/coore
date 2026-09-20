@@ -104,11 +104,11 @@ void main() {
 
     test('registerStrataNetwork injects SensitiveStorageInterface, CoreLoggerInterface, and custom interceptors when registered', () {
       final mockStorage = MockSensitiveStorage();
-      final mockLogger = MockCoreLogger();
+      final logger = TalkerCoreLogger();
       final customInterceptor = InterceptorsWrapper();
 
       getIt.registerSingleton<SensitiveStorageInterface>(mockStorage);
-      getIt.registerSingleton<CoreLoggerInterface>(mockLogger);
+      getIt.registerSingleton<CoreLoggerInterface>(logger);
 
       final config = createTestNetworkConfig(
         interceptors: [customInterceptor],
@@ -128,6 +128,7 @@ void main() {
 
       final dio = getIt<Dio>();
       expect(dio.interceptors.contains(customInterceptor), isTrue);
+      expect(dio.interceptors.any((i) => i is TalkerDioLogger), isTrue);
     });
   });
 }

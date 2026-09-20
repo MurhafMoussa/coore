@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
+import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 /// Authentication interceptor type options.
 enum AuthInterceptorType { tokenBased, cookieBased }
@@ -33,6 +34,8 @@ class NetworkConfigEntity extends Equatable {
     this.maxRedirects = 5,
     this.enableTokenInjection = true,
     this.enableRefreshTokenBehavior = true,
+    this.enableLogging = true,
+    this.talkerDioLoggerSettings,
   });
 
   final String baseUrl;
@@ -58,6 +61,8 @@ class NetworkConfigEntity extends Equatable {
   final int maxRedirects;
   final bool enableTokenInjection;
   final bool enableRefreshTokenBehavior;
+  final bool enableLogging;
+  final TalkerDioLoggerSettings? talkerDioLoggerSettings;
 
   @override
   List<Object?> get props => [
@@ -83,5 +88,7 @@ class NetworkConfigEntity extends Equatable {
         refreshTokenKey,
         enableTokenInjection,
         enableRefreshTokenBehavior,
+        enableLogging,
+        talkerDioLoggerSettings,
       ];
 }
