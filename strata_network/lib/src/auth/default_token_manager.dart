@@ -10,20 +10,15 @@ import 'token_manager_interface.dart';
 class DefaultTokenManager implements TokenManagerInterface {
   DefaultTokenManager({
     this.sensitiveStorage,
-    this.secureStorageEnabled = false,
-    this.onUnauthenticated,
     this.cookieJar,
+    this.secureStorageEnabled = false,
   });
 
   final SensitiveStorageInterface? sensitiveStorage;
   final CookieJar? cookieJar;
   final bool secureStorageEnabled;
-
   final StreamController<void> _unauthenticatedController =
       StreamController<void>.broadcast();
-
-  @override
-  void Function()? onUnauthenticated;
 
   @override
   Stream<void> get unauthenticatedStream => _unauthenticatedController.stream;
@@ -33,7 +28,6 @@ class DefaultTokenManager implements TokenManagerInterface {
 
   @override
   void notifyUnauthenticated() {
-    onUnauthenticated?.call();
     if (!_unauthenticatedController.isClosed) {
       _unauthenticatedController.add(null);
     }
@@ -47,13 +41,10 @@ class DefaultTokenManager implements TokenManagerInterface {
         return _accessToken!;
       }
       final result = await storage.read('accessToken');
-      return result.fold(
-        (failure) => '',
-        (String? token) {
-          _accessToken = token;
-          return token ?? '';
-        },
-      );
+      return result.fold((failure) => '', (String? token) {
+        _accessToken = token;
+        return token ?? '';
+      });
     }
     return _accessToken ?? '';
   }
@@ -66,13 +57,10 @@ class DefaultTokenManager implements TokenManagerInterface {
         return _refreshToken!;
       }
       final result = await storage.read('refreshToken');
-      return result.fold(
-        (failure) => '',
-        (String? token) {
-          _refreshToken = token;
-          return token ?? '';
-        },
-      );
+      return result.fold((failure) => '', (String? token) {
+        _refreshToken = token;
+        return token ?? '';
+      });
     }
     return _refreshToken ?? '';
   }

@@ -12,13 +12,11 @@ abstract class TokenRefreshInterceptorInterface extends Interceptor {
     required this.dio,
     required this.tokenManager,
     required this.networkConfigEntity,
-    this.onUnauthenticated,
   });
 
   final Dio dio;
   final TokenManagerInterface tokenManager;
   final NetworkConfigEntity networkConfigEntity;
-  final void Function()? onUnauthenticated;
 
   final Mutex _refreshMutex = Mutex();
   final Queue<MapEntry<RequestOptions, ErrorInterceptorHandler>> _pending =
@@ -42,8 +40,7 @@ abstract class TokenRefreshInterceptorInterface extends Interceptor {
     }
     final requestOptions = err.requestOptions;
     final isUnauthorized = err.response?.statusCode == 401;
-    final requiresAuthorization =
-        requestOptions.extra['isAuthorized'] == true;
+    final requiresAuthorization = requestOptions.extra['isAuthorized'] == true;
     final isNotRetryAttempt = requestOptions.extra['isRetry'] != true;
     final isNotRefreshTokenPath = !requestOptions.path.contains(
       networkConfigEntity.refreshTokenApiEndpoint,
@@ -74,8 +71,12 @@ abstract class TokenRefreshInterceptorInterface extends Interceptor {
         }
 
         if (!success) {
-          await tokenManager.clearTokens();
-          onUnauthenticated?.call();
+          try {
+            await tokenManager.clearTokens();
+          } catch (_) {
+            // Continue rejecting the queued requests even if cleanup fails.
+          }
+
           tokenManager.notifyUnauthenticated();
         }
 
@@ -112,7 +113,8 @@ abstract class TokenRefreshInterceptorInterface extends Interceptor {
       response: Response(
         requestOptions: opts,
         statusCode: statusCode,
-        data: err.response?.data ??
+        data:
+            err.response?.data ??
             {
               'error': {
                 'status': statusCode,
@@ -128,18 +130,20 @@ abstract class TokenRefreshInterceptorInterface extends Interceptor {
 
   /// Helper to extract nested JSON values via dot notation (e.g. `data.token`).
   dynamic getNestedValue(Map<String, dynamic>? data, String path) {
-    if (data == null) return null;
-    final List<String> keys = path.split('.');
+    if (data == null || path.isEmpty) return null;
     dynamic currentValue = data;
-    for (final String key in keys) {
-      if (currentValue is Map<String, dynamic> &&
-          currentValue.containsKey(key)) {
-        currentValue = currentValue[key];
-      } else {
+    for (final key in path.split('.')) {
+      if (currentValue is! Map || !currentValue.containsKey(key)) {
         return null;
       }
+      currentValue = currentValue[key];
     }
     return currentValue;
+  }
+
+  String? getNestedString(Map<String, dynamic>? data, String path) {
+    final value = getNestedValue(data, path);
+    return value is String && value.isNotEmpty ? value : null;
   }
 }
 
@@ -149,7 +153,7 @@ class BearerTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
     required super.dio,
     required super.tokenManager,
     required super.networkConfigEntity,
-    super.onUnauthenticated,
+   
   });
 
   @override
@@ -161,14 +165,20 @@ class BearerTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
       final response = await dio.post<Map<String, dynamic>>(
         networkConfigEntity.refreshTokenApiEndpoint,
         data: {networkConfigEntity.refreshTokenKey: rt},
+        options: Options(extra: {'isAuthorized': false}),
       );
       final data = response.data;
       if (data == null) return false;
 
-      final accessToken =
-          getNestedValue(data, networkConfigEntity.accessTokenKey) as String?;
-      final refreshToken =
-          getNestedValue(data, networkConfigEntity.refreshTokenKey) as String?;
+      final accessToken = getNestedString(
+        data,
+        networkConfigEntity.accessTokenKey,
+      );
+      if (accessToken == null) return false;
+      final refreshToken = getNestedString(
+        data,
+        networkConfigEntity.refreshTokenKey,
+      );
       await tokenManager.setTokens(
         accessToken: accessToken,
         refreshToken: refreshToken,
@@ -186,7 +196,7 @@ class CookieTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
     required super.dio,
     required super.tokenManager,
     required super.networkConfigEntity,
-    super.onUnauthenticated,
+
   });
 
   @override
@@ -194,14 +204,20 @@ class CookieTokenRefreshInterceptor extends TokenRefreshInterceptorInterface {
     try {
       final response = await dio.post<Map<String, dynamic>>(
         networkConfigEntity.refreshTokenApiEndpoint,
+        options: Options(extra: {'isAuthorized': false}),
       );
       final data = response.data;
       if (data == null) return false;
 
-      final refreshToken =
-          getNestedValue(data, networkConfigEntity.refreshTokenKey) as String?;
-      final accessToken =
-          getNestedValue(data, networkConfigEntity.accessTokenKey) as String?;
+      final refreshToken = getNestedString(
+        data,
+        networkConfigEntity.refreshTokenKey,
+      );
+      final accessToken = getNestedString(
+        data,
+        networkConfigEntity.accessTokenKey,
+      );
+      if (accessToken == null && refreshToken == null) return false;
       await tokenManager.setTokens(
         accessToken: accessToken,
         refreshToken: refreshToken,

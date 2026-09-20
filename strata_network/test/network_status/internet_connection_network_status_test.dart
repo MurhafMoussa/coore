@@ -6,17 +6,16 @@ import 'package:strata_core/strata_core.dart';
 import 'package:strata_network/strata_network.dart';
 import 'package:test/test.dart';
 
-class MockInternetConnection extends Mock implements InternetConnection {}
-class MockCoreLoggerInterface extends Mock implements CoreLoggerInterface {}
+import '../helpers/test_helpers.dart';
 
 void main() {
   late MockInternetConnection mockInternetConnection;
-  late MockCoreLoggerInterface mockLogger;
+  late MockCoreLogger mockLogger;
   late StreamController<InternetStatus> statusController;
 
   setUp(() {
     mockInternetConnection = MockInternetConnection();
-    mockLogger = MockCoreLoggerInterface();
+    mockLogger = MockCoreLogger();
     statusController = StreamController<InternetStatus>.broadcast();
 
     when(() => mockInternetConnection.onStatusChange)
@@ -53,6 +52,22 @@ void main() {
 
       statusController.add(InternetStatus.connected);
       statusController.add(InternetStatus.disconnected);
+    });
+
+    test('dispose cancels subscription and closes controller', () {
+      final service =
+          InternetConnectionNetworkStatus(mockInternetConnection, mockLogger);
+      expect(service.connectionStream, isA<Stream<ConnectionStatus>>());
+      service.dispose();
+    });
+
+    test('logs error when onStatusChange stream emits an error', () async {
+      InternetConnectionNetworkStatus(mockInternetConnection, mockLogger);
+
+      statusController.addError(Exception('Network error'));
+      await pumpEventQueue();
+
+      verify(() => mockLogger.error('Something went wrong in NetworkStatus', any(), any())).called(1);
     });
   });
 }

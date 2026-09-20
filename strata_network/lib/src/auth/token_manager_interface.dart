@@ -14,8 +14,7 @@ abstract class TokenManagerInterface {
   /// Clears stored access and refresh tokens.
   Future<void> clearTokens();
 
-  /// Optional callback invoked when authentication token refresh fails.
-  void Function()? onUnauthenticated;
+ 
 
   /// Stream emitting events when unauthenticated state is triggered.
   Stream<void> get unauthenticatedStream;

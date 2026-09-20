@@ -2,20 +2,11 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:get_it/get_it.dart';
+import 'package:strata_core/strata_core.dart';
 import 'package:strata_network/strata_network.dart';
 import 'package:test/test.dart';
 
-class _TestErrorResponseModel extends BaseErrorResponseModel {
-  _TestErrorResponseModel()
-      : super(
-          status: 500,
-          developerMessage: 'Error',
-          timestamp: DateTime.now(),
-        );
-
-  @override
-  Map<String, String> get validationErrors => {};
-}
+import '../helpers/test_helpers.dart';
 
 void main() {
   group('StrataNetworkDiExtension Tests', () {
@@ -26,15 +17,10 @@ void main() {
     });
 
     test('registerStrataNetwork registers all network singletons correctly', () {
-      const config = NetworkConfigEntity(
-        baseUrl: 'https://api.example.com',
-        excludedPaths: <String>[],
-        refreshTokenApiEndpoint: '/refresh',
-        accessTokenKey: 'access_token',
-        refreshTokenKey: 'refresh_token',
-        connectTimeout: Duration(seconds: 10),
-        sendTimeout: Duration(seconds: 15),
-        receiveTimeout: Duration(seconds: 20),
+      final config = createTestNetworkConfig(
+        connectTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 20),
         staticHeaders: {'X-App-Version': '1.0.0'},
         defaultQueryParams: {'lang': 'en'},
         defaultContentType: 'application/json',
@@ -44,7 +30,11 @@ void main() {
 
       getIt.registerStrataNetwork(
         config: config,
-        errorParser: (response) => _TestErrorResponseModel(),
+        errorParser: (response) => TestErrorResponseModel(
+          status: 500,
+          developerMessage: 'Error',
+          timestamp: DateTime.now(),
+        ),
       );
 
       expect(getIt.isRegistered<NetworkConfigEntity>(), isTrue);
@@ -75,23 +65,69 @@ void main() {
     });
 
     test('registerStrataNetwork registers CookieJar when cookieBased auth', () {
-      const config = NetworkConfigEntity(
-        baseUrl: 'https://api.example.com',
+      final config = createTestNetworkConfig(
         authInterceptorType: AuthInterceptorType.cookieBased,
-        refreshTokenApiEndpoint: '/refresh',
-        excludedPaths: <String>[],
-        accessTokenKey: 'access_token',
-        refreshTokenKey: 'refresh_token',
       );
 
       getIt.registerStrataNetwork(
         config: config,
-        errorParser: (response) => _TestErrorResponseModel(),
+        errorParser: (response) => TestErrorResponseModel(
+          status: 500,
+          developerMessage: 'Error',
+          timestamp: DateTime.now(),
+        ),
       );
 
       expect(getIt.isRegistered<CookieJar>(), isTrue);
       final dio = getIt<Dio>();
       expect(dio.interceptors.any((i) => i is CookieManager), isTrue);
+    });
+
+    test('registerStrataNetwork configures BearerToken injectors and refresh interceptors when tokenBased auth', () {
+      final config = createTestNetworkConfig(
+        authInterceptorType: AuthInterceptorType.tokenBased,
+      );
+
+      getIt.registerStrataNetwork(
+        config: config,
+        errorParser: (response) => TestErrorResponseModel(
+          status: 500,
+          developerMessage: 'Error',
+          timestamp: DateTime.now(),
+        ),
+      );
+
+      final dio = getIt<Dio>();
+      expect(dio.interceptors.any((i) => i is BearerTokenInjectorInterceptor), isTrue);
+      expect(dio.interceptors.any((i) => i is BearerTokenRefreshInterceptor), isTrue);
+    });
+
+    test('registerStrataNetwork injects SensitiveStorageInterface, CoreLoggerInterface, and custom interceptors when registered', () {
+      final mockStorage = MockSensitiveStorage();
+      final mockLogger = MockCoreLogger();
+      final customInterceptor = InterceptorsWrapper();
+
+      getIt.registerSingleton<SensitiveStorageInterface>(mockStorage);
+      getIt.registerSingleton<CoreLoggerInterface>(mockLogger);
+
+      final config = createTestNetworkConfig(
+        interceptors: [customInterceptor],
+      );
+
+      getIt.registerStrataNetwork(
+        config: config,
+        errorParser: (response) => TestErrorResponseModel(
+          status: 500,
+          developerMessage: 'Error',
+          timestamp: DateTime.now(),
+        ),
+      );
+
+      final tokenManager = getIt<TokenManagerInterface>() as DefaultTokenManager;
+      expect(tokenManager.sensitiveStorage, equals(mockStorage));
+
+      final dio = getIt<Dio>();
+      expect(dio.interceptors.contains(customInterceptor), isTrue);
     });
   });
 }

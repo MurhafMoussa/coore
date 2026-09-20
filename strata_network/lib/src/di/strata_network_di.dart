@@ -89,10 +89,7 @@ extension StrataNetworkDiExtension on GetIt {
 
         if (config.enableRetry) {
           dio.interceptors.add(
-            RetryInterceptor(
-              dio: dio,
-              networkConfigEntity: config,
-            ),
+            RetryInterceptor(dio: dio, networkConfigEntity: config),
           );
         }
 
@@ -100,8 +97,8 @@ extension StrataNetworkDiExtension on GetIt {
           final tokenManager = get<TokenManagerInterface>();
           final injector =
               config.authInterceptorType == AuthInterceptorType.cookieBased
-                  ? CookieTokenInjectorInterceptor(tokenManager)
-                  : BearerTokenInjectorInterceptor(tokenManager);
+              ? CookieTokenInjectorInterceptor(tokenManager)
+              : BearerTokenInjectorInterceptor(tokenManager);
           dio.interceptors.add(injector);
         }
 
@@ -109,16 +106,16 @@ extension StrataNetworkDiExtension on GetIt {
           final tokenManager = get<TokenManagerInterface>();
           final refreshInterceptor =
               config.authInterceptorType == AuthInterceptorType.cookieBased
-                  ? CookieTokenRefreshInterceptor(
-                      dio: dio,
-                      tokenManager: tokenManager,
-                      networkConfigEntity: config,
-                    )
-                  : BearerTokenRefreshInterceptor(
-                      dio: dio,
-                      tokenManager: tokenManager,
-                      networkConfigEntity: config,
-                    );
+              ? CookieTokenRefreshInterceptor(
+                  dio: dio,
+                  tokenManager: tokenManager,
+                  networkConfigEntity: config,
+                )
+              : BearerTokenRefreshInterceptor(
+                  dio: dio,
+                  tokenManager: tokenManager,
+                  networkConfigEntity: config,
+                );
           dio.interceptors.add(refreshInterceptor);
         }
 

@@ -5,20 +5,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:strata_network/strata_network.dart';
 import 'package:test/test.dart';
 
-class MockDio extends Mock implements Dio {}
-
-class MockErrorInterceptorHandler extends Mock
-    implements ErrorInterceptorHandler {}
+import '../helpers/test_helpers.dart';
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(RequestOptions(path: ''));
-    registerFallbackValue(
-      Response<dynamic>(requestOptions: RequestOptions(path: '')),
-    );
-    registerFallbackValue(
-      DioException(requestOptions: RequestOptions(path: '')),
-    );
+    registerTestFallbacks();
   });
 
   group('RetryInterceptor Tests', () {
@@ -115,6 +106,30 @@ void main() {
 
       verifyZeroInteractions(mockDio);
       verify(() => mockHandler.next(error)).called(1);
+    });
+
+    test('retries with custom retryDelay and handles DioException during retry', () async {
+      final interceptor = RetryInterceptor(
+        dio: mockDio,
+        networkConfigEntity: config,
+      );
+
+      final options = RequestOptions(
+        path: '/data',
+        extra: {'retryDelay': 1},
+      );
+      final error = DioException(
+        requestOptions: options,
+        response: Response(statusCode: 500, requestOptions: options),
+      );
+
+      final retryException = DioException(requestOptions: options, message: 'Retry failed');
+      when(() => mockDio.fetch<dynamic>(any())).thenThrow(retryException);
+      when(() => mockHandler.next(any())).thenAnswer((_) {});
+
+      await interceptor.onError(error, mockHandler);
+
+      verify(() => mockHandler.next(retryException)).called(1);
     });
   });
 }

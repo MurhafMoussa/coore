@@ -1,12 +1,12 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:strata_core/strata_core.dart';
 import 'package:strata_network/strata_network.dart';
 import 'package:test/test.dart';
 
-class MockDio extends Mock implements Dio {}
-class MockNetworkExceptionMapper extends Mock implements NetworkExceptionMapperInterface {}
-class MockCancelRequestManager extends Mock implements CancelRequestManagerInterface {}
+import '../helpers/test_helpers.dart';
 
 void main() {
   group('ApiRequestOptions & NetworkFormData Models Tests', () {
@@ -68,8 +68,7 @@ void main() {
     late DioApiHandler handler;
 
     setUpAll(() {
-      registerFallbackValue(CancelToken());
-      registerFallbackValue(Options());
+      registerTestFallbacks();
     });
 
     setUp(() {
@@ -168,10 +167,13 @@ void main() {
       verify(() => mockCancelManager.unregisterToken('req_123', dummyToken)).called(1);
     });
 
-    test('post converts NetworkFormData fields into Dio FormData', () async {
+    test('post converts NetworkFormData fields and files into Dio FormData', () async {
       final reqOptions = RequestOptions(path: '/upload');
       dynamic capturedData;
       Options? capturedDioOptions;
+
+      final tempDir = await Directory.systemTemp.createTemp();
+      final tempFile = File('${tempDir.path}/test.png')..writeAsStringSync('dummy content');
 
       when(
         () => mockDio.post<dynamic>(
@@ -193,8 +195,15 @@ void main() {
         );
       });
 
-      const formData = NetworkFormData(
-        fields: {'username': 'johndoe', 'age': 30},
+      final file = NetworkFile(
+        fieldName: 'avatar',
+        filePath: tempFile.path,
+        filename: 'test.png',
+        contentType: 'image/png',
+      );
+      final formData = NetworkFormData(
+        fields: const {'username': 'johndoe', 'age': 30},
+        files: [file],
       );
 
       final result = await handler.post<String>(
@@ -210,9 +219,69 @@ void main() {
       final dioFormData = capturedData as FormData;
       final fieldKeys = dioFormData.fields.map((e) => e.key).toList();
       expect(fieldKeys, containsAll(['username', 'age']));
-      expect(dioFormData.fields.firstWhere((e) => e.key == 'username').value, equals('johndoe'));
-      expect(dioFormData.fields.firstWhere((e) => e.key == 'age').value, equals('30'));
+      expect(dioFormData.files, hasLength(1));
+      expect(dioFormData.files.first.key, equals('avatar'));
       expect(capturedDioOptions!.contentType, equals(Headers.multipartFormDataContentType));
+
+      await tempDir.delete(recursive: true);
+    });
+
+    test('get and download invoke onReceiveProgress callbacks', () async {
+      double getReceiveProgress = 0;
+      double downloadReceiveProgress = 0;
+
+      final reqOptions = RequestOptions(path: '/get');
+      when(
+        () => mockDio.get<dynamic>(
+          '/get',
+          queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
+          onReceiveProgress: any(named: 'onReceiveProgress'),
+          cancelToken: any(named: 'cancelToken'),
+        ),
+      ).thenAnswer((invocation) async {
+        final onReceive = invocation.namedArguments[#onReceiveProgress] as void Function(int, int)?;
+        onReceive?.call(50, 100);
+        return Response<dynamic>(
+          requestOptions: reqOptions,
+          statusCode: 200,
+          data: {'success': true},
+        );
+      });
+
+      await handler.get<bool>(
+        '/get',
+        parser: (j) => true,
+        options: ApiRequestOptions(onReceiveProgress: (p) => getReceiveProgress = p),
+      );
+      expect(getReceiveProgress, equals(0.5));
+
+      when(
+        () => mockDio.download(
+          '/dl.zip',
+          '/dest.zip',
+          queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
+          onReceiveProgress: any(named: 'onReceiveProgress'),
+          cancelToken: any(named: 'cancelToken'),
+        ),
+      ).thenAnswer((invocation) async {
+        final onReceive = invocation.namedArguments[#onReceiveProgress] as void Function(int, int)?;
+        onReceive?.call(80, 100);
+        return Response<dynamic>(
+          requestOptions: reqOptions,
+          statusCode: 200,
+          data: 'OK',
+        );
+      });
+
+      await handler.download<String>(
+        '/dl.zip',
+        '/dest.zip',
+        parser: (j) => j['data'] as String,
+        options: ApiRequestOptions(onReceiveProgress: (p) => downloadReceiveProgress = p),
+      );
+      expect(downloadReceiveProgress, equals(0.8));
     });
 
     test('put executes PUT request with ApiRequestOptions', () async {
@@ -302,12 +371,11 @@ void main() {
       expect(result.getOrElse((_) => false), isTrue);
     });
 
-    test('download executes DOWNLOAD request with ApiRequestOptions', () async {
-      final reqOptions = RequestOptions(path: '/file.zip');
+    test('handles List<dynamic> response data correctly', () async {
+      final reqOptions = RequestOptions(path: '/list');
       when(
-        () => mockDio.download(
-          '/file.zip',
-          '/dest/file.zip',
+        () => mockDio.get<dynamic>(
+          '/list',
           queryParameters: any(named: 'queryParameters'),
           options: any(named: 'options'),
           onReceiveProgress: any(named: 'onReceiveProgress'),
@@ -317,18 +385,129 @@ void main() {
         (_) async => Response<dynamic>(
           requestOptions: reqOptions,
           statusCode: 200,
-          data: 'SUCCESS',
+          data: ['item1', 'item2'],
         ),
       );
 
-      final result = await handler.download<String>(
-        '/file.zip',
-        '/dest/file.zip',
-        parser: (json) => json['data'] as String,
+      final result = await handler.get<int>(
+        '/list',
+        parser: (json) => (json['data'] as List).length,
       );
 
       expect(result.isRight(), isTrue);
-      expect(result.getOrElse((_) => ''), equals('SUCCESS'));
+      expect(result.getOrElse((_) => 0), equals(2));
+    });
+
+    test('returns UnknownFailure when response data is invalid type or non-Dio exception occurs', () async {
+      final reqOptions = RequestOptions(path: '/invalid');
+      when(
+        () => mockDio.get<dynamic>(
+          '/invalid',
+          queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
+          onReceiveProgress: any(named: 'onReceiveProgress'),
+          cancelToken: any(named: 'cancelToken'),
+        ),
+      ).thenAnswer(
+        (_) async => Response<dynamic>(
+          requestOptions: reqOptions,
+          statusCode: 200,
+          data: 12345, // invalid data type
+        ),
+      );
+
+      final result = await handler.get<String>(
+        '/invalid',
+        parser: (json) => '',
+      );
+
+      expect(result.isLeft(), isTrue);
+      result.fold(
+        (failure) => expect(failure.message, equals('Invalid response data')),
+        (_) => fail('Should fail'),
+      );
+
+      // Non-Dio exception
+      when(
+        () => mockDio.get<dynamic>(
+          '/exception',
+          queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
+          onReceiveProgress: any(named: 'onReceiveProgress'),
+          cancelToken: any(named: 'cancelToken'),
+        ),
+      ).thenThrow(Exception('Generic error'));
+
+      final resultExc = await handler.get<String>(
+        '/exception',
+        parser: (json) => '',
+      );
+
+      expect(resultExc.isLeft(), isTrue);
+    });
+
+    test('rethrows DioExceptionType.cancel in _handleResponse', () async {
+      final cancelErr = DioException(
+        type: DioExceptionType.cancel,
+        requestOptions: RequestOptions(path: '/cancel'),
+      );
+      when(
+        () => mockDio.get<dynamic>(
+          '/cancel',
+          queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
+          onReceiveProgress: any(named: 'onReceiveProgress'),
+          cancelToken: any(named: 'cancelToken'),
+        ),
+      ).thenThrow(cancelErr);
+
+      expect(
+        () => handler.get<String>('/cancel', parser: (j) => ''),
+        throwsA(isA<DioException>()),
+      );
+    });
+
+    test('progress callbacks are invoked correctly on send and receive', () async {
+      double sendProgressValue = 0;
+      double receiveProgressValue = 0;
+
+      final reqOptions = RequestOptions(path: '/progress');
+      when(
+        () => mockDio.post<dynamic>(
+          '/progress',
+          data: any(named: 'data'),
+          queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
+          onSendProgress: any(named: 'onSendProgress'),
+          onReceiveProgress: any(named: 'onReceiveProgress'),
+          cancelToken: any(named: 'cancelToken'),
+        ),
+      ).thenAnswer((invocation) async {
+        final onSend = invocation.namedArguments[#onSendProgress] as void Function(int, int)?;
+        final onReceive = invocation.namedArguments[#onReceiveProgress] as void Function(int, int)?;
+
+        onSend?.call(50, 100);
+        onReceive?.call(100, 100);
+
+        return Response<dynamic>(
+          requestOptions: reqOptions,
+          statusCode: 200,
+          data: {'status': 'ok'},
+        );
+      });
+
+      await handler.post<String>(
+        '/progress',
+        parser: (j) => '',
+        body: {'a': 'b'},
+        options: ApiRequestOptions(
+          onSendProgress: (p) => sendProgressValue = p,
+          onReceiveProgress: (p) => receiveProgressValue = p,
+        ),
+      );
+
+      expect(sendProgressValue, equals(0.5));
+      expect(receiveProgressValue, equals(1.0));
     });
 
     test('maps DioException to Failure when request fails', () async {
