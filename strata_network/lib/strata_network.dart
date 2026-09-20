@@ -14,4 +14,4 @@ export 'src/interceptors/logging_interceptor.dart';
 export 'src/interceptors/retry_interceptor.dart';
 export 'src/interceptors/token_injector_interceptor.dart';
 export 'src/interceptors/token_refresh_interceptor_interface.dart';
-export 'src/network_status/network_status_imp.dart';
+export 'src/network_status/internet_connection_network_status.dart';

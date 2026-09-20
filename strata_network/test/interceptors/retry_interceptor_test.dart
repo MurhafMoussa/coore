@@ -77,7 +77,10 @@ void main() {
         networkConfigEntity: config,
       );
 
-      final options = RequestOptions(path: '/data', extra: {'enableRetry': false});
+      final options = RequestOptions(
+        path: '/data',
+        extra: {'enableRetry': false},
+      );
       final error = DioException(
         requestOptions: options,
         response: Response(statusCode: 500, requestOptions: options),

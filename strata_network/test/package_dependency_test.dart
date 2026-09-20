@@ -30,5 +30,35 @@ void main() {
         }
       }
     });
+
+    test('lib/strata_network.dart must not re-export package:dio or Dio types', () {
+      final entryPoint = File('lib/strata_network.dart');
+      expect(entryPoint.existsSync(), isTrue);
+
+      final content = entryPoint.readAsStringSync();
+
+      expect(
+        content.contains('package:dio'),
+        isFalse,
+        reason: 'lib/strata_network.dart directly exports or imports package:dio',
+      );
+
+      final forbiddenDioTypes = [
+        'Dio',
+        'FormData',
+        'Options',
+        'CancelToken',
+        'DioException',
+        'Interceptor',
+      ];
+
+      for (final typeName in forbiddenDioTypes) {
+        expect(
+          content.contains('show $typeName') || content.contains('export \'$typeName'),
+          isFalse,
+          reason: 'lib/strata_network.dart exports Dio type $typeName',
+        );
+      }
+    });
   });
 }

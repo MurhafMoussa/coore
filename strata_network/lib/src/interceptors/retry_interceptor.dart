@@ -7,15 +7,12 @@ import '../config/network_config_entity.dart';
 
 /// Interceptor that automatically retries transient HTTP request failures with exponential backoff and jitter.
 class RetryInterceptor extends Interceptor {
-  RetryInterceptor({
-    required this.dio,
-    required this.networkConfigEntity,
-    Random? random,
-  }) : _random = random ?? Random();
+  RetryInterceptor({required this.dio, required this.networkConfigEntity, Random? random})
+      : _random = random ?? Random();
 
   final Dio dio;
   final NetworkConfigEntity networkConfigEntity;
-  final Random _random;
+  final Random _random ;
 
   @override
   Future<void> onError(
@@ -25,9 +22,11 @@ class RetryInterceptor extends Interceptor {
     final options = err.requestOptions;
 
     final int currentRetry = options.extra['retry_count'] as int? ?? 0;
-    final enableRetry = options.extra['enableRetry'] as bool? ??
+    final enableRetry =
+        options.extra['enableRetry'] as bool? ??
         networkConfigEntity.enableRetry;
-    final maxRetryAttempts = options.extra['maxRetryAttempts'] as int? ??
+    final maxRetryAttempts =
+        options.extra['maxRetryAttempts'] as int? ??
         networkConfigEntity.maxRetries;
     final retryDelayMs = options.extra['retryDelay'] as int?;
     final baseInterval = retryDelayMs != null
@@ -70,27 +69,18 @@ class RetryInterceptor extends Interceptor {
     required bool enableRetry,
     required int maxRetryAttempts,
   }) {
-    if (!enableRetry) {
-      return false;
-    }
-    if (currentRetry >= maxRetryAttempts) {
+    if (!enableRetry || currentRetry >= maxRetryAttempts) {
       return false;
     }
 
-    if (err.type == DioExceptionType.connectionTimeout ||
+    final isTimeout = err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.sendTimeout ||
-        err.type == DioExceptionType.receiveTimeout ||
-        err.error is SocketException) {
-      return true;
-    }
+        err.type == DioExceptionType.receiveTimeout;
+    final isSocketError = err.error is SocketException;
+    final isRetryableStatus = networkConfigEntity.retryOnStatusCodes.contains(
+      err.response?.statusCode,
+    );
 
-    if (err.response != null &&
-        networkConfigEntity.retryOnStatusCodes.contains(
-          err.response!.statusCode,
-        )) {
-      return true;
-    }
-
-    return false;
+    return isTimeout || isSocketError || isRetryableStatus;
   }
 }

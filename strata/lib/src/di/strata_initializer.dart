@@ -29,8 +29,7 @@ class StrataInitializer {
       sl.registerStrataNetwork(
         config: config.networkConfig!,
         errorParser: config.errorParser,
-        customDio: config.customDio,
-        onUnauthenticated: config.onUnauthenticated,
+      
       );
     }
 

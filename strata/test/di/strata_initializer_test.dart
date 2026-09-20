@@ -4,6 +4,21 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strata/strata.dart';
 
+class _TestErrorResponseModel extends BaseErrorResponseModel {
+  _TestErrorResponseModel()
+      : super(
+          status: 500,
+          developerMessage: 'Error',
+          timestamp: DateTime.now(),
+        );
+
+  @override
+  Map<String, String> get validationErrors => {};
+}
+
+_TestErrorResponseModel _testErrorParser(dynamic response) =>
+    _TestErrorResponseModel();
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -39,6 +54,7 @@ void main() {
       final config = StrataConfigEntity(
         networkConfig: networkConfig,
         navigationConfig: navigationConfig,
+        errorParser: _testErrorParser,
       );
 
       var isReadyResolved = false;
@@ -62,7 +78,9 @@ void main() {
     });
 
     test('initialize supports storage-only config without network or navigation', () async {
-      const config = StrataConfigEntity();
+      final config = StrataConfigEntity(
+        errorParser: _testErrorParser,
+      );
 
       await StrataInitializer.initialize(config, getIt: getIt);
 
@@ -72,7 +90,9 @@ void main() {
     });
 
     test('reset cleans up GetIt registrations between runs', () async {
-      const config = StrataConfigEntity();
+      final config = StrataConfigEntity(
+        errorParser: _testErrorParser,
+      );
 
       await StrataInitializer.initialize(config, getIt: getIt);
       expect(getIt.isRegistered<SensitiveStorageInterface>(), isTrue);
@@ -82,9 +102,18 @@ void main() {
     });
 
     test('StrataConfigEntity supports equality comparison', () {
-      const config1 = StrataConfigEntity(shouldLogNavigation: true);
-      const config2 = StrataConfigEntity(shouldLogNavigation: true);
-      const config3 = StrataConfigEntity(shouldLogNavigation: false);
+      final config1 = StrataConfigEntity(
+        errorParser: _testErrorParser,
+        shouldLogNavigation: true,
+      );
+      final config2 = StrataConfigEntity(
+        errorParser: _testErrorParser,
+        shouldLogNavigation: true,
+      );
+      final config3 = StrataConfigEntity(
+        errorParser: _testErrorParser,
+        shouldLogNavigation: false,
+      );
 
       expect(config1, equals(config2));
       expect(config1, isNot(equals(config3)));

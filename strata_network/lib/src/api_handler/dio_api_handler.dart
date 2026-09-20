@@ -13,10 +13,7 @@ class DioApiHandler(
   final NetworkExceptionMapperInterface _exceptionMapper,
   final CancelRequestManagerInterface _cancelRequestManager,
 ) implements ApiHandlerInterface {
-  Options _buildOptions(
-    ApiRequestOptions? options, {
-    bool isFormData = false,
-  }) {
+  Options _buildOptions(ApiRequestOptions? options, {bool isFormData = false}) {
     final opts = options ?? const ApiRequestOptions();
     final extra = <String, dynamic>{
       'isAuthorized': opts.isAuthorized,
@@ -66,8 +63,23 @@ class DioApiHandler(
     return dioFormData;
   }
 
+  void Function(int, int)? _buildProgressCallback(
+    void Function(double progress)? callback,
+  ) {
+    if (callback == null) return null;
+    return (count, total) => callback(total > 0 ? count / total : 0.0);
+  }
+
+  Future<dynamic> _buildRequestData(
+    Map<String, dynamic>? body,
+    NetworkFormData? formData,
+  ) async {
+    return formData == null ? body : _convertToDioFormData(formData);
+  }
+
   ResultFuture<T> _handleResponse<T>({
-    required Future<Response<dynamic>> Function(CancelToken? cancelToken) dioMethod,
+    required Future<Response<dynamic>> Function(CancelToken? cancelToken)
+    dioMethod,
     required T Function(Map<String, dynamic> json) parser,
     String? requestId,
   }) async {
@@ -129,7 +141,7 @@ class DioApiHandler(
         options: _buildOptions(opts),
         onReceiveProgress: opts.onReceiveProgress != null
             ? (count, total) =>
-                opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
+                  opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
             : null,
         cancelToken: cancelToken,
       ),
@@ -150,22 +162,14 @@ class DioApiHandler(
     final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
       dioMethod: (CancelToken? cancelToken) async {
-        final dynamic requestData = formData != null
-            ? await _convertToDioFormData(formData)
-            : body;
+        final requestData = await _buildRequestData(body, formData);
         return _dio.post(
           path,
           data: requestData,
           queryParameters: queryParameters,
           options: _buildOptions(opts, isFormData: formData != null),
-          onSendProgress: opts.onSendProgress != null
-              ? (count, total) =>
-                  opts.onSendProgress!(total > 0 ? count / total : 0.0)
-              : null,
-          onReceiveProgress: opts.onReceiveProgress != null
-              ? (count, total) =>
-                  opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
-              : null,
+          onSendProgress: _buildProgressCallback(opts.onSendProgress),
+          onReceiveProgress: _buildProgressCallback(opts.onReceiveProgress),
           cancelToken: cancelToken,
         );
       },
@@ -206,22 +210,14 @@ class DioApiHandler(
     final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
       dioMethod: (CancelToken? cancelToken) async {
-        final dynamic requestData = formData != null
-            ? await _convertToDioFormData(formData)
-            : body;
+        final requestData = await _buildRequestData(body, formData);
         return _dio.put(
           path,
           data: requestData,
           queryParameters: queryParameters,
           options: _buildOptions(opts, isFormData: formData != null),
-          onSendProgress: opts.onSendProgress != null
-              ? (count, total) =>
-                  opts.onSendProgress!(total > 0 ? count / total : 0.0)
-              : null,
-          onReceiveProgress: opts.onReceiveProgress != null
-              ? (count, total) =>
-                  opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
-              : null,
+          onSendProgress: _buildProgressCallback(opts.onSendProgress),
+          onReceiveProgress: _buildProgressCallback(opts.onReceiveProgress),
           cancelToken: cancelToken,
         );
       },
@@ -242,22 +238,14 @@ class DioApiHandler(
     final opts = options ?? const ApiRequestOptions();
     return _handleResponse(
       dioMethod: (CancelToken? cancelToken) async {
-        final dynamic requestData = formData != null
-            ? await _convertToDioFormData(formData)
-            : body;
+        final requestData = await _buildRequestData(body, formData);
         return _dio.patch(
           path,
           data: requestData,
           queryParameters: queryParameters,
           options: _buildOptions(opts, isFormData: formData != null),
-          onSendProgress: opts.onSendProgress != null
-              ? (count, total) =>
-                  opts.onSendProgress!(total > 0 ? count / total : 0.0)
-              : null,
-          onReceiveProgress: opts.onReceiveProgress != null
-              ? (count, total) =>
-                  opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
-              : null,
+          onSendProgress: _buildProgressCallback(opts.onSendProgress),
+          onReceiveProgress: _buildProgressCallback(opts.onReceiveProgress),
           cancelToken: cancelToken,
         );
       },
@@ -280,10 +268,11 @@ class DioApiHandler(
         url,
         downloadDestinationPath,
         queryParameters: queryParameters,
-        options: _buildOptions(opts).copyWith(responseType: ResponseType.stream),
+        options: _buildOptions(opts)
+            .copyWith(responseType: ResponseType.stream),
         onReceiveProgress: opts.onReceiveProgress != null
             ? (count, total) =>
-                opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
+                  opts.onReceiveProgress!(total > 0 ? count / total : 0.0)
             : null,
         cancelToken: cancelToken,
       ),

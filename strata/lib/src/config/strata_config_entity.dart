@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:strata_navigation/strata_navigation.dart';
@@ -12,9 +11,8 @@ class const StrataConfigEntity({
   final ThemeConfigEntity? themeConfig,
   final LocalizationConfigEntity? localizationConfig,
   final FlutterSecureStorage? secureStorage,
-  final ErrorModelParser? errorParser,
-  final Dio? customDio,
-  final void Function()? onUnauthenticated,
+  required final ErrorModelParser errorParser,
+  
   final bool shouldLogNavigation = false,
 }) extends Equatable {
 
@@ -26,8 +24,6 @@ class const StrataConfigEntity({
         localizationConfig,
         secureStorage,
         errorParser,
-        customDio,
-        onUnauthenticated,
         shouldLogNavigation,
       ];
 }

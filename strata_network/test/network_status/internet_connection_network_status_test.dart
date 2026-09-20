@@ -27,19 +27,21 @@ void main() {
     statusController.close();
   });
 
-  group('NetworkStatusImp', () {
+  group('InternetConnectionNetworkStatus', () {
     test('isConnected returns internet status from InternetConnection', () async {
       when(() => mockInternetConnection.hasInternetAccess)
           .thenAnswer((_) async => true);
 
-      final service = NetworkStatusImp(mockInternetConnection, mockLogger);
+      final service =
+          InternetConnectionNetworkStatus(mockInternetConnection, mockLogger);
       final isConnected = await service.isConnected;
 
       expect(isConnected, isTrue);
     });
 
     test('connectionStream emits ConnectionStatus on status changes', () async {
-      final service = NetworkStatusImp(mockInternetConnection, mockLogger);
+      final service =
+          InternetConnectionNetworkStatus(mockInternetConnection, mockLogger);
 
       expectLater(
         service.connectionStream,
