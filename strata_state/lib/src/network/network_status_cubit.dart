@@ -4,13 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:strata_core/strata_core.dart';
 
 /// A Cubit that manages the current network connection status.
-class NetworkStatusCubit({
-  required NetworkStatusInterface networkStatus,
-}) extends Cubit<ConnectionStatus> {
-  // ignore: prefer_initializing_formals
-  this
-      : _networkStatus = networkStatus,
-        super(ConnectionStatus.connected) {
+class NetworkStatusCubit extends Cubit<ConnectionStatus> {
+  NetworkStatusCubit({
+    required this._networkStatus,
+  })  : super(ConnectionStatus.connected) {
     _initialize();
   }
 

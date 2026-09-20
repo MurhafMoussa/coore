@@ -11,6 +11,7 @@ export 'src/extensions/string_extensions.dart';
 export 'src/models/identifiable.dart';
 export 'src/models/pagination_response_model.dart';
 export 'src/navigation/navigation_service_interface.dart';
+export 'src/network/cancel_request_manager_interface.dart';
 export 'src/network/network_status_interface.dart';
 export 'src/pagination/pagination_cache_policy.dart';
 export 'src/pagination/pagination_strategy.dart';

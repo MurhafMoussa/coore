@@ -14,14 +14,14 @@ Refactor state management in `strata_state` into `StrataPaginationBloc<T extends
 - Optimistic mutations: `addFirst`, `addLast`, `update`, `delete` operations maintain immutability and $O(N)$ lookup efficiency.
 
 ## Acceptance criteria
-- [ ] `StrataPaginationState` is a sealed class modeling initial vs page-N loading and failure states (`PaginationLoadingMore`, `PaginationPageFetchFailure`).
-- [ ] `StrataPaginationBloc` uses `droppable()` transformer for load-more and `restartable()` transformer for initial/filter fetch events.
-- [ ] Automatic item deduplication by `Identifiable.id` uses $O(N)$ set lookups during page appends.
-- [ ] In-flight requests are cancelled via `CancelRequestManagerInterface` when filter options or initial fetches trigger.
-- [ ] Optimistic mutations (`addFirst`, `addLast`, `update`, `delete`) update state efficiently without data corruption.
-- [ ] `PaginationCacheAdapterInterface` is defined for pluggable caching support (`isFromCache`, `isOffline`).
-- [ ] 100% executable DartDoc documentation with `@example` code snippets for all state layer public contracts.
-- [ ] Comprehensive `bloc_test` suite in `strata_state/test/` verifies all state transitions, concurrency dropping, cancellation, deduplication, and optimistic mutations.
+- [x] `StrataPaginationState` is a sealed class modeling initial vs page-N loading and failure states (`PaginationLoadingMore`, `PaginationPageFetchFailure`).
+- [x] `StrataPaginationBloc` uses `droppable()` transformer for load-more and `restartable()` transformer for initial/filter fetch events.
+- [x] Automatic item deduplication by `Identifiable.id` uses $O(N)$ set lookups during page appends.
+- [x] In-flight requests are cancelled via `CancelRequestManagerInterface` when filter options or initial fetches trigger.
+- [x] Optimistic mutations (`addFirst`, `addLast`, `update`, `delete`) update state efficiently without data corruption.
+- [x] `PaginationCacheAdapterInterface` is defined for pluggable caching support (`isFromCache`, `isOffline`).
+- [x] 100% executable DartDoc documentation with `@example` code snippets for all state layer public contracts.
+- [x] Comprehensive `bloc_test` suite in `strata_state/test/` verifies all state transitions, concurrency dropping, cancellation, deduplication, and optimistic mutations.
 
 ## Covers
 - User Stories: 1, 4, 5

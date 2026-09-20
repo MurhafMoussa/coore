@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:strata_core/strata_core.dart';
 import 'params/params.dart';
 
 /// Abstract contract for managing request cancellation tokens.
-abstract class CancelRequestManagerInterface {
+abstract class CancelRequestManagerInterface implements PaginatedCancelManagerInterface {
   /// Registers a new request under [requestId], returning a distinct [CancelToken].
   CancelToken registerRequest(String requestId);
 
@@ -10,12 +11,14 @@ abstract class CancelRequestManagerInterface {
   void cancelToken(CancelToken token, {String? reason});
 
   /// Cancels all active tokens associated with [requestId].
+  @override
   void cancelRequest(String requestId, {String? reason});
 
   /// Unregisters a specific [CancelToken] for [requestId].
   void unregisterToken(String requestId, CancelToken token);
 
   /// Cancels all active requests across all registered request IDs.
+  @override
   void cancelAll({String? reason});
 
   /// Total count of active cancel tokens currently tracked.
