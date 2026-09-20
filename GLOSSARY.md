@@ -47,3 +47,19 @@ _Avoid_: RequestOptions, DioOptions, NetworkRequestOptions
 **NetworkFormData**:
 The framework-agnostic multipart data structure in `strata_network` encapsulating form fields and `NetworkFile` instances without leaking Dio types to host applications.
 _Avoid_: FormDataAdapter, DioFormData
+
+**PaginationStrategy**:
+The pure, immutable value interface in `strata_core` defining pagination parameters (Page/Offset, Skip/Limit, Cursor) and next-page computation without side effects.
+_Avoid_: MutablePaginationStrategy, StatefulPaginationEngine
+
+**StrataPaginationState**:
+The sealed union state representation in `strata_state` modeling pagination lifecycle states (`initial`, `loading`, `succeeded`, `refreshing`, `loadingMore`, `failed`, `pageFetchFailure`).
+_Avoid_: CorePaginationState, CorePaginationWidgetState, EasyRefreshState
+
+**StrataPaginationBloc**:
+The generic state controller in `strata_state` managing paginated network requests, $O(N)$ item deduplication, and concurrency throttling.
+_Avoid_: PaginationBloc, PaginationController, CorePaginationCubit, CorePaginationBloc
+
+**StrataPaginationWidget**:
+The decoupled presentation component in `strata_ui` providing native platform-adaptive pull-to-refresh (`RefreshIndicator.adaptive`) and infinite scrolling across multi-screen layouts.
+_Avoid_: CorePaginationWidget, EasyRefreshWidget, SmartRefresher

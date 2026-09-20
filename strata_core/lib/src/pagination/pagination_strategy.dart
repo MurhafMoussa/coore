@@ -1,87 +1,293 @@
-abstract class PaginationStrategy {
-  PaginationStrategy({required this.limit});
+import 'package:equatable/equatable.dart';
+import '../models/pagination_response_model.dart';
 
+/// Immutable parameter value container for page-number based pagination.
+///
+/// `@example`
+/// ```dart
+/// const params = PagePaginationParams(page: 1, limit: 20);
+/// print(params.page); // 1
+/// ```
+class PagePaginationParams extends Equatable {
+  /// Creates a [PagePaginationParams] instance.
+  const PagePaginationParams({
+    required this.page,
+    required this.limit,
+  });
+
+  /// The 1-based page index.
+  final int page;
+
+  /// The maximum number of items requested per page.
   final int limit;
-  int get nextBatch;
-  void reset();
-  void increment();
-  void decrement();
 
-  void incrementByOne() {}
-  void decrementByOne() {}
-  bool get isFirst;
+  @override
+  List<Object?> get props => [page, limit];
 }
 
-class SkipPaginationStrategy extends PaginationStrategy {
-  SkipPaginationStrategy({super.limit = 20});
+/// Immutable parameter value container for skip/limit offset based pagination.
+///
+/// `@example`
+/// ```dart
+/// const params = SkipPaginationParams(skip: 0, limit: 20);
+/// print(params.skip); // 0
+/// ```
+class SkipPaginationParams extends Equatable {
+  /// Creates a [SkipPaginationParams] instance.
+  const SkipPaginationParams({
+    required this.skip,
+    required this.limit,
+  });
 
-  int skip = 0;
+  /// The number of items to skip.
+  final int skip;
 
-  @override
-  int get nextBatch => skip;
-
-  @override
-  void reset() {
-    skip = 0;
-  }
-
-  @override
-  void increment() {
-    skip += limit;
-  }
-
-  @override
-  void decrement() {
-    skip -= limit;
-  }
+  /// The maximum number of items requested per batch.
+  final int limit;
 
   @override
-  void incrementByOne() {
-    skip += 1;
-  }
-
-  @override
-  void decrementByOne() {
-    if (skip > 0) skip -= 1;
-  }
-
-  @override
-  bool get isFirst => skip == 0;
+  List<Object?> get props => [skip, limit];
 }
 
-class PagePaginationStrategy extends PaginationStrategy {
-  PagePaginationStrategy({super.limit = 20});
+/// Immutable parameter value container for opaque cursor/keyset based pagination.
+///
+/// `@example`
+/// ```dart
+/// const params = CursorPaginationParams(cursor: 'cursor_123', limit: 20);
+/// print(params.cursor); // 'cursor_123'
+/// ```
+class CursorPaginationParams extends Equatable {
+  /// Creates a [CursorPaginationParams] instance.
+  const CursorPaginationParams({
+    this.cursor,
+    required this.limit,
+  });
 
-  int page = 1;
+  /// Opaque continuation cursor token.
+  final String? cursor;
+
+  /// The maximum number of items requested per batch.
+  final int limit;
 
   @override
-  int get nextBatch => page;
+  List<Object?> get props => [cursor, limit];
+}
 
-  @override
-  void reset() {
-    page = 1;
+/// Pure, state-free pagination strategy abstraction.
+///
+/// Implementations calculate initial and subsequent page request parameters as pure functions
+/// without maintaining mutable internal state.
+///
+/// Generic parameter [P] represents the parameter model passed to data fetchers.
+///
+/// `@example`
+/// ```dart
+/// const strategy = PagePaginationStrategy();
+/// final initialParams = strategy.getInitialParams(limit: 20);
+/// final nextParams = strategy.getNextParams<String, NoMetaModel>(
+///   currentItems: List.generate(20, (i) => 'Item $i'),
+///   limit: 20,
+/// );
+/// print(nextParams?.page); // 2
+/// ```
+abstract class PaginationStrategy<P> {
+  /// Const constructor for pure value strategies.
+  const PaginationStrategy();
+
+  /// Calculates initial parameters for the first page request.
+  P getInitialParams({required int limit});
+
+  /// Calculates next page parameters based on [currentItems], optional [meta], and [nextCursor].
+  ///
+  /// Returns `null` when maximum pages/items have been reached or no further data is available.
+  P? getNextParams<T, M extends MetaModel>({
+    required List<T> currentItems,
+    M? meta,
+    String? nextCursor,
+    required int limit,
+  });
+}
+
+/// Pure, state-free strategy for 1-based page number pagination.
+///
+/// Generates parameter instances of type [PagePaginationParams].
+///
+/// `@example`
+/// ```dart
+/// const strategy = PagePaginationStrategy();
+/// final initial = strategy.getInitialParams(limit: 20);
+/// print(initial.page); // 1
+///
+/// final next = strategy.getNextParams<String, NoMetaModel>(
+///   currentItems: List.generate(20, (i) => 'Item $i'),
+///   limit: 20,
+/// );
+/// print(next?.page); // 2
+/// ```
+class PagePaginationStrategy extends PaginationStrategy<PagePaginationParams> {
+  /// Creates a [PagePaginationStrategy].
+  ///
+  /// If [createParams] is provided, it is used to generate custom parameter instances.
+  const PagePaginationStrategy({
+    this.createParams,
+  });
+
+  /// Optional factory function to create custom parameter objects.
+  final PagePaginationParams Function({required int page, required int limit})? createParams;
+
+  PagePaginationParams _buildParams({required int page, required int limit}) {
+    final builder = createParams;
+    if (builder != null) {
+      return builder(page: page, limit: limit);
+    }
+    return PagePaginationParams(page: page, limit: limit);
   }
 
   @override
-  void increment() {
-    page += 1;
+  PagePaginationParams getInitialParams({required int limit}) {
+    return _buildParams(page: 1, limit: limit);
   }
 
   @override
-  void decrement() {
-    if (page > 1) page -= 1;
+  PagePaginationParams? getNextParams<T, M extends MetaModel>({
+    required List<T> currentItems,
+    M? meta,
+    String? nextCursor,
+    required int limit,
+  }) {
+    if (currentItems.isEmpty) return null;
+    if (currentItems.length % limit != 0) return null;
+
+    if (meta is PaginationMetaModel && meta.totalCount != null) {
+      if (currentItems.length >= meta.totalCount!) return null;
+    }
+
+    final nextPage = (currentItems.length ~/ limit) + 1;
+    return _buildParams(page: nextPage, limit: limit);
+  }
+}
+
+/// Pure, state-free strategy for skip/limit offset based pagination.
+///
+/// Generates parameter instances of type [SkipPaginationParams].
+///
+/// `@example`
+/// ```dart
+/// const strategy = SkipPaginationStrategy();
+/// final initial = strategy.getInitialParams(limit: 20);
+/// print(initial.skip); // 0
+///
+/// final next = strategy.getNextParams<String, NoMetaModel>(
+///   currentItems: List.generate(20, (i) => 'Item $i'),
+///   limit: 20,
+/// );
+/// print(next?.skip); // 20
+/// ```
+class SkipPaginationStrategy extends PaginationStrategy<SkipPaginationParams> {
+  /// Creates a [SkipPaginationStrategy].
+  ///
+  /// If [createParams] is provided, it is used to generate custom parameter instances.
+  const SkipPaginationStrategy({
+    this.createParams,
+  });
+
+  /// Optional factory function to create custom parameter objects.
+  final SkipPaginationParams Function({required int skip, required int limit})? createParams;
+
+  SkipPaginationParams _buildParams({required int skip, required int limit}) {
+    final builder = createParams;
+    if (builder != null) {
+      return builder(skip: skip, limit: limit);
+    }
+    return SkipPaginationParams(skip: skip, limit: limit);
   }
 
   @override
-  void incrementByOne() {
-    increment();
+  SkipPaginationParams getInitialParams({required int limit}) {
+    return _buildParams(skip: 0, limit: limit);
   }
 
   @override
-  void decrementByOne() {
-    decrement();
+  SkipPaginationParams? getNextParams<T, M extends MetaModel>({
+    required List<T> currentItems,
+    M? meta,
+    String? nextCursor,
+    required int limit,
+  }) {
+    if (currentItems.isEmpty) return null;
+    if (currentItems.length % limit != 0) return null;
+
+    if (meta is PaginationMetaModel && meta.totalCount != null) {
+      if (currentItems.length >= meta.totalCount!) return null;
+    }
+
+    final nextSkip = currentItems.length;
+    return _buildParams(skip: nextSkip, limit: limit);
+  }
+}
+
+/// Pure, state-free strategy for opaque cursor/keyset based pagination.
+///
+/// Generates parameter instances of type [CursorPaginationParams].
+///
+/// `@example`
+/// ```dart
+/// const strategy = CursorPaginationStrategy();
+/// final initial = strategy.getInitialParams(limit: 20);
+/// print(initial.cursor); // null
+///
+/// final next = strategy.getNextParams<String, NoMetaModel>(
+///   currentItems: List.generate(20, (i) => 'Item $i'),
+///   nextCursor: 'cursor_xyz',
+///   limit: 20,
+/// );
+/// print(next?.cursor); // 'cursor_xyz'
+/// ```
+class CursorPaginationStrategy extends PaginationStrategy<CursorPaginationParams> {
+  /// Creates a [CursorPaginationStrategy].
+  ///
+  /// [initialCursor] optional token used on the initial page fetch.
+  /// If [createParams] is provided, it is used to generate custom parameter instances.
+  const CursorPaginationStrategy({
+    this.initialCursor,
+    this.createParams,
+  });
+
+  /// Optional initial cursor token.
+  final String? initialCursor;
+
+  /// Optional factory function to create custom parameter objects.
+  final CursorPaginationParams Function({String? cursor, required int limit})? createParams;
+
+  CursorPaginationParams _buildParams({String? cursor, required int limit}) {
+    final builder = createParams;
+    if (builder != null) {
+      return builder(cursor: cursor, limit: limit);
+    }
+    return CursorPaginationParams(cursor: cursor, limit: limit);
   }
 
   @override
-  bool get isFirst => page == 1;
+  CursorPaginationParams getInitialParams({required int limit}) {
+    return _buildParams(cursor: initialCursor, limit: limit);
+  }
+
+  @override
+  CursorPaginationParams? getNextParams<T, M extends MetaModel>({
+    required List<T> currentItems,
+    M? meta,
+    String? nextCursor,
+    required int limit,
+  }) {
+    if (currentItems.isEmpty) return null;
+    if (nextCursor == null || nextCursor.isEmpty) return null;
+
+    if (meta is PaginationMetaModel && meta.totalCount != null) {
+      if (currentItems.length >= meta.totalCount!) return null;
+    }
+
+    if (currentItems.length % limit != 0) return null;
+
+    return _buildParams(cursor: nextCursor, limit: limit);
+  }
 }

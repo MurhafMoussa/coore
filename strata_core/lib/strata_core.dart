@@ -1,5 +1,3 @@
-library strata_core;
-
 export 'src/dev_tools/core_logger_interface.dart';
 export 'src/dev_tools/talker_core_logger.dart';
 export 'src/di/strata_core_di.dart';
@@ -14,6 +12,7 @@ export 'src/models/identifiable.dart';
 export 'src/models/pagination_response_model.dart';
 export 'src/navigation/navigation_service_interface.dart';
 export 'src/network/network_status_interface.dart';
+export 'src/pagination/pagination_cache_policy.dart';
 export 'src/pagination/pagination_strategy.dart';
 export 'src/platform/device_info_entity.dart';
 export 'src/platform/platform_service_interface.dart';
